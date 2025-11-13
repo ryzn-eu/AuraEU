@@ -1,97 +1,97 @@
 [
   {
     "id": 1,
-    "title": "8 giorni di Natale",
-    "file": "8 giorni di Natale .mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/8 giorni di Natale .mp4",
+    "title": "8 Days of Christmas",
+    "file": "8 Days of Christmas .mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/8 Days of Christmas .mp4",
     "trackIndex": 1,
-    "genre": "Traditional Christmas"
+    "genre": "Pop Christmas"
   },
   {
     "id": 2,
-    "title": "Un po' d'amore",
-    "file": "Un po' d'amore .mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Un po' d'amore .mp4",
+    "title": "A Little Love",
+    "file": "A Little Love .mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/A Little Love .mp4",
     "trackIndex": 2,
     "genre": "Pop Christmas"
   },
   {
     "id": 3,
-    "title": "Tutto ciò che voglio per Natale sei tu",
-    "file": "Tutto ciò che voglio per Natale sei tu .mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Tutto ciò che voglio per Natale sei tu .mp4",
+    "title": "All I Want for Christmas Is You",
+    "file": "All I Want for Christmas Is You .mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/All I Want for Christmas Is You .mp4",
     "trackIndex": 3,
     "genre": "Pop Christmas"
   },
   {
     "id": 4,
-    "title": "Tesoro, fa freddo fuori",
-    "file": "Tesoro, fa freddo fuori.mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Tesoro, fa freddo fuori.mp4",
+    "title": "Baby, It's Cold Outside",
+    "file": "Baby, It's Cold Outside.mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Baby, It's Cold Outside.mp4",
     "trackIndex": 4,
-    "genre": "Ballad Christmas"
+    "genre": "Christmas Ballad"
   },
   {
     "id": 5,
-    "title": "Natale blu",
-    "file": "Natale blu .mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Natale blu .mp4",
+    "title": "Blue Christmas",
+    "file": "Blue Christmas .mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Blue Christmas .mp4",
     "trackIndex": 5,
     "genre": "Traditional Christmas"
   },
   {
     "id": 6,
-    "title": "Natale",
-    "file": "Natale.mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Natale.mp4",
+    "title": "Christmas",
+    "file": "Christmas.mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Christmas.mp4",
     "trackIndex": 6,
-    "genre": "Ballad Christmas"
+    "genre": "Traditional Christmas"
   },
   {
     "id": 7,
-    "title": "Freddo come il Natale",
-    "file": "Freddo come il Natale.mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Freddo come il Natale.mp4",
+    "title": "Cold As Christmas",
+    "file": "Cold As Christmas.mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Cold As Christmas.mp4",
     "trackIndex": 7,
-    "genre": "Pop Christmas"
+    "genre": "Christmas Ballad"
   },
   {
     "id": 8,
-    "title": "Dicembre",
-    "file": "Dicembre.mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Dicembre.mp4",
+    "title": "December",
+    "file": "December.mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/December.mp4",
     "trackIndex": 8,
-    "genre": "Instrumental Christmas"
+    "genre": "Christmas Ballad"
   },
   {
     "id": 9,
-    "title": "Sanno che è Natale",
-    "file": "Sanno che è Natale .mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Sanno che è Natale .mp4",
+    "title": "Do They Know It’s Christmas",
+    "file": "Do They Know It’s Christmas .mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Do They Know It’s Christmas .mp4",
     "trackIndex": 9,
     "genre": "Traditional Christmas"
   },
   {
     "id": 10,
-    "title": "BUON NATALE",
-    "file": "BUON NATALE .mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/BUON NATALE .mp4",
+    "title": "HAPPY XMAS",
+    "file": "HAPPY XMAS .mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/HAPPY XMAS .mp4",
     "trackIndex": 10,
     "genre": "Pop Christmas"
   },
   {
     "id": 11,
-    "title": "Appendi le tue luci",
-    "file": "Appendi le tue luci.mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Appendi le tue luci.mp4",
+    "title": "Hang Your Lights",
+    "file": "Hang Your Lights.mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Hang Your Lights.mp4",
     "trackIndex": 11,
-    "genre": "Ballad Christmas"
+    "genre": "Pop Christmas"
   },
   {
     "id": 12,
-    "title": "Sta iniziando a somigliare molto al Natale",
-    "file": "Sta iniziando a somigliare molto al Natale .mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Sta iniziando a somigliare molto al Natale .mp4",
+    "title": "It's Beginning To Look A Lot Like Christmas",
+    "file": "It's Beginning To Look A Lot Like Christmas .mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/It's Beginning To Look A Lot Like Christmas .mp4",
     "trackIndex": 12,
     "genre": "Traditional Christmas"
   },
@@ -101,46 +101,46 @@
     "file": "Jingle Bell Rock .mp4",
     "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Jingle Bell Rock .mp4",
     "trackIndex": 13,
-    "genre": "Party Christmas"
+    "genre": "Pop Christmas"
   },
   {
     "id": 14,
-    "title": "Gioia al mondo",
-    "file": "Gioia al mondo .mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Gioia al mondo .mp4",
+    "title": "Joy to the World",
+    "file": "Joy to the World .mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Joy to the World .mp4",
     "trackIndex": 14,
     "genre": "Traditional Christmas"
   },
   {
     "id": 15,
-    "title": "Ultimo Natale",
-    "file": "Ultimo Natale.mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Ultimo Natale.mp4",
+    "title": "Last Christmas",
+    "file": "Last Christmas.mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Last Christmas.mp4",
     "trackIndex": 15,
     "genre": "Pop Christmas"
   },
   {
     "id": 16,
-    "title": "Lascia che nevichi!",
-    "file": "Lascia che nevichi!.mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Lascia che nevichi!.mp4",
+    "title": "Let It Snow!",
+    "file": "Let It Snow!.mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Let It Snow!.mp4",
     "trackIndex": 16,
-    "genre": "Ballad Christmas"
+    "genre": "Traditional Christmas"
   },
   {
     "id": 17,
-    "title": "Solo questo Natale",
-    "file": "Solo questo Natale .mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Solo questo Natale .mp4",
+    "title": "Lonely This Christmas",
+    "file": "Lonely This Christmas .mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Lonely This Christmas .mp4",
     "trackIndex": 17,
-    "genre": "Pop Christmas"
+    "genre": "Christmas Ballad"
   },
   {
     "id": 18,
-    "title": "Entra nel Natale",
-    "file": "Entra nel Natale.mp4",
-    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Entra nel Natale.mp4",
+    "title": "Step Into Christmas",
+    "file": "Step Into Christmas.mp4",
+    "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Step Into Christmas.mp4",
     "trackIndex": 18,
-    "genre": "Traditional Christmas"
+    "genre": "Pop Christmas"
   }
 ]
