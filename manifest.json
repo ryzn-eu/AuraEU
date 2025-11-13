@@ -4,19 +4,19 @@
   "display": "standalone",
   "name": "Aura.horizon",
   "orientation": "any",
-  "scope": "/Aura-Music-/",
+  "scope": "/AuraEU/",
   "short_name": "Aura",
-  "start_url": "/Aura-Music-/",
+  "start_url": "/AuraEU/",
   "theme_color": "#000000",
   "description": "By Horizon",
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/se02babro-tech/Aura-Music-/main/Image/icon-192x192.png",
+      "src": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://raw.githubusercontent.com/se02babro-tech/Aura-Music-/main/Image/icon-512x512.png",
+      "src": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
