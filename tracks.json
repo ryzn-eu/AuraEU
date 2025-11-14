@@ -1,50 +1,76 @@
-[
-    {
-        "title": "Lighthouse Echo",
-        "artist": "Ember Shore",
-        "mood": "Spettrale",
-        "vibe": 78,
-        "color": "#800080", 
-        "rgb": "128 0 128" 
-    },
-    {
-        "title": "Electric Nightwave",
-        "artist": "Vortex Signal",
-        "mood": "Party",
-        "vibe": 92,
-        "color": "#FFD700",
-        "rgb": "255 215 0"
-    },
-    {
-        "title": "Deep Focus Session",
-        "artist": "Leda Tapes",
-        "mood": "Ambient",
-        "vibe": 55,
-        "color": "#32CD32",
-        "rgb": "50 205 50"
-    },
-    {
-        "title": "Midnight Drive (Lo-Fi)",
-        "artist": "Charon Labs",
-        "mood": "Chill",
-        "vibe": 68,
-        "color": "#1E90FF",
-        "rgb": "30 144 255"
-    },
-    {
-        "title": "Zen Garden Flow",
-        "artist": "Koto Beats",
-        "mood": "Spettrale",
-        "vibe": 85,
-        "color": "#FF4500",
-        "rgb": "255 69 0"
-    },
-    {
-        "title": "Rhythm Reactor",
-        "artist": "Pulse",
-        "mood": "Party",
-        "vibe": 98,
-        "color": "#FF1493",
-        "rgb": "255 20 147"
-    }
-]
+{
+    "tracks": [
+        {
+            "title": "8 Days of Christmas",
+            "file": "8 Days of Christmas .mp3"
+        },
+        {
+            "title": "A Little Love",
+            "file": "A Little Love .mp3"
+        },
+        {
+            "title": "All I Want for Christmas Is You",
+            "file": "All I Want for Christmas Is You .mp3"
+        },
+        {
+            "title": "Baby, It's Cold Outside",
+            "file": "Baby, It's Cold Outside.mp3"
+        },
+        {
+            "title": "Blue Christmas",
+            "file": "Blue Christmas .mp3"
+        },
+        {
+            "title": "Christmas",
+            "file": "Christmas.mp3"
+        },
+        {
+            "title": "Cold As Christmas",
+            "file": "Cold As Christmas.mp3"
+        },
+        {
+            "title": "December",
+            "file": "December.mp3"
+        },
+        {
+            "title": "Do They Know It’s Christmas",
+            "file": "Do They Know It’s Christmas .mp3"
+        },
+        {
+            "title": "HAPPY XMAS",
+            "file": "HAPPY XMAS .mp3"
+        },
+        {
+            "title": "Hang Your Lights",
+            "file": "Hang Your Lights.mp3"
+        },
+        {
+            "title": "It's Beginning To Look A Lot Like Christmas",
+            "file": "It's Beginning To Look A Lot Like Christmas .mp3"
+        },
+        {
+            "title": "Jingle Bell Rock",
+            "file": "Jingle Bell Rock .mp3"
+        },
+        {
+            "title": "Joy to the World",
+            "file": "Joy to the World .mp3"
+        },
+        {
+            "title": "Last Christmas",
+            "file": "Last Christmas.mp3"
+        },
+        {
+            "title": "Let It Snow!",
+            "file": "Let It Snow!.mp3"
+        },
+        {
+            "title": "Lonely This Christmas",
+            "file": "Lonely This Christmas .mp3"
+        },
+        {
+            "title": "Step Into Christmas",
+            "file": "Step Into Christmas.mp3"
+        }
+    ]
+}
