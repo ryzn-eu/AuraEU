@@ -9,6 +9,8 @@
     <link rel="apple-touch-icon" href="https://via.placeholder.com/192x192">
     <meta name="theme-color" content="#171717">
 
+    <link rel="manifest" href="./manifest.json">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
@@ -254,9 +256,9 @@
             <h2 class="text-xl font-semibold">In Riproduzione</h2>
         </div>
         
-        <div class="flex flex-col items-center w-full max-w-xl md:max-w-2xl pt-16 md:pt-0">
+        <div class="flex flex-col items-center w-full max-w-xl md:max-w-2xl pt-20 pb-16 md:pt-0 md:pb-0">
             
-            <div id="immersive-player-visual-container" class="w-full max-w-sm aspect-square rounded-3xl shadow-2xl shadow-ryzn-accent/30 overflow-hidden bg-black flex items-center justify-center mb-10 transition-all duration-300">
+            <div id="immersive-player-visual-container" class="w-full max-w-[280px] sm:max-w-sm aspect-square rounded-3xl shadow-2xl shadow-ryzn-accent/30 overflow-hidden bg-black flex items-center justify-center mb-8 sm:mb-10 transition-all duration-300">
                  <img id="immersive-cover" src="" alt="Album Cover" class="w-full h-full object-cover">
                  <video id="immersive-video-player" src="" class="w-full h-full object-contain bg-black hidden" playsinline loop muted></video>
             </div>
@@ -1290,7 +1292,7 @@
                     <div class="depth-glass p-4 rounded-xl space-y-3 flex flex-col justify-between cursor-pointer transition hover:bg-white/10 relative">
                         <div>
                             <h3 class="text-xl font-bold accent-text truncate">${playlist.name}</h3>
-                            <p class="text-sm text-gray-400 mb-3">${trackCount} brani</p>
+                            <p class="text-sm text-gray-400 mb-3">${trackCount} brani}</p>
                         </div>
                         <div onclick="event.stopPropagation(); playPlaylist('${playlist.id}')" class="flex items-center justify-between">
                             <div class="grid grid-cols-2 gap-1 w-24 aspect-square rounded-lg overflow-hidden flex-shrink-0 bg-black/20">
@@ -1604,11 +1606,16 @@
 
         async function initializeAppContent() {
             
-            // Rimozione del blocco PWA Manifest
-            const pwaLink = document.createElement('link');
-            pwaLink.rel = 'manifest';
-            pwaLink.href = '../manifest.json'; 
-            document.head.appendChild(pwaLink);
+            // ✅ REGISTRAZIONE SERVICE WORKER (PWA)
+            if ('serviceWorker' in navigator) {
+                try {
+                    // Assicurati che il percorso del file sw.js sia corretto
+                    const registration = await navigator.serviceWorker.register('./sw.js');
+                    console.log('Service Worker registrato con successo:', registration);
+                } catch (error) {
+                    console.error('Registrazione Service Worker fallita:', error);
+                }
+            }
 
             loadLocalData();
             
