@@ -226,7 +226,7 @@
         
         <div id="immersive-player-visual-container" class="w-full max-w-3xl aspect-video rounded-3xl shadow-2xl shadow-ryzn-accent/30 overflow-hidden bg-black flex items-center justify-center mb-8">
              <img id="immersive-cover" src="" alt="Album Cover" class="w-full h-full object-cover">
-             <video id="immersive-video-player" src="" class="w-full h-full object-contain bg-black hidden" playsinline muted loop></video>
+             <video id="immersive-video-player" src="" class="w-full h-full object-contain bg-black hidden" playsinline loop muted></video>
         </div>
         
         <div class="flex flex-col items-center space-y-8 max-w-lg w-full">
@@ -377,11 +377,11 @@
     <script>
         // --- CONFIGURAZIONE GITHUB (Sostituisce YouTube) ---
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
-        // ⭐ FIX 1: AGGIORNAMENTO PATH AUDIO: ASSUME I FILE SONO IN /docs/audio/ (come suggerito dai percorsi video)
+        // ⭐ PATH AUDIO AGGIORNATO: ASSUME I FILE SONO IN /docs/audio/
         const AUDIO_BASE_URL = GITHUB_RAW_BASE + "docs/audio/"; 
         const FALLBACK_COVER_URL = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/a8e71d4d-18b1-468b-9e3c-819fe551bb3a.jpg";
         
-        // Percorsi JSON ora assoluti usando GITHUB_RAW_BASE
+        // Percorsi JSON ora assoluti per il FETCH REMOTO
         const VIDEO_JSON_URL = GITHUB_RAW_BASE + "video.json"; 
         const TRACKS_JSON_URL = GITHUB_RAW_BASE + "tracks.json"; 
         
@@ -444,35 +444,32 @@
         // FUNZIONI DI GESTIONE DATI E API (DINAMICHE)
         // ====================================================================
 
-        /**
-         * Costruisce l'URL della cover, usando la cover di fallback richiesta.
-         */
         function getCoverUrl(title) {
             return FALLBACK_COVER_URL;
         }
 
         /**
-         * Carica i brani dai JSON locali.
+         * Carica i brani dai JSON remoti usando fetch.
          */
         async function fetchTracks() {
             const container = document.getElementById('home-widgets-container');
             if (container) {
-                container.innerHTML = `<p class="text-center text-gray-400 col-span-full"><i data-lucide="loader-2" class="w-5 h-5 animate-spin inline-block mr-2"></i> Caricamento brani locali... </p>`;
+                container.innerHTML = `<p class="text-center text-gray-400 col-span-full"><i data-lucide="loader-2" class="w-5 h-5 animate-spin inline-block mr-2"></i> Caricamento brani da GitHub... </p>`;
                 lucide.createIcons();
             }
 
             try {
-                const [tracksResponse, videosResponse] = await Promise.all([
-                    fetch(TRACKS_JSON_URL),
-                    fetch(VIDEO_JSON_URL)
-                ]);
+                // Tenta di recuperare i file JSON dal percorso GitHub specificato
+                const tracksResponse = await fetch(TRACKS_JSON_URL);
+                const videosResponse = await fetch(VIDEO_JSON_URL);
 
                 if (!tracksResponse.ok || !videosResponse.ok) {
-                    throw new Error(`Errore HTTP: Tracks (${tracksResponse.status}), Videos (${videosResponse.status}). Controlla nomi e percorsi su GitHub.`);
+                     // Questo errore si verifica se i file non sono trovati (404) o se CORS è bloccato (0)
+                     throw new Error(`Impossibile recuperare uno o entrambi i file JSON. Controlla che siano su GitHub ai path corretti (${TRACKS_JSON_URL} e ${VIDEO_JSON_URL}).`);
                 }
 
                 const tracksData = await tracksResponse.json();
-                const videosData = await videosResponse.json(); 
+                const videosData = await videosResponse.json();
                 
                 const videoMap = new Map();
                 videosData.forEach(video => {
@@ -484,10 +481,11 @@
                 const results = tracks.map((track) => {
                     const title = track.title;
                     
-                    // ⭐ FIX 2: NORMALIZZAZIONE NOME FILE: Rimuove eventuali spazi prima di .mp3/.mp4
-                    // Rimuove lo spazio extra prima dell'estensione .mp3
-                    let normalizedFile = track.file.replace(/\s*\.mp3/i, '.mp3'); 
-                    const audioUrl = AUDIO_BASE_URL + encodeURIComponent(normalizedFile); 
+                    // ⭐ NORMALIZZAZIONE E SANIFICAZIONE URL PIÙ ROBUSTA
+                    let normalizedFile = track.file.trim(); 
+                    normalizedFile = normalizedFile.replace(/\s(\.[a-zA-Z0-9]+)$/, '$1'); 
+                    const encodedFile = encodeURIComponent(normalizedFile);
+                    const audioUrl = AUDIO_BASE_URL + encodedFile; 
                     
                     const videoUrl = videoMap.get(title) || null; 
                     const cover = getCoverUrl(title); 
@@ -514,7 +512,8 @@
                 console.error("Errore nel recupero dei brani locali:", error);
                 container.innerHTML = `<p class="text-center p-4 text-red-400 col-span-full">
                     <i data-lucide="alert-triangle" class="w-5 h-5 inline-block mr-2"></i> 
-                    Errore nel caricamento dei dati: ${error.message}.
+                    Errore nel caricamento dei dati: ${error.message}. <br> 
+                    Se stai usando il file in locale, è probabile che il browser abbia bloccato l'accesso ai file remoti (CORS).
                 </p>`;
                 AURA_MAP = [];
                 lucide.createIcons();
@@ -535,6 +534,17 @@
             return moods[Math.floor(Math.random() * moods.length)];
         }
         
+        // ⭐ FIX: Cambiato "snowflakes" con "snowflake" (Lucide icon) e "Chill"
+        function getMoodIcon(mood) {
+            switch (mood) {
+                case "Invernale": return "snowflake"; 
+                case "Party": return "sparkles";
+                case "Ambient": return "cloud-drizzle";
+                case "Chill": return "cloud-snow"; // Per variazione con Invernale
+                default: return "music";
+            }
+        }
+        
         // Aggiorna la cronologia di ascolto
         function updateListeningHistory(trackId) {
             listeningHistory = listeningHistory.filter(id => id !== trackId);
@@ -544,7 +554,7 @@
         }
 
 
-        // --- Funzioni di Autenticazione (Invariate) ---
+        // --- Funzioni di Autenticazione (Invariante) ---
         function openAuthModal(mode) {
              document.getElementById('auth-modal').classList.remove('hidden');
              switchAuthMode(mode);
@@ -615,10 +625,15 @@
             updateListeningHistory(trackId); 
 
             try {
+                // Imposta la sorgente audio (Fix 2 assicura l'URL corretto)
                 audioPlayer.src = track.audioUrl;
                 
                 // Prepara il player immersivo
                 immersiveVideoPlayer.src = track.videoUrl || '';
+                
+                // Assicurati che l'immersivo inizi con la cover (audio mode)
+                // Questo disabilita l'audioPlayer.muted se il video non è attivo
+                setImmersiveVisual('cover'); 
                 
                 if (autoplay) {
                     const attemptPlay = audioPlayer.play();
@@ -630,8 +645,6 @@
                     }
                 }
                 
-                // Assicurati che l'immersivo inizi con la cover (audio mode)
-                setImmersiveVisual('cover'); 
 
             } catch (e) {
                 showToast("Errore nel caricamento del brano.", 'error');
@@ -661,9 +674,11 @@
                         showToast("Riproduzione manuale richiesta.", 'info');
                      });
                  }
+                 // Riproduci il video solo se è attivo (isImmersiveVideoActive)
                  if(isImmersiveVideoActive) immersiveVideoPlayer.play();
             } else {
                 audioPlayer.pause();
+                // Metti in pausa il video solo se è attivo (isImmersiveVideoActive)
                 if(isImmersiveVideoActive) immersiveVideoPlayer.pause();
             }
         }
@@ -738,41 +753,54 @@
         function setImmersiveVisual(mode) {
              if(!currentTrackData) return;
              
-             const icon = switchToVideoBtn.querySelector('i');
+             const icon = switchToVideoBtn ? switchToVideoBtn.querySelector('i') : null; // Riferimento sicuro
              
              // Il video è disponibile?
-             const videoAvailable = currentTrackData.videoUrl && immersiveVideoPlayer.src;
+             const videoAvailable = currentTrackData.videoUrl && immersiveVideoPlayer && immersiveVideoPlayer.src;
 
              if (mode === 'video' && videoAvailable) {
+                // Modalità Video (Audio Muto sul Player Principale)
                 isImmersiveVideoActive = true;
                 immersiveCover.classList.add('hidden');
                 immersiveVideoPlayer.classList.remove('hidden');
                 
                 // Sincronizza e avvia il video, muta l'audio principale
                 immersiveVideoPlayer.currentTime = audioPlayer.currentTime;
+                // Rimuovi il muto dal player video (ha già l'attributo muted nell'HTML, ma in caso)
+                immersiveVideoPlayer.muted = false; 
+                // Il video player deve avere il volume attivo, ma in un setup corretto l'audio principale
+                // deve essere disattivato per non avere doppio audio.
+                audioPlayer.muted = true; 
+
                 if (!audioPlayer.paused) {
                     immersiveVideoPlayer.play();
                 } else {
                     immersiveVideoPlayer.pause();
                 }
-                audioPlayer.muted = true;
                 
-                icon.setAttribute('data-lucide', 'monitor-smartphone'); // Icona per tornare all'audio
+                // ⭐ FIX: Aggiunto controllo null
+                if (icon) {
+                    icon.setAttribute('data-lucide', 'monitor-smartphone'); // Icona per tornare all'audio
+                }
              } else {
                 // Modalità 'cover' (audio)
                 isImmersiveVideoActive = false;
                 immersiveCover.classList.remove('hidden');
                 immersiveVideoPlayer.classList.add('hidden');
 
-                // Pausa il video, riattiva l'audio principale
+                // Pausa il video (se attivo), riattiva l'audio principale
                 immersiveVideoPlayer.pause();
-                audioPlayer.muted = false;
-
-                icon.setAttribute('data-lucide', 'video'); // Icona per passare al video
+                // Disattiva il muto sul player audio
+                audioPlayer.muted = false; 
+                
+                // ⭐ FIX: Aggiunto controllo null
+                if (icon) {
+                    icon.setAttribute('data-lucide', 'video'); // Icona per passare al video
+                }
              }
              // Mostra/nascondi il tasto switch A/V nella modal
-             switchToVideoBtn.classList.toggle('hidden', !videoAvailable);
-             switchToVideoPipBtn.classList.toggle('hidden', !videoAvailable);
+             if (switchToVideoBtn) switchToVideoBtn.classList.toggle('hidden', !videoAvailable);
+             if (switchToVideoPipBtn) switchToVideoPipBtn.classList.toggle('hidden', !videoAvailable);
              lucide.createIcons();
         }
         
@@ -858,7 +886,7 @@
             }
         }
 
-        // --- Logica Like/Playlist/UI (Invariata) ---
+        // --- Logica Like/Playlist/UI (Invariante) ---
         function saveLocalData() {
             localStorage.setItem('aura_liked_tracks', JSON.stringify(Array.from(likedTracks)));
             localStorage.setItem('aura_playlists', JSON.stringify(userPlaylists));
@@ -897,7 +925,7 @@
             }
         }
 
-        // --- Gestione Sezioni e Rendering Widgets (Invariata) ---
+        // --- Gestione Sezioni e Rendering Widgets (Invariante) ---
         window.showSection = function(sectionId, filter = activeFilter) {
             activeFilter = filter; 
 
@@ -1003,16 +1031,6 @@
                  </div>
             `;
         }
-
-        function getMoodIcon(mood) {
-            switch (mood) {
-                case "Invernale": return "snowflakes"; 
-                case "Party": return "sparkles";
-                case "Ambient": return "cloud-drizzle";
-                case "Chill": return "snowflake";
-                default: return "music";
-            }
-        }
         
         function getMoodGridHtml() {
             return ALL_MOODS.map(mood => {
@@ -1039,8 +1057,9 @@
             document.getElementById('home-greeting').textContent = `${greeting} La tua Vibe è pronta.`;
 
             if (AURA_MAP.length === 0) {
+                // Se i dati non sono caricati, non sovrascrivere l'errore se è già presente
                 if (container.innerHTML.indexOf('Errore nel caricamento') === -1) {
-                    container.innerHTML = '<p class="text-center text-gray-500 col-span-full">Nessun brano caricato. Riprova più tardi.</p>';
+                     container.innerHTML = '<p class="text-center text-gray-500 col-span-full">Nessun brano caricato. Riprova più tardi.</p>';
                 }
                 return;
             }
@@ -1110,12 +1129,15 @@
             allWidgetsHtml += disclaimerHtml;
 
             // ⭐ WIDGET 3: Playlist Natalizia 1 
-            const playlist1Tracks = shuffled.slice(6, 16);
+            // Usa una selezione di tracce casuali, assicurandosi di non superare la lunghezza di AURA_MAP
+            const sliceEnd1 = Math.min(6 + 10, AURA_MAP.length);
+            const playlist1Tracks = shuffled.slice(6, sliceEnd1);
             const playlist1Html = playlist1Tracks.map(getTrackElement).join('');
             allWidgetsHtml += createWidgetBlock('Playlist Natalizia: Atmosfera Glaciale', 'Un mix di suoni chill e ambientali per l\'inverno.', playlist1Html, 'grid');
 
             // ⭐ WIDGET 4: Playlist Natalizia 2
-            const playlist2Tracks = shuffled.slice(16, 26);
+            const sliceEnd2 = Math.min(sliceEnd1 + 10, AURA_MAP.length);
+            const playlist2Tracks = shuffled.slice(sliceEnd1, sliceEnd2);
             const playlist2Html = playlist2Tracks.map(getTrackElement).join('');
             allWidgetsHtml += createWidgetBlock('Playlist Natalizia: Le Hit delle Feste', 'Le canzoni che non possono mancare durante le vacanze.', playlist2Html, 'grid');
             
@@ -1128,7 +1150,7 @@
             renderHomePageWidgets(); 
         }
 
-        // --- Altre Funzioni (Invariate) ---
+        // --- Altre Funzioni (Invariante) ---
         function getLikedTrackElement(track) {
             return `
                  <div onclick="playTrack('${track.id}')" class="depth-glass p-3 rounded-xl flex items-center space-x-4 cursor-pointer hover:bg-white/10 transition">
@@ -1471,7 +1493,8 @@
                  audioPlayer.addEventListener('pause', onPlayerPause);
                  audioPlayer.addEventListener('timeupdate', updateProgress);
                  audioPlayer.addEventListener('seeked', () => {
-                     if(isImmersiveVideoActive && immersiveVideoPlayer) immersiveVideoPlayer.currentTime = audioPlayer.currentTime;
+                     // Sincronizza il video quando si cerca
+                     if(isImmersiveVideoActive) immersiveVideoPlayer.currentTime = audioPlayer.currentTime;
                  });
             }
 
@@ -1536,17 +1559,18 @@
 
         async function initializeAppContent() {
             
-            const pwaLink = document.createElement('link');
-            pwaLink.rel = 'manifest';
-            pwaLink.href = '../manifest.json'; 
-            document.head.appendChild(pwaLink);
+            // Rimozione del blocco PWA Manifest
+            // const pwaLink = document.createElement('link');
+            // pwaLink.rel = 'manifest';
+            // pwaLink.href = '../manifest.json'; 
+            // document.head.appendChild(pwaLink);
 
             loadLocalData();
             
             getDOMElements(); 
             createSnowflakes(); 
             
-            await fetchTracks(); 
+            await fetchTracks(); // ⭐ ABILITA IL FETCH DEI JSON REMOTI
             
             updateAmbientLight('#00BFFF', '0 191 255'); 
             
