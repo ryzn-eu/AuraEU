@@ -2,75 +2,93 @@
     "tracks": [
         {
             "title": "8 Days of Christmas",
-            "file": "8 Days of Christmas .mp3"
+            "file": "8 Days of Christmas .mp3",
+            "categoryID": "CR1" 
         },
         {
             "title": "A Little Love",
-            "file": "A Little Love .mp3"
+            "file": "A Little Love .mp3",
+            "categoryID": "CR2" 
         },
         {
             "title": "All I Want for Christmas Is You",
-            "file": "All I Want for Christmas Is You .mp3"
+            "file": "All I Want for Christmas Is You .mp3",
+            "categoryID": "CR1"
         },
         {
             "title": "Baby, It's Cold Outside",
-            "file": "Baby, It's Cold Outside.mp3"
+            "file": "Baby, It's Cold Outside.mp3",
+            "categoryID": "CR2"
         },
         {
             "title": "Blue Christmas",
-            "file": "Blue Christmas .mp3"
+            "file": "Blue Christmas .mp3",
+            "categoryID": "CR3"
         },
         {
             "title": "Christmas",
-            "file": "Christmas.mp3"
+            "file": "Christmas.mp3",
+            "categoryID": "CR3"
         },
         {
             "title": "Cold As Christmas",
-            "file": "Cold As Christmas.mp3"
+            "file": "Cold As Christmas.mp3",
+            "categoryID": "CR4" 
         },
         {
             "title": "December",
-            "file": "December.mp3"
+            "file": "December.mp3",
+            "categoryID": "CR4" 
         },
         {
             "title": "Do They Know It’s Christmas",
-            "file": "Do They Know It’s Christmas .mp3"
+            "file": "Do They Know It’s Christmas .mp3",
+            "categoryID": "CR3"
         },
         {
             "title": "HAPPY XMAS",
-            "file": "HAPPY XMAS .mp3"
+            "file": "HAPPY XMAS .mp3",
+            "categoryID": "CR1"
         },
         {
             "title": "Hang Your Lights",
-            "file": "Hang Your Lights.mp3"
+            "file": "Hang Your Lights.mp3",
+            "categoryID": "CR1"
         },
         {
             "title": "It's Beginning To Look A Lot Like Christmas",
-            "file": "It's Beginning To Look A Lot Like Christmas .mp3"
+            "file": "It's Beginning To Look A Lot Like Christmas .mp3",
+            "categoryID": "CR3"
         },
         {
             "title": "Jingle Bell Rock",
-            "file": "Jingle Bell Rock .mp3"
+            "file": "Jingle Bell Rock .mp3",
+            "categoryID": "CR1"
         },
         {
             "title": "Joy to the World",
-            "file": "Joy to the World .mp3"
+            "file": "Joy to the World .mp3",
+            "categoryID": "CR3"
         },
         {
             "title": "Last Christmas",
-            "file": "Last Christmas.mp3"
+            "file": "Last Christmas.mp3",
+            "categoryID": "CR1"
         },
         {
             "title": "Let It Snow!",
-            "file": "Let It Snow!.mp3"
+            "file": "Let It Snow!.mp3",
+            "categoryID": "CR3"
         },
         {
             "title": "Lonely This Christmas",
-            "file": "Lonely This Christmas .mp3"
+            "file": "Lonely This Christmas .mp3",
+            "categoryID": "CR2"
         },
         {
             "title": "Step Into Christmas",
-            "file": "Step Into Christmas.mp3"
+            "file": "Step Into Christmas.mp3",
+            "categoryID": "CR1"
         }
     ]
 }
