@@ -154,6 +154,32 @@
             }
         }
         
+        /* --- STILI MARQUEE PER TITOLI LUNGHI --- */
+        .title-wrapper {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        /* Animazione di scorrimento (Marquee) */
+        .marquee {
+            display: inline-block;
+            animation: marquee 10s linear infinite; /* Velocità di scorrimento */
+            padding-left: 100%; 
+            animation-play-state: paused; /* Inizia in pausa */
+        }
+        
+        /* Riprende l'animazione se il testo è troppo lungo (controllato da JS) */
+        .title-wrapper.is-long .marquee {
+            animation-play-state: running;
+        }
+
+        /* Definisce l'animazione */
+        @keyframes marquee {
+            0%   { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+        /* ------------------------------------------ */
+
         /* --- NUOVI STILI CAROSELLO ORIZZONTALE --- */
         .horizontal-scroll {
             display: flex;
@@ -265,7 +291,9 @@
             
             <div class="flex flex-col items-center space-y-8 max-w-lg w-full">
                 <div class="text-center">
-                    <h3 id="immersive-title" class="text-4xl font-extrabold truncate px-4">Titolo Brano</h3>
+                    <div id="immersive-title-wrapper" class="title-wrapper max-w-full text-4xl font-extrabold px-4">
+                        <h3 id="immersive-title" class="text-4xl font-extrabold"><span class="marquee">Titolo Brano</span></h3>
+                    </div>
                     <p id="immersive-artist" class="text-xl text-gray-400 truncate px-4">Artista</p>
                 </div>
                 
@@ -285,7 +313,7 @@
                         <i data-lucide="skip-back" class="w-8 h-8 fill-current"></i>
                     </button>
                     <button onclick="event.stopPropagation(); togglePlayPause()" class="p-4 accent-bg rounded-full hover:scale-105 transition shadow-xl shadow-ryzn-accent/50">
-                        <i id="immersive-play-icon" data-lucide="play" class="w-10 h-10 text-ryzn-bg fill-ryzn-bg animated-icon"></i> 
+                        <i id="immersive-play-icon" data-lucide="play" class="w-10 h-10 text-ryzn-bg animated-icon"></i> 
                     </button>
                     <button onclick="event.stopPropagation(); skipForward()" class="text-white/70 hover:text-white transition">
                         <i data-lucide="skip-forward" class="w-8 h-8 fill-current"></i>
@@ -370,22 +398,22 @@
     
     <div onclick="enterImmersiveMode()" class="player-bar depth-glass bg-ryzn-bg/80 border-t border-white/10 flex items-center justify-between px-4 sm:px-8 cursor-pointer">
         
-        <div class="flex items-center space-x-4 w-1/3">
-            <img id="player-cover" src="https://via.placeholder.com/64" alt="Album Cover" class="w-12 h-12 rounded-md object-cover">
-            <div class="truncate">
-                <p id="player-title" class="font-bold truncate text-sm">Nessun Brano</p>
+        <div class="flex items-center space-x-4 w-1/3 overflow-hidden">
+            <img id="player-cover" src="https://via.placeholder.com/64" alt="Album Cover" class="w-12 h-12 rounded-md object-cover flex-shrink-0">
+            <div id="player-title-wrapper" class="title-wrapper truncate">
+                <p id="player-title" class="font-bold text-sm"><span class="marquee">Nessun Brano</span></p>
                 <p id="player-artist" class="text-xs text-gray-400 truncate">Tocca per iniziare</p>
             </div>
         </div>
 
         <div class="flex items-center justify-center space-x-4 w-1/3">
-            <button onclick="event.stopPropagation(); skipBackward()" class="text-white/70 hover:text-white transition hidden md:block">
+            <button onclick="event.stopPropagation(); skipBackward()" class="text-white/70 hover:text-white transition block">
                  <i data-lucide="skip-back" class="w-5 h-5 fill-current"></i>
             </button>
             <button onclick="event.stopPropagation(); togglePlayPause()" class="p-2 accent-bg rounded-full hover:scale-105 transition shadow-lg shadow-ryzn-accent/30">
-                <i id="play-icon" data-lucide="play" class="w-6 h-6 text-ryzn-bg fill-ryzn-bg animated-icon"></i> 
+                <i id="play-icon" data-lucide="play" class="w-6 h-6 text-ryzn-bg animated-icon"></i> 
             </button>
-            <button onclick="event.stopPropagation(); skipForward()" class="text-white/70 hover:text-white transition hidden md:block">
+            <button onclick="event.stopPropagation(); skipForward()" class="text-white/70 hover:text-white transition block">
                  <i data-lucide="skip-forward" class="w-5 h-5 fill-current"></i>
             </button>
         </div>
@@ -442,6 +470,10 @@
         
         // Riferimenti DOM
         let progressBar, progressBarImmersive, playIcon, immersivePlayIcon, playerTitle, playerArtist, playerCover, immersiveCover, immersiveTitle, immersiveArtist, likeButton, vibeScoreDisplay, progressBarContainer, progressBarImmersiveContainer, loopButtonImmersive, playerBar, switchToVideoBtn, switchToVideoPipBtn;
+        
+        // ✅ NUOVI RIFERIMENTI DOM PER MARQUEE
+        let playerTitleWrapper, immersiveTitleWrapper;
+
 
         let trackIdToAdd = null; 
         
@@ -894,18 +926,77 @@
             if(progressBarImmersiveContainer) progressBarImmersiveContainer.addEventListener('click', handleSeek);
         }
         
+        // ✅ FUNZIONE CORRETTA: Riferimenti dinamici per l'aggiornamento Lucide
         function togglePlayIcon(isPaused) {
-            if (playIcon) playIcon.setAttribute('data-lucide', isPaused ? 'play' : 'pause');
-            if (immersivePlayIcon) immersivePlayIcon.setAttribute('data-lucide', isPaused ? 'play' : 'pause');
+            // *** FIX FONDAMENTALE ***
+            // Reperisce il riferimento all'elemento DOM ATTUALE (che è un SVG) 
+            // in quanto la libreria Lucide sostituisce l'originale <i>.
+            // L'ID viene trasferito all'SVG, quindi il lookup funziona correttamente sull'elemento live.
+            const currentPlayIcon = document.getElementById('play-icon'); 
+            const currentImmersivePlayIcon = document.getElementById('immersive-play-icon');
+
+            if (currentPlayIcon) {
+                // La libreria Lucide si affida all'attributo data-lucide per il rendering/aggiornamento.
+                currentPlayIcon.setAttribute('data-lucide', isPaused ? 'play' : 'pause');
+            }
+            if (currentImmersivePlayIcon) {
+                currentImmersivePlayIcon.setAttribute('data-lucide', isPaused ? 'play' : 'pause');
+            }
+            
+            // ✅ Fix per l'animazione Marquee
+            checkMarqueeStatus(isPaused);
+            
+            // Rimuove e ricrea l'icona basandosi sul nuovo data-lucide
             lucide.createIcons();
         }
+        
+        // ✅ NUOVA FUNZIONE: Controlla e applica l'animazione Marquee se necessario
+        function checkMarqueeStatus(isPaused) {
+            if (!playerTitleWrapper || !immersiveTitleWrapper || isPaused) {
+                if(playerTitleWrapper) playerTitleWrapper.classList.remove('is-long');
+                if(immersiveTitleWrapper) immersiveTitleWrapper.classList.remove('is-long');
+                return;
+            }
+
+            // Player Bar
+            const playerTitleElement = playerTitle.querySelector('.marquee');
+            if (playerTitleElement) {
+                 // Controlla se l'elemento marquee è più largo del suo wrapper (testo lungo)
+                 if (playerTitleElement.scrollWidth > playerTitleWrapper.offsetWidth) {
+                    playerTitleWrapper.classList.add('is-long');
+                 } else {
+                    playerTitleWrapper.classList.remove('is-long');
+                 }
+            }
+
+            // Immersive Modal
+            const immersiveTitleElement = immersiveTitle.querySelector('.marquee');
+            if (immersiveTitleElement) {
+                 if (immersiveTitleElement.scrollWidth > immersiveTitleWrapper.offsetWidth) {
+                    immersiveTitleWrapper.classList.add('is-long');
+                 } else {
+                    immersiveTitleWrapper.classList.remove('is-long');
+                 }
+            }
+        }
+
 
         function updateUI(track) {
-            playerTitle.textContent = track.title;
+            // Aggiornamento dei titoli con l'HTML del marquee (da fare una volta sola)
+            if (!playerTitle.querySelector('.marquee')) {
+                playerTitle.innerHTML = `<span class="marquee">${track.title}</span>`;
+            } else {
+                playerTitle.querySelector('.marquee').textContent = track.title;
+            }
+            if (!immersiveTitle.querySelector('.marquee')) {
+                immersiveTitle.innerHTML = `<span class="marquee">${track.title}</span>`;
+            } else {
+                immersiveTitle.querySelector('.marquee').textContent = track.title;
+            }
+
             playerArtist.textContent = track.artist;
             playerCover.src = track.cover;
 
-            immersiveTitle.textContent = track.title;
             immersiveArtist.textContent = track.artist;
             immersiveCover.src = track.cover;
 
@@ -917,6 +1008,9 @@
             const hasVideo = !!track.videoUrl;
             if (switchToVideoPipBtn) switchToVideoPipBtn.classList.toggle('hidden', !hasVideo);
             if (switchToVideoBtn) switchToVideoBtn.classList.toggle('hidden', !hasVideo);
+            
+            // ✅ Controlla subito se il Marquee deve partire
+            checkMarqueeStatus(audioPlayer.paused);
             
             togglePlayIcon(audioPlayer.paused);
             lucide.createIcons();
@@ -1525,11 +1619,9 @@
             switchToVideoBtn = document.getElementById('switch-to-video-btn'); // Modal switch
             switchToVideoPipBtn = document.getElementById('switch-to-video-pip'); // PIP switch
 
-            // UI Player
+            // UI Player (Non usiamo più queste variabili globali per l'icona play/pause per evitare riferimenti obsoleti)
             progressBar = document.getElementById('progress-bar');
             progressBarImmersive = document.getElementById('progress-bar-immersive');
-            playIcon = document.getElementById('play-icon');
-            immersivePlayIcon = document.getElementById('immersive-play-icon');
             playerTitle = document.getElementById('player-title');
             playerArtist = document.getElementById('player-artist');
             playerCover = document.getElementById('player-cover');
@@ -1545,6 +1637,10 @@
             vibeScoreDisplay = document.getElementById('vibe-score-display');
             progressBarContainer = document.getElementById('progress-bar-container');
             progressBarImmersiveContainer = document.getElementById('progress-bar-immersive-container');
+            
+            // ✅ Riferimenti Wrapper Marquee
+            playerTitleWrapper = document.getElementById('player-title-wrapper');
+            immersiveTitleWrapper = document.getElementById('immersive-title-wrapper');
 
 
             // Aggiungi Listeners
