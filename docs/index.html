@@ -275,7 +275,7 @@
         </div>
     </div>
 
-    <div id="immersive-mode" onclick="exitImmersiveMode()" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[150] hidden flex flex-col items-center justify-center p-6 modal">
+    <div id="immersive-mode" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[150] hidden flex flex-col items-center justify-center p-6 modal">
         
         <div class="absolute top-6 left-6 flex items-center space-x-4">
             <button onclick="event.stopPropagation(); exitImmersiveMode()" class="text-white/80 hover:text-white transition"><i data-lucide="chevron-down" class="w-8 h-8"></i></button>
@@ -423,7 +423,7 @@
                 <i data-lucide="monitor-dot" class="w-5 h-5"></i>
             </button>
             
-            <button id="add-to-playlist-button" onclick="event.stopPropagation(); openAddToPlaylistModal()" class="text-white/50 hover:text-white transition hidden lg:block">
+            <button id="add-to-playlist-button" onclick="event.stopPropagation(); openAddToPlaylistModal()" class="text-white/50 hover:text-white transition">
                 <i data-lucide="list-plus" class="w-5 h-5"></i>
             </button>
             <button id="like-button" onclick="event.stopPropagation(); toggleLike()" class="text-white/50 hover:text-red-400 transition">
@@ -798,17 +798,16 @@
         }
 
         function updateLoopButton(isLooping) {
-            const loopIcon = document.getElementById('loop-button-immersive').querySelector('i');
-            if (loopIcon) {
-                if (isLooping) {
-                    loopIcon.setAttribute('data-lucide', 'repeat-one');
-                    loopIcon.classList.add('accent-text');
-                    loopIcon.classList.remove('text-white/70');
-                } else {
-                    loopIcon.setAttribute('data-lucide', 'repeat');
-                    loopIcon.classList.remove('accent-text');
-                    loopIcon.classList.add('text-white/70');
-                }
+            const loopButton = document.getElementById('loop-button-immersive'); // Prende il bottone
+            const loopIcon = loopButton.querySelector('i'); // Prende l'icona interna
+            
+            if (loopButton && loopIcon) {
+                // 1. Cambia la forma dell'icona (repeat o repeat-one)
+                loopIcon.setAttribute('data-lucide', isLooping ? 'repeat-one' : 'repeat');
+                
+                // 2. Cambia il colore del BOTTONE (che l'icona eredita)
+                loopButton.classList.toggle('accent-text', isLooping); // Colore acceso
+                loopButton.classList.toggle('text-white/70', !isLooping); // Colore grigio
             }
             lucide.createIcons();
         }
@@ -950,35 +949,31 @@
             lucide.createIcons();
         }
         
-        // ✅ NUOVA FUNZIONE: Controlla e applica l'animazione Marquee se necessario
+        // ==========================================================
+        // --- MODIFICA RICHIESTA (Marquee Forzato) ---
+        // L'animazione parte sempre se la musica è in play, indipendentemente 
+        // dalla lunghezza del titolo.
+        // ==========================================================
         function checkMarqueeStatus(isPaused) {
-            if (!playerTitleWrapper || !immersiveTitleWrapper || isPaused) {
-                if(playerTitleWrapper) playerTitleWrapper.classList.remove('is-long');
-                if(immersiveTitleWrapper) immersiveTitleWrapper.classList.remove('is-long');
-                return;
-            }
+            if (!playerTitleWrapper || !immersiveTitleWrapper) return;
 
-            // Player Bar
-            const playerTitleElement = playerTitle.querySelector('.marquee');
-            if (playerTitleElement) {
-                 // Controlla se l'elemento marquee è più largo del suo wrapper (testo lungo)
-                 if (playerTitleElement.scrollWidth > playerTitleWrapper.offsetWidth) {
-                    playerTitleWrapper.classList.add('is-long');
-                 } else {
-                    playerTitleWrapper.classList.remove('is-long');
-                 }
-            }
+            // USA UN TIMEOUT per dare al browser il tempo di renderizzare il nuovo testo.
+            setTimeout(() => {
+                try {
+                    // Player Bar: Forziamo la classe 'is-long' se NON in pausa.
+                    playerTitleWrapper.classList.toggle('is-long', !isPaused);
 
-            // Immersive Modal
-            const immersiveTitleElement = immersiveTitle.querySelector('.marquee');
-            if (immersiveTitleElement) {
-                 if (immersiveTitleElement.scrollWidth > immersiveTitleWrapper.offsetWidth) {
-                    immersiveTitleWrapper.classList.add('is-long');
-                 } else {
-                    immersiveTitleWrapper.classList.remove('is-long');
-                 }
-            }
+                    // Immersive Modal: Forziamo la classe 'is-long' se NON in pausa.
+                    immersiveTitleWrapper.classList.toggle('is-long', !isPaused);
+
+                } catch (e) {
+                    console.error("Errore Marquee:", e);
+                }
+            }, 50); // 50ms di ritardo per consentire il rendering del nuovo testo
         }
+        // ==========================================================
+        // --- FINE MODIFICA ---
+        // ==========================================================
 
 
         function updateUI(track) {
