@@ -9,7 +9,7 @@
     <link rel="apple-touch-icon" href="https://via.placeholder.com/192x192">
     <meta name="theme-color" content="#171717">
 
-    <link rel="manifest" href="../manifest.json">
+    <link rel="manifest" href="./manifest.json">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -802,7 +802,7 @@
             const loopIcon = loopButton.querySelector('i'); // Prende l'icona interna
             
             if (loopButton && loopIcon) {
-                // 1. Cambia la forma dell'icona (repeat o repeat-one)
+                // 1. Cambia la forma dell'icona (repeat or repeat-one)
                 loopIcon.setAttribute('data-lucide', isLooping ? 'repeat-one' : 'repeat');
                 
                 // 2. Cambia il colore del BOTTONE (che l'icona eredita)
@@ -1381,7 +1381,7 @@
                     <div class="depth-glass p-4 rounded-xl space-y-3 flex flex-col justify-between cursor-pointer transition hover:bg-white/10 relative">
                         <div>
                             <h3 class="text-xl font-bold accent-text truncate">${playlist.name}</h3>
-                            <p class="text-sm text-gray-400 mb-3">${trackCount} brani}</p>
+                            <p class="text-sm text-gray-400 mb-3">${trackCount} brani</p>
                         </div>
                         <div onclick="event.stopPropagation(); playPlaylist('${playlist.id}')" class="flex items-center justify-between">
                             <div class="grid grid-cols-2 gap-1 w-24 aspect-square rounded-lg overflow-hidden flex-shrink-0 bg-black/20">
@@ -1697,12 +1697,10 @@
 
         async function initializeAppContent() {
             
-            // ✅ REGISTRAZIONE SERVICE WORKER (PWA)
+            // ✅ REGISTRAZIONE SERVICE WORKER (PWA) - Percorso corretto: './service_worker.js'
             if ('serviceWorker' in navigator) {
                 try {
-                    // Assicurati che il percorso del file sw.js sia corretto
-                    // --- FIX APPLICATO QUI ---
-                    const registration = await navigator.serviceWorker.register('../service_worker.js');
+                    const registration = await navigator.serviceWorker.register('./service_worker.js');
                     console.log('Service Worker registrato con successo:', registration);
                 } catch (error) {
                     console.error('Registrazione Service Worker fallita:', error);
