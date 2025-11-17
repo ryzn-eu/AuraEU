@@ -4,109 +4,109 @@
             "title": "8 Days of Christmas",
             "file": "8 Days of Christmas .mp3",
             "categoryID": "CR1",
-            "videoUrl": "https://www.youtube.com/embed/S2gXFf62YhY?autoplay=1&controls=0&modestbranding=1" 
+            "videoUrl": "" 
         },
         {
             "title": "A Little Love",
             "file": "A Little Love .mp3",
             "categoryID": "CR2",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/A%20Little%20Love%20.mp4" 
+            "videoUrl": "" 
         },
         {
             "title": "All I Want for Christmas Is You",
             "file": "All I Want for Christmas Is You .mp3",
             "categoryID": "CR1",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/All%20I%20Want%20for%20Christmas%20Is%20You%20.mp4"
+            "videoUrl": "https://invidious.f5.si/watch?v=aAkMkVFwAoo"
         },
         {
             "title": "Baby, It's Cold Outside",
             "file": "Baby, It's Cold Outside.mp3",
             "categoryID": "CR2",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Baby%2C%20It's%20Cold%20Outside.mp4"
+            "videoUrl": ""
         },
         {
             "title": "Blue Christmas",
             "file": "Blue Christmas .mp3",
             "categoryID": "CR3",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Blue%20Christmas%20.mp4"
+            "videoUrl": ""
         },
         {
             "title": "Christmas",
             "file": "Christmas.mp3",
             "categoryID": "CR3",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Christmas.mp4"
+            "videoUrl": ""
         },
         {
             "title": "Cold As Christmas",
             "file": "Cold As Christmas.mp3",
             "categoryID": "CR4",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Cold%20As%20Christmas.mp4" 
+            "videoUrl": "" 
         },
         {
             "title": "December",
             "file": "December.mp3",
             "categoryID": "CR4",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/December.mp4" 
+            "videoUrl": "" 
         },
         {
             "title": "Do They Know It’s Christmas",
             "file": "Do They Know It’s Christmas .mp3",
             "categoryID": "CR3",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Do%20They%20Know%20It%E2%80%99s%20Christmas%20.mp4"
+            "videoUrl": ""
         },
         {
             "title": "HAPPY XMAS",
             "file": "HAPPY XMAS .mp3",
             "categoryID": "CR1",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/HAPPY%20XMAS%20.mp4"
+            "videoUrl": ""
         },
         {
             "title": "Hang Your Lights",
             "file": "Hang Your Lights.mp3",
             "categoryID": "CR1",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Hang%20Your%20Lights.mp4"
+            "videoUrl": ""
         },
         {
             "title": "It's Beginning To Look A Lot Like Christmas",
             "file": "It's Beginning To Look A Lot Like Christmas .mp3",
             "categoryID": "CR3",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/It's%20Beginning%20To%20Look%20A%20Lot%20Like%20Christmas%20.mp4"
+            "videoUrl": ""
         },
         {
             "title": "Jingle Bell Rock",
             "file": "Jingle Bell Rock .mp3",
             "categoryID": "CR1",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Jingle%20Bell%20Rock%20.mp4"
+            "videoUrl": ""
         },
         {
             "title": "Joy to the World",
             "file": "Joy to the World .mp3",
             "categoryID": "CR3",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Joy%20to%20the%20World%20.mp4"
+            "videoUrl": ""
         },
         {
             "title": "Last Christmas",
             "file": "Last Christmas.mp3",
             "categoryID": "CR1",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Last%20Christmas.mp4"
+            "videoUrl": ""
         },
         {
             "title": "Let It Snow!",
             "file": "Let It Snow!.mp3",
             "categoryID": "CR3",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Let%20It%20Snow!.mp4"
+            "videoUrl": ""
         },
         {
             "title": "Lonely This Christmas",
             "file": "Lonely This Christmas .mp3",
             "categoryID": "CR2",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Lonely%20This%20Christmas%20.mp4"
+            "videoUrl": ""
         },
         {
             "title": "Step Into Christmas",
             "file": "Step Into Christmas.mp3",
             "categoryID": "CR1",
-            "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/docs/video/Step%20Into%20Christmas.mp4"
+            "videoUrl": ""
         }
     ]
 }
