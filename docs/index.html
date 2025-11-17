@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aura Music - (GitHub V8.6) Grafica Glaciale/Natale</title>
+    <title>Aura</title>
     
     <link rel="icon" href="https://via.placeholder.com/192x192">
     <link rel="apple-touch-icon" href="https://via.placeholder.com/192x192">
@@ -286,8 +286,9 @@
             
             <div id="immersive-player-visual-container" class="w-full max-w-[280px] sm:max-w-sm aspect-square rounded-3xl shadow-2xl shadow-ryzn-accent/30 overflow-hidden bg-black flex items-center justify-center mb-8 sm:mb-10 transition-all duration-300">
                  <img id="immersive-cover" src="" alt="Album Cover" class="w-full h-full object-cover">
-                 <video id="immersive-video-player" src="" class="w-full h-full object-contain bg-black hidden" playsinline loop muted></video>
-            </div>
+                 
+                 <iframe id="immersive-video-player" src="" class="w-full h-full object-contain bg-black hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; encrypted-media"></iframe>
+                 </div>
             
             <div class="flex flex-col items-center space-y-8 max-w-lg w-full">
                 <div class="text-center">
@@ -449,7 +450,7 @@
         const COVER_BASE_URL = GITHUB_RAW_BASE + "Covers/"; 
         
         // Percorsi JSON ora assoluti per il FETCH REMOTO
-        const VIDEO_JSON_URL = GITHUB_RAW_BASE + "video.json"; 
+        // const VIDEO_JSON_URL = GITHUB_RAW_BASE + "video.json"; // <-- RIMOSSO COME DA RICHIESTA
         const TRACKS_JSON_URL = GITHUB_RAW_BASE + "tracks.json"; 
         
         // --- Dati & Configurazione Locali ---
@@ -543,6 +544,9 @@
         /**
          * Carica i brani dai JSON remoti usando fetch.
          */
+        // ==========================================================
+        // --- MODIFICA RICHIESTA (Rimozione video.json) ---
+        // ==========================================================
         async function fetchTracks() {
             const container = document.getElementById('home-widgets-container');
             if (container) {
@@ -551,23 +555,17 @@
             }
 
             try {
-                // Tenta di recuperare i file JSON dal percorso GitHub specificato
+                // Tenta di recuperare SOLO il file tracks.json
                 const tracksResponse = await fetch(TRACKS_JSON_URL);
-                const videosResponse = await fetch(VIDEO_JSON_URL);
 
-                if (!tracksResponse.ok || !videosResponse.ok) {
-                     // Questo errore si verifica se i file non sono trovati (404) o se CORS è bloccato (0)
-                     throw new Error(`Impossibile recuperare uno o entrambi i file JSON. Controlla che siano su GitHub ai path corretti (${TRACKS_JSON_URL} e ${VIDEO_JSON_URL}).`);
+                if (!tracksResponse.ok) {
+                     // Errore se tracks.json non è trovato (404) o CORS è bloccato (0)
+                     throw new Error(`Impossibile recuperare il file JSON. Controlla che sia su GitHub al path corretto (${TRACKS_JSON_URL}).`);
                 }
 
                 const tracksData = await tracksResponse.json();
-                const videosData = await videosResponse.json();
                 
-                const videoMap = new Map();
-                videosData.forEach(video => {
-                    // video.videoUrl deve essere l'URL RAW completo del video
-                    videoMap.set(video.title.trim(), video.videoUrl);
-                });
+                // --- Rimossa logica di video.json e videoMap ---
 
                 // Costruisci AURA_MAP
                 const tracks = tracksData.tracks || [];
@@ -582,7 +580,8 @@
                     const encodedFile = encodeURIComponent(normalizedFile);
                     const audioUrl = AUDIO_BASE_URL + encodedFile; 
                     
-                    const videoUrl = videoMap.get(title) || null; 
+                    // ⭐ FIX: Leggi videoUrl direttamente dall'oggetto track (da tracks.json)
+                    const videoUrl = track.videoUrl || null; 
                     
                     // Chiama la funzione getCoverUrl con l'oggetto track
                     const cover = getCoverUrl(track); 
@@ -593,7 +592,7 @@
                         artist: "Aura Choise", 
                         cover: cover,
                         audioUrl: audioUrl, 
-                        videoUrl: videoUrl, 
+                        videoUrl: videoUrl, // <-- Il videoUrl ora proviene da tracks.json
                         categoryID: track.categoryID, // <--- AGGIUNTA FONDAMENTALE
                         mood: getTrackMood(), 
                         vibe: Math.floor(Math.random() * 100) + 1,
@@ -617,6 +616,9 @@
                 lucide.createIcons();
             }
         }
+        // ==========================================================
+        // --- FINE MODIFICA ---
+        // ==========================================================
         
         function getRandomAccentColor() {
             const colors = ['#00BFFF', '#34D399', '#FCD34D', '#FF007F', '#8B5CF6']; // Glacial, Mint, Gold, Magenta, Violet
@@ -726,8 +728,15 @@
             
             // 1. Imposta le sorgenti
             audioPlayer.src = track.audioUrl;
+            
+            // ==========================================================
+            // --- MODIFICA RICHIESTA (Imposta SRC Iframe) ---
+            // ==========================================================
             // ⭐ ASSICURIAMO CHE IL VIDEO URL SIA NULL O UNA STRINGA VALIDA
-            immersiveVideoPlayer.src = track.videoUrl || ''; 
+            if (immersiveVideoPlayer) {
+                immersiveVideoPlayer.src = track.videoUrl || ''; 
+            }
+            // ==========================================================
 
             // 2. Esegui il load per preparare i metadati
             audioPlayer.load();
@@ -762,18 +771,18 @@
                 return;
             }
             
-            // Toggle Play/Pause
+            // ==========================================================
+            // --- MODIFICA RICHIESTA (Rimozione controllo Iframe) ---
+            // ==========================================================
+            // Toggle Play/Pause (Solo Audio)
             if (audioPlayer.paused) {
                 audioPlayer.play();
-                if (isImmersiveVideoActive && immersiveVideoPlayer) {
-                    immersiveVideoPlayer.play();
-                }
+                // RIMOSSO: Controllo play per immersiveVideoPlayer
             } else {
                 audioPlayer.pause();
-                 if (isImmersiveVideoActive && immersiveVideoPlayer) {
-                    immersiveVideoPlayer.pause();
-                }
+                // RIMOSSO: Controllo pause per immersiveVideoPlayer
             }
+            // ==========================================================
         }
 
         window.skipForward = function() {
@@ -827,26 +836,23 @@
         /**
          * Imposta la visualizzazione Immersiva: 'video' o 'cover' (audio).
          */
+        // ==========================================================
+        // --- MODIFICA RICHIESTA (Gestione Iframe) ---
+        // ==========================================================
         function setImmersiveVisual(mode) {
             if(!currentTrackData) return;
             const icon = switchToVideoBtn ? switchToVideoBtn.querySelector('i') : null; // Riferimento sicuro
             // Il video è disponibile?
-            const videoAvailable = currentTrackData.videoUrl && immersiveVideoPlayer && immersiveVideoPlayer.src;
+            const videoAvailable = currentTrackData.videoUrl && immersiveVideoPlayer;
 
             if (mode === 'video' && videoAvailable) {
-                // Modalità Video
+                // Modalità Video (Iframe)
                 isImmersiveVideoActive = true;
                 immersiveCover.classList.add('hidden');
                 immersiveVideoPlayer.classList.remove('hidden');
 
-                // Sincronizza e tenta l'avvio del video
-                immersiveVideoPlayer.currentTime = audioPlayer.currentTime;
-                // Gestione del muto del video per evitare doppio audio
-                if(!audioPlayer.paused) {
-                    // Muta il video se l'audio principale è attivo
-                    immersiveVideoPlayer.muted = true; 
-                    immersiveVideoPlayer.play().catch(e => { console.error("Riproduzione video bloccata/fallita:", e); });
-                }
+                // RIMOSSI: Controlli di riproduzione (play, pause, currentTime, muted)
+                // L'iframe gestirà la riproduzione in autonomia (es. autoplay se permesso)
                 
                 // Aggiorna l'icona per mostrare l'opzione di tornare alla copertina
                 if(icon) icon.setAttribute('data-lucide', 'monitor-dot'); 
@@ -857,10 +863,9 @@
                 immersiveCover.classList.remove('hidden');
                 immersiveVideoPlayer.classList.add('hidden');
 
-                // Pausa il video se è in riproduzione e non serve
+                // Pausa il video (se possibile) resettando l'src dell'iframe
                 if(immersiveVideoPlayer) {
-                    immersiveVideoPlayer.pause();
-                    immersiveVideoPlayer.muted = true; 
+                    immersiveVideoPlayer.src = ''; 
                 }
                 
                 // Aggiorna l'icona per mostrare l'opzione di passare al video (se disponibile)
@@ -868,6 +873,7 @@
             }
             lucide.createIcons();
         }
+        // ==========================================================
 
         /**
          * Alterna tra visuale copertina e visuale video (se disponibile)
@@ -892,6 +898,11 @@
             document.getElementById('immersive-mode').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             updateProgress();
+            
+            // Ricarica l'SRC dell'iframe quando si entra in modalità immersiva
+            if (immersiveVideoPlayer && currentTrackData.videoUrl) {
+                immersiveVideoPlayer.src = currentTrackData.videoUrl;
+            }
 
             // Imposta la visuale preferita
             const finalMode = (preferredMode === 'video' && currentTrackData.videoUrl) ? 'video' : 'cover';
@@ -905,6 +916,9 @@
             setImmersiveVisual('cover');
         }
 
+        // ==========================================================
+        // --- MODIFICA RICHIESTA (Rimozione seek Iframe) ---
+        // ==========================================================
         function handleSeek(event) {
             if (!audioPlayer || !currentTrackData) return;
             const duration = audioPlayer.duration;
@@ -916,9 +930,9 @@
             const seekTime = (clickX / width) * duration;
             audioPlayer.currentTime = seekTime;
 
-            // Sincronizza anche il video se attivo
-            if(isImmersiveVideoActive) immersiveVideoPlayer.currentTime = seekTime;
+            // RIMOSSO: Sincronizzazione seek per immersiveVideoPlayer
         }
+        // ==========================================================
 
         function setupSeekListeners() {
             if(progressBarContainer) progressBarContainer.addEventListener('click', handleSeek);
@@ -1610,7 +1624,12 @@
         function getDOMElements() {
             // Player HTML5
             audioPlayer = document.getElementById('audioPlayer');
-            immersiveVideoPlayer = document.getElementById('immersive-video-player');
+            // ==========================================================
+            // --- MODIFICA RICHIESTA (Riferimento a Iframe) ---
+            // ==========================================================
+            immersiveVideoPlayer = document.getElementById('immersive-video-player'); // Ora è un <iframe>
+            // ==========================================================
+            
             switchToVideoBtn = document.getElementById('switch-to-video-btn'); // Modal switch
             switchToVideoPipBtn = document.getElementById('switch-to-video-pip'); // PIP switch
 
@@ -1644,16 +1663,7 @@
             audioPlayer.addEventListener('timeupdate', updateProgress);
             audioPlayer.addEventListener('ended', onTrackEnded);
             
-            // Listener per il video immersivo (se disponibile)
-            if (immersiveVideoPlayer) {
-                immersiveVideoPlayer.addEventListener('pause', () => { 
-                    if(isImmersiveVideoActive && !audioPlayer.paused) {
-                        // Questo gestisce il caso in cui il video non è in loop e si ferma, 
-                        // ma l'audio principale continua (il video è muto/sincronizzato)
-                        // Per il momento non facciamo nulla qui per non interrompere l'audio
-                    }
-                });
-            }
+            // RIMOSSO: Listener 'pause' per immersiveVideoPlayer (ora è un iframe)
 
             setupSeekListeners();
         }
