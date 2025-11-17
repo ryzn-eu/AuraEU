@@ -287,7 +287,16 @@
             <div id="immersive-player-visual-container" class="w-full max-w-[280px] sm:max-w-sm aspect-square rounded-3xl shadow-2xl shadow-ryzn-accent/30 overflow-hidden bg-black flex items-center justify-center mb-8 sm:mb-10 transition-all duration-300">
                  <img id="immersive-cover" src="" alt="Album Cover" class="w-full h-full object-cover">
                  
-                 <iframe id="immersive-video-player" src="" class="w-full h-full object-contain bg-black hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; encrypted-media"></iframe>
+                 <iframe 
+                    id="immersive-video-player" 
+                    width="600" 
+                    height="480" 
+                    src="" 
+                    scrolling="no" 
+                    frameborder="0" 
+                    allowfullscreen="true" 
+                    class="w-full h-full object-contain bg-black hidden">
+                 </iframe>
                  </div>
             
             <div class="flex flex-col items-center space-y-8 max-w-lg w-full">
@@ -450,7 +459,6 @@
         const COVER_BASE_URL = GITHUB_RAW_BASE + "Covers/"; 
         
         // Percorsi JSON ora assoluti per il FETCH REMOTO
-        // const VIDEO_JSON_URL = GITHUB_RAW_BASE + "video.json"; // <-- RIMOSSO COME DA RICHIESTA
         const TRACKS_JSON_URL = GITHUB_RAW_BASE + "tracks.json"; 
         
         // --- Dati & Configurazione Locali ---
@@ -544,9 +552,6 @@
         /**
          * Carica i brani dai JSON remoti usando fetch.
          */
-        // ==========================================================
-        // --- MODIFICA RICHIESTA (Rimozione video.json) ---
-        // ==========================================================
         async function fetchTracks() {
             const container = document.getElementById('home-widgets-container');
             if (container) {
@@ -565,8 +570,6 @@
 
                 const tracksData = await tracksResponse.json();
                 
-                // --- Rimossa logica di video.json e videoMap ---
-
                 // Costruisci AURA_MAP
                 const tracks = tracksData.tracks || [];
                 const results = tracks.map((track) => {
@@ -616,9 +619,6 @@
                 lucide.createIcons();
             }
         }
-        // ==========================================================
-        // --- FINE MODIFICA ---
-        // ==========================================================
         
         function getRandomAccentColor() {
             const colors = ['#00BFFF', '#34D399', '#FCD34D', '#FF007F', '#8B5CF6']; // Glacial, Mint, Gold, Magenta, Violet
@@ -634,7 +634,6 @@
             return moods[Math.floor(Math.random() * moods.length)];
         }
         
-        // FIX: Cambiato "snowflakes" con "snowflake" (Lucide icon) e "Chill"
         function getMoodIcon(mood) {
             switch (mood) {
                 case "Invernale": return "snowflake"; 
@@ -714,50 +713,47 @@
         }
         
         /**
-         * Funzioni di riproduzione del player HTML5
+         * Funzioni di riproduzione del player HTML5 e Iframe Video
          */
-        // ⭐ FUNZIONE playTrack MODIFICATA PER IL NUOVO FLUSSO DI AVVIO (FIX AUTOPLAY)
+        // ⭐ FUNZIONE playTrack AGGIORNATA: PRIORITÀ AUDIO
         window.playTrack = function(trackId) {
             const track = AURA_MAP.find(t => t.id === trackId);
             if (!track) return;
             currentTrackData = track;
             updateListeningHistory(trackId);
 
-            // Prepara il player immersivo e assicura che l'audio principale non sia muto (default)
-            setImmersiveVisual('cover'); 
+            // 1. Pulisce l'iframe per sicurezza (importante se si passa da video a audio)
+            if (immersiveVideoPlayer) immersiveVideoPlayer.src = '';
             
-            // 1. Imposta le sorgenti
+            // 2. Imposta l'SRC AUDIO
             audioPlayer.src = track.audioUrl;
-            
-            // ==========================================================
-            // --- MODIFICA RICHIESTA (Imposta SRC Iframe) ---
-            // ==========================================================
-            // ⭐ ASSICURIAMO CHE IL VIDEO URL SIA NULL O UNA STRINGA VALIDA
-            if (immersiveVideoPlayer) {
-                immersiveVideoPlayer.src = track.videoUrl || ''; 
-            }
-            // ==========================================================
-
-            // 2. Esegui il load per preparare i metadati
             audioPlayer.load();
-
-            // 3. Aggiorna l'interfaccia utente
-            updateUI(track);
-            if (playerBar) playerBar.classList.add('active');
-
-            // ⭐ IL FIX CHIAVE: Avvia la riproduzione immediatamente (sincrono al click utente)
+            
+            // 3. Avvia la riproduzione audio
             const attemptPlay = audioPlayer.play();
             if (attemptPlay && typeof attemptPlay.catch === 'function') {
                 attemptPlay.catch(e => {
-                    // Questo blocco viene eseguito se il browser blocca l'autoplay
-                    console.error("Riproduzione bloccata dal browser:", e);
-                    showToast("Avvio manuale richiesto: tocca PLAY nel player. (Blocco Autoplay)", 'error');
+                    console.error("Autoplay Audio bloccato:", e);
                     togglePlayIcon(true);
                 });
             }
+
+            // 4. Se il video esiste, pre-carica l'iframe con l'SRC
+            if (track.videoUrl) {
+                 if (immersiveVideoPlayer) {
+                     // Pre-carica l'SRC ma non lo mostra ancora
+                     immersiveVideoPlayer.src = track.videoUrl;
+                 }
+            }
+            
+            // 5. Imposta la visuale su COPERTINA (Cover) di default
+            setImmersiveVisual('cover');
+
+            updateUI(track);
+            if (playerBar) playerBar.classList.add('active');
         }
 
-        // ⭐ FUNZIONE togglePlayPause MODIFICATA (FIX VIDEO E MESSAGGIO ERRORE)
+        // ⭐ FUNZIONE togglePlayPause 
         window.togglePlayPause = function() {
             if (!audioPlayer) return;
 
@@ -771,18 +767,13 @@
                 return;
             }
             
-            // ==========================================================
-            // --- MODIFICA RICHIESTA (Rimozione controllo Iframe) ---
-            // ==========================================================
-            // Toggle Play/Pause (Solo Audio)
+            // Toggle Play/Pause solo per Audio Player
+            // I video iframe gestiscono il loro play/pause internamente
             if (audioPlayer.paused) {
                 audioPlayer.play();
-                // RIMOSSO: Controllo play per immersiveVideoPlayer
             } else {
                 audioPlayer.pause();
-                // RIMOSSO: Controllo pause per immersiveVideoPlayer
             }
-            // ==========================================================
         }
 
         window.skipForward = function() {
@@ -836,54 +827,65 @@
         /**
          * Imposta la visualizzazione Immersiva: 'video' o 'cover' (audio).
          */
-        // ==========================================================
-        // --- MODIFICA RICHIESTA (Gestione Iframe) ---
-        // ==========================================================
         function setImmersiveVisual(mode) {
             if(!currentTrackData) return;
             const icon = switchToVideoBtn ? switchToVideoBtn.querySelector('i') : null; // Riferimento sicuro
             // Il video è disponibile?
-            const videoAvailable = currentTrackData.videoUrl && immersiveVideoPlayer;
-
-            if (mode === 'video' && videoAvailable) {
+            const videoAvailable = !!currentTrackData.videoUrl;
+            
+            // 1. Logica di visualizzazione tra copertina e iframe
+            if (mode === 'video' && videoAvailable && immersiveVideoPlayer) {
                 // Modalità Video (Iframe)
                 isImmersiveVideoActive = true;
                 immersiveCover.classList.add('hidden');
                 immersiveVideoPlayer.classList.remove('hidden');
 
-                // RIMOSSI: Controlli di riproduzione (play, pause, currentTime, muted)
-                // L'iframe gestirà la riproduzione in autonomia (es. autoplay se permesso)
-                
-                // Aggiorna l'icona per mostrare l'opzione di tornare alla copertina
-                if(icon) icon.setAttribute('data-lucide', 'monitor-dot'); 
-
             } else {
                 // Modalità Copertina (Audio)
                 isImmersiveVideoActive = false;
                 immersiveCover.classList.remove('hidden');
-                immersiveVideoPlayer.classList.add('hidden');
-
-                // Pausa il video (se possibile) resettando l'src dell'iframe
-                if(immersiveVideoPlayer) {
-                    immersiveVideoPlayer.src = ''; 
-                }
-                
-                // Aggiorna l'icona per mostrare l'opzione di passare al video (se disponibile)
-                if(icon && videoAvailable) icon.setAttribute('data-lucide', 'video');
+                if(immersiveVideoPlayer) immersiveVideoPlayer.classList.add('hidden');
             }
+
+            // 2. Aggiorna i pulsanti di switch (che mostrano l'opzione opposta)
+            if (videoAvailable) {
+                // Il pulsante deve essere visibile se il video è disponibile
+                if (switchToVideoBtn) switchToVideoBtn.classList.remove('hidden');
+                if (switchToVideoPipBtn) switchToVideoPipBtn.classList.remove('hidden');
+                
+                // Aggiorna l'icona sul pulsante immersivo
+                if(icon) icon.setAttribute('data-lucide', isImmersiveVideoActive ? 'monitor-dot' : 'video');
+            } else {
+                 // Nascondi i pulsanti se il video NON è disponibile
+                 if (switchToVideoBtn) switchToVideoBtn.classList.add('hidden');
+                 if (switchToVideoPipBtn) switchToVideoPipBtn.classList.add('hidden');
+            }
+            
             lucide.createIcons();
         }
-        // ==========================================================
 
         /**
-         * Alterna tra visuale copertina e visuale video (se disponibile)
+         * Alterna tra visuale copertina (audio) e visuale video (iframe)
          */
         window.toggleImmersiveVisuals = function() {
             event.stopPropagation();
             if (!currentTrackData || !currentTrackData.videoUrl) return;
 
             const newMode = isImmersiveVideoActive ? 'cover' : 'video';
+            
             setImmersiveVisual(newMode);
+            
+            if(newMode === 'cover') {
+                // Se passo alla copertina: spengo il video e riattivo l'audio
+                if(immersiveVideoPlayer) immersiveVideoPlayer.src = ''; // Spegne l'iframe
+                audioPlayer.currentTime = 0;
+                audioPlayer.play();
+            } else {
+                // Se passo al video: carico iframe e stoppo l'audio MP3
+                 if(immersiveVideoPlayer) immersiveVideoPlayer.src = currentTrackData.videoUrl;
+                 audioPlayer.pause();
+                 // Nota: il player video deve auto-avviarsi
+            }
         }
         
         /**
@@ -899,26 +901,21 @@
             document.body.style.overflow = 'hidden';
             updateProgress();
             
-            // Ricarica l'SRC dell'iframe quando si entra in modalità immersiva
-            if (immersiveVideoPlayer && currentTrackData.videoUrl) {
-                immersiveVideoPlayer.src = currentTrackData.videoUrl;
+            // Logica per determinare la visualizzazione iniziale
+            if (preferredMode === 'video' && currentTrackData.videoUrl) {
+                // Se richiesto esplicitamente 'video', avvia il video
+                 toggleImmersiveVisuals(); 
+            } else {
+                // Altrimenti, rimane sulla cover (che è la priorità audio)
+                 setImmersiveVisual('cover'); 
             }
-
-            // Imposta la visuale preferita
-            const finalMode = (preferredMode === 'video' && currentTrackData.videoUrl) ? 'video' : 'cover';
-            setImmersiveVisual(finalMode);
         }
 
         window.exitImmersiveMode = function() {
             document.getElementById('immersive-mode').classList.add('hidden');
             document.body.style.overflow = 'auto';
-            // Se esco, torno sempre all'audio (per riattivare l'audioPlayer se necessario)
-            setImmersiveVisual('cover');
         }
 
-        // ==========================================================
-        // --- MODIFICA RICHIESTA (Rimozione seek Iframe) ---
-        // ==========================================================
         function handleSeek(event) {
             if (!audioPlayer || !currentTrackData) return;
             const duration = audioPlayer.duration;
@@ -929,10 +926,7 @@
             const width = container.offsetWidth;
             const seekTime = (clickX / width) * duration;
             audioPlayer.currentTime = seekTime;
-
-            // RIMOSSO: Sincronizzazione seek per immersiveVideoPlayer
         }
-        // ==========================================================
 
         function setupSeekListeners() {
             if(progressBarContainer) progressBarContainer.addEventListener('click', handleSeek);
@@ -941,15 +935,10 @@
         
         // ✅ FUNZIONE CORRETTA: Riferimenti dinamici per l'aggiornamento Lucide
         function togglePlayIcon(isPaused) {
-            // *** FIX FONDAMENTALE ***
-            // Reperisce il riferimento all'elemento DOM ATTUALE (che è un SVG) 
-            // in quanto la libreria Lucide sostituisce l'originale <i>.
-            // L'ID viene trasferito all'SVG, quindi il lookup funziona correttamente sull'elemento live.
             const currentPlayIcon = document.getElementById('play-icon'); 
             const currentImmersivePlayIcon = document.getElementById('immersive-play-icon');
 
             if (currentPlayIcon) {
-                // La libreria Lucide si affida all'attributo data-lucide per il rendering/aggiornamento.
                 currentPlayIcon.setAttribute('data-lucide', isPaused ? 'play' : 'pause');
             }
             if (currentImmersivePlayIcon) {
@@ -963,15 +952,9 @@
             lucide.createIcons();
         }
         
-        // ==========================================================
-        // --- MODIFICA RICHIESTA (Marquee Forzato) ---
-        // L'animazione parte sempre se la musica è in play, indipendentemente 
-        // dalla lunghezza del titolo.
-        // ==========================================================
         function checkMarqueeStatus(isPaused) {
             if (!playerTitleWrapper || !immersiveTitleWrapper) return;
 
-            // USA UN TIMEOUT per dare al browser il tempo di renderizzare il nuovo testo.
             setTimeout(() => {
                 try {
                     // Player Bar: Forziamo la classe 'is-long' se NON in pausa.
@@ -983,11 +966,8 @@
                 } catch (e) {
                     console.error("Errore Marquee:", e);
                 }
-            }, 50); // 50ms di ritardo per consentire il rendering del nuovo testo
+            }, 50); 
         }
-        // ==========================================================
-        // --- FINE MODIFICA ---
-        // ==========================================================
 
 
         function updateUI(track) {
@@ -1014,9 +994,8 @@
             updateAmbientLight(track.color || '#00BFFF', track.rgb || '0 191 255');
             updateLikeButton(track.id);
 
-            const hasVideo = !!track.videoUrl;
-            if (switchToVideoPipBtn) switchToVideoPipBtn.classList.toggle('hidden', !hasVideo);
-            if (switchToVideoBtn) switchToVideoBtn.classList.toggle('hidden', !hasVideo);
+            // La logica di visibilità dei pulsanti video è ora gestita in setImmersiveVisual()
+            setImmersiveVisual(isImmersiveVideoActive ? 'video' : 'cover'); 
             
             // ✅ Controlla subito se il Marquee deve partire
             checkMarqueeStatus(audioPlayer.paused);
@@ -1625,21 +1604,21 @@
             // Player HTML5
             audioPlayer = document.getElementById('audioPlayer');
             // ==========================================================
-            // --- MODIFICA RICHIESTA (Riferimento a Iframe) ---
+            // --- RIFERIMENTO AL PLAYER VIDEO (il tuo iframe) ---
             // ==========================================================
-            immersiveVideoPlayer = document.getElementById('immersive-video-player'); // Ora è un <iframe>
+            immersiveVideoPlayer = document.getElementById('immersive-video-player'); 
             // ==========================================================
             
             switchToVideoBtn = document.getElementById('switch-to-video-btn'); // Modal switch
             switchToVideoPipBtn = document.getElementById('switch-to-video-pip'); // PIP switch
 
-            // UI Player (Non usiamo più queste variabili globali per l'icona play/pause per evitare riferimenti obsoleti)
+            // UI Player
             progressBar = document.getElementById('progress-bar');
             progressBarImmersive = document.getElementById('progress-bar-immersive');
             playerTitle = document.getElementById('player-title');
             playerArtist = document.getElementById('player-artist');
             playerCover = document.getElementById('player-cover');
-            playerBar = document.querySelector('.player-bar'); // NUOVO RIFERIMENTO PER LA BARRA
+            playerBar = document.querySelector('.player-bar'); 
 
             // UI Immersiva
             immersiveCover = document.getElementById('immersive-cover');
@@ -1662,8 +1641,6 @@
             audioPlayer.addEventListener('pause', onPlayerPause);
             audioPlayer.addEventListener('timeupdate', updateProgress);
             audioPlayer.addEventListener('ended', onTrackEnded);
-            
-            // RIMOSSO: Listener 'pause' per immersiveVideoPlayer (ora è un iframe)
 
             setupSeekListeners();
         }
