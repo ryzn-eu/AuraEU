@@ -34,42 +34,6 @@
             "title": "Christmas",
             "file": "Christmas.mp3",
             "categoryID": "CR3",
-            "videoUrl": "https://dsvplay.com/e/m57p0shs3bzw"
-        },
-        {
-            "title": "Cold As Christmas",
-            "file": "Cold As Christmas.mp3",
-            "categoryID": "CR4",
-            "videoUrl": "https://dsvplay.com/e/eg1c05ek0air" 
-        },
-        {
-            "title": "December",
-            "file": "December.mp3",
-            "categoryID": "CR4",
-            "videoUrl": "https://dsvplay.com/e/4nw35evqrnaw" 
-        },
-        {
-            "title": "Do They Know It’s Christmas",
-            "file": "Do They Know It’s Christmas .mp3",
-            "categoryID": "CR3",
-            "videoUrl": "https://dsvplay.com/e/uxnoore5l60g"
-        },
-        {
-            "title": "HAPPY XMAS",
-            "file": "HAPPY XMAS .mp3",
-            "categoryID": "CR1",
-            "videoUrl": "https://dsvplay.com/e/dxwx6wznuarx"
-        },
-        {
-            "title": "Hang Your Lights",
-            "file": "Hang Your Lights.mp3",
-            "categoryID": "CR1",
-            "videoUrl": "https://dsvplay.com/e/kqao0titayns"
-        },
-        {
-            "title": "It's Beginning To Look A Lot Like Christmas",
-            "file": "It's Beginning To Look A Lot Like Christmas .mp3",
-            "categoryID": "CR3",
             "videoUrl": "https://dsvplay.com/e/ie7cdcs7rwjy"
         },
         {
@@ -104,15 +68,31 @@
         },
         {
             "title": "Step Into Christmas",
-            "file": "Step Into Christmas.mp3",
-            "categoryID": "CR1",
-            "videoUrl": "https://dsvplay.com/e/vohtkjfadhsl"
+            "file": "Step Into Christmas .mp3",
+            "categoryID": "CR2",
+            "videoUrl": "https://dsvplay.com/e/n6o2x1516a2i"
         },
         {
-            "title": "We Are The World",
-            "file": "USAxAfrica.mp3",
-            "categoryID": "CR2",
-            "videoUrl": "https://dsvplay.com/e/birk9lhf2bx5"
+            "title": "White Christmas",
+            "file": "White Christmas .mp3",
+            "categoryID": "CR3",
+            "videoUrl": "https://dsvplay.com/e/hly4485uowp8"
+        },
+        {
+            "title": "Winter Wonderland",
+            "file": "Winter Wonderland .mp3",
+            "categoryID": "CR3",
+            "videoUrl": "https://dsvplay.com/e/x9w70r8a9fwi"
+        },
+        {
+            "id": "Icy.030",
+            "title": "Mi Fai..",
+            "file": "Mi Fai.mp3",
+            "categoryID": "Ryzn Best",
+            "videoUrl": "",
+            "artistId": "Icy.030", 
+            "albumId": "Aura", 
+            "albumTitle": "Aura" 
         }
     ]
 }
