@@ -1,0 +1,17 @@
+[
+  {
+    "id": "Icy.030",
+    "name": "Icy.030",
+    "bio": " Icy (born in 2002) is an Italian music producer originally from Varese and now based in Brescia. His sound blends elements of trap, electronic, and ambient music, creating modern, atmospheric productions with a signature cold and cinematic vibe.
+
+Known for deep basslines, airy textures, and evocative melodies, Icy has quickly become one of the most promising young producers in the new Italian scene, collaborating with emerging artists and shaping a unique sonic identity.
+
+Constantly evolving, he continues to push the boundaries of his sound, turning each track into an immersive experience.",
+    "genre": "Trap / Elettronic / Urban Pop / Tecno ambient",
+    // ⭐ URL di una foto profilo quadrata (es. 600x600)
+    "imageUrl": "https://via.placeholder.com/600x600/1E90FF/FFFFFF?text=Aura+Glaciale", 
+    "socials": {
+      "instagram": "https://instagram.com/Icy.030",
+    }
+  }
+]
