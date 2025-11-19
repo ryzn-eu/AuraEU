@@ -220,6 +220,25 @@
             background: transparent;
         }
 
+        /* --- STILE BANNER RYZN CONTEST --- */
+        .promo-banner {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* Gradiente viola-rosa simile all'immagine */
+            border-radius: 24px; /* Angoli molto arrotondati */
+            padding: 24px;
+            box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.4); /* Ombra rosa soffusa */
+            margin-bottom: 40px; /* Spazio sotto il banner */
+        }
+        .promo-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
     </style>
 </head>
 <body class="ryzn-bg">
@@ -1132,6 +1151,35 @@
                 </div>
             `;
         }
+        
+        // NUOVA FUNZIONE: Genera il Banner "Ryzn Contest" con i brani "Ryzn Best"
+        function getPromoBannerHtml() {
+             // Filtra i brani con categoryID = 'Ryzn Best'
+             const bestTracks = AURA_MAP.filter(t => t.categoryID === 'Ryzn Best').slice(0, 4);
+             
+             // Se non ci sono brani, non mostrare nulla
+             if (bestTracks.length === 0) return '';
+             
+             // Genera le card 2x2
+             const cardsHtml = bestTracks.map(track => `
+                <div onclick="playTrack('${track.id}')" class="bg-white/10 backdrop-blur-md p-3 rounded-xl flex items-center space-x-3 cursor-pointer hover:bg-white/20 transition group">
+                    <img src="${track.cover}" class="w-12 h-12 rounded-lg object-cover shadow-lg">
+                    <div class="min-w-0">
+                        <p class="font-bold text-white text-sm truncate">${track.title}</p>
+                        <p class="text-xs text-white/70 truncate">RYZN Music Group</p>
+                    </div>
+                </div>
+             `).join('');
+
+             return `
+                <div class="promo-banner">
+                    <h3 class="promo-title">Ryzn Xmas Contest</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        ${cardsHtml}
+                    </div>
+                </div>
+             `;
+        }
 
 
         function getMoodGridHtml() {
@@ -1173,6 +1221,9 @@
                 lucide.createIcons();
                 return;
             }
+            
+            // ⭐ WIDGET 0: BANNER RYZN CONTEST (INSERITO QUI)
+            allWidgetsHtml += getPromoBannerHtml();
 
             // WIDGET 1: Accesso Rapido
             const quickAccessTracks = AURA_MAP.slice(0, 4); 
@@ -1183,13 +1234,7 @@
             const moodGridHtml = getMoodGridHtml();
             allWidgetsHtml += createWidgetBlock('✨ Mood Select', 'Scegli la vibe perfetta per il tuo momento.', moodGridHtml, 'grid-cols-2 md:grid-cols-4');
             
-            // WIDGET 3: Disclaimer
-            const disclaimerHtml = createWidgetBlock('⚠️ Informazioni Importanti', 'Beta', `
-                 <p class="text-white/90"> Questo programma è in **fase Beta**. Potrebbero essere riscontrati bug o malfunzionamenti. La tua collaborazione è fondamentale per la Vibe perfetta. </p>
-                 <p class="text-sm mt-3 text-red-300"> Se trovi i problemi, segnalali per favore su <a href="https://Ryznmusic.it" target="_blank" class="font-bold underline hover:text-white transition">Ryzn Music.it</a>. </p>
-             `, 'grid-cols-1');
-
-            allWidgetsHtml += disclaimerHtml;
+            // DISCLAIMER RIMOSSO COME RICHIESTO
 
             // WIDGET 4: Categorie
             const allCategoryTracks = [];
