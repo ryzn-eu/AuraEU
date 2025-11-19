@@ -32,7 +32,7 @@
         .shadow-ryzn-accent\/30 { box-shadow: 0 10px 15px -3px rgba(var(--ryzn-color-rgb) / 0.3), 0 4px 6px -2px rgba(var(--ryzn-color-rgb) / 0.1); }
         .fill-ryzn-accent\/30 { fill: rgba(var(--ryzn-color-rgb) / 0.3); }
 
-        /* Effetto Glassmorphism (Depth-Glass) - FONDAMENTALE PER LA GRAFICA */
+        /* Effetto Glassmorphism (Depth-Glass) */
         .depth-glass {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -40,10 +40,9 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Stile Logo con Gradiente Dinamico (Palette Glaciale) */
+        /* Stile Logo con Gradiente Dinamico */
         .logo-aura { font-size: 2.5rem; font-weight: 900; }
         .logo-text {
-            /* Palette Glaciale: Da Blu Vivo a Bianco/Celeste */
             background: linear-gradient(45deg, var(--ryzn-color-hex), #B3E0FF); 
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -51,12 +50,12 @@
             text-fill-color: transparent;
         }
         
-        /* Nuove Transizioni per Icone */
+        /* Transizioni Icone */
         .animated-icon {
             transition: transform 0.2s ease, opacity 0.2s ease, fill 0.3s ease;
         }
         
-        /* Contenitore Principale e Sezioni (Animazioni di Transizione) */
+        /* Layout Base */
         body {
             background-color: var(--ryzn-bg-color);
             color: white;
@@ -78,7 +77,7 @@
         .section-page {
             display: none;
             opacity: 0;
-            transition: opacity 0.5s ease; /* Transizione per le sezioni */
+            transition: opacity 0.5s ease;
         }
         .section-page.active {
             display: block;
@@ -94,7 +93,7 @@
             height: 80px;
             z-index: 100;
             transform: translateY(100%);
-            transition: transform 0.3s ease-out; /* Animazione di entrata */
+            transition: transform 0.3s ease-out;
         }
         .player-bar.active {
              transform: translateY(0);
@@ -102,14 +101,14 @@
         
         /* Modal Generici */
         .modal {
-            animation: fadeIn 0.3s ease-out; /* Animazione Modal */
+            animation: fadeIn 0.3s ease-out;
         }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
         
-        /* Toast Container */
+        /* Toast */
         #toast-container {
             position: fixed;
             top: 20px;
@@ -117,7 +116,7 @@
             z-index: 200;
         }
         
-        /* Player Audio HTML5 Nascosto */
+        /* Audio Nascosto */
         #audio-player-container {
             position: absolute;
             top: -9999px; 
@@ -128,7 +127,7 @@
             opacity: 0;
         }
         
-        /* Stili Snow (Neve che Cade) */
+        /* Snow */
         .snow-container {
             position: fixed;
             top: 0;
@@ -146,87 +145,52 @@
             font-size: 10px;
             opacity: 0.8;
             animation: fall linear infinite;
-            text-shadow: 0 0 3px rgba(var(--ryzn-color-rgb) / 0.5); /* Lieve bagliore blu */
+            text-shadow: 0 0 3px rgba(var(--ryzn-color-rgb) / 0.5);
         }
         @keyframes fall {
-            to {
-                transform: translateY(100vh);
-            }
+            to { transform: translateY(100vh); }
         }
         
-        /* --- STILI MARQUEE PER TITOLI LUNGHI --- */
-        .title-wrapper {
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        /* Animazione di scorrimento (Marquee) */
+        /* Marquee */
+        .title-wrapper { overflow: hidden; white-space: nowrap; }
         .marquee {
             display: inline-block;
-            animation: marquee 10s linear infinite; /* Velocità di scorrimento */
+            animation: marquee 10s linear infinite;
             padding-left: 100%; 
-            animation-play-state: paused; /* Inizia in pausa */
+            animation-play-state: paused;
         }
-        
-        /* Riprende l'animazione se il testo è troppo lungo (controllato da JS) */
-        .title-wrapper.is-long .marquee {
-            animation-play-state: running;
-        }
-
-        /* Definisce l'animazione */
+        .title-wrapper.is-long .marquee { animation-play-state: running; }
         @keyframes marquee {
             0%   { transform: translate(0, 0); }
             100% { transform: translate(-100%, 0); }
         }
 
-        /* --- NUOVI STILI CAROSELLO ORIZZONTALE --- */
+        /* Scroll Orizzontale */
         .horizontal-scroll {
             display: flex;
-            overflow-x: auto; /* Abilita lo scroll orizzontale */
-            padding-bottom: 1rem; /* Spazio sotto per la scrollbar su mobile */
-            gap: 1rem; /* Spazio tra gli elementi */
-            scrollbar-color: var(--ryzn-color-hex) #1f2937; /* Colore scrollbar per Firefox */
-            scrollbar-width: thin; /* Spessore scrollbar per Firefox */
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            gap: 1rem;
+            scrollbar-color: var(--ryzn-color-hex) #1f2937;
+            scrollbar-width: thin;
         }
+        .horizontal-scroll::-webkit-scrollbar { height: 8px; }
+        .horizontal-scroll::-webkit-scrollbar-thumb { background: var(--ryzn-color-hex); border-radius: 4px; }
+        .horizontal-scroll::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
+        .horizontal-widget-item { flex: 0 0 160px; width: 160px; min-width: 160px; }
         
-        .horizontal-scroll::-webkit-scrollbar {
-            height: 8px; /* Altezza scrollbar per Chrome/Safari */
-        }
+        /* Custom Scrollbar Generica */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 
-        .horizontal-scroll::-webkit-scrollbar-thumb {
-            background: var(--ryzn-color-hex); /* Colore "manopola" */
-            border-radius: 4px;
-        }
-
-        .horizontal-scroll::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1); /* Colore sfondo traccia */
-        }
-
-        .horizontal-widget-item {
-            flex: 0 0 160px; /* Larghezza fissa per ogni elemento nella riga orizzontale */
-            width: 160px; 
-            min-width: 160px;
-        }
-        
-        /* Custom Scrollbar per Modale Artista */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        /* --- STILE BANNER RYZN CONTEST --- */
+        /* Banner Contest */
         .promo-banner {
-            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); /* Gradiente viola-rosa simile all'immagine */
-            border-radius: 24px; /* Angoli molto arrotondati */
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            border-radius: 24px;
             padding: 24px;
-            box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.4); /* Ombra rosa soffusa */
-            margin-bottom: 40px; /* Spazio sotto il banner */
+            box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.4);
+            margin-bottom: 40px;
         }
         .promo-title {
             font-size: 1.8rem;
@@ -237,6 +201,49 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* --- STILI LYRICS SPOTIFY-STYLE --- */
+        .lyrics-container-spotify {
+            width: 100%;
+            height: 180px; /* Altezza fissa per il banner testi */
+            overflow-y: auto;
+            padding: 10px 0;
+            text-align: center;
+            margin-top: 20px;
+            /* Sfumatura sopra e sotto per effetto scroll infinito */
+            mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+            /* Nascondi scrollbar ma permetti scroll */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            scroll-behavior: smooth;
+        }
+        .lyrics-container-spotify::-webkit-scrollbar {
+            display: none;
+        }
+
+        .lyric-line {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.4); /* Grigio trasparente per linee non attive */
+            margin-bottom: 12px;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+        
+        .lyric-line:hover {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .lyric-line.active {
+            color: #ffffff; /* Bianco puro */
+            transform: scale(1.08); /* Leggero ingrandimento */
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.4); /* Glow */
+            font-weight: 800;
         }
 
     </style>
@@ -254,12 +261,9 @@
     <div id="auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4 modal">
         <div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative">
             <h3 id="auth-title" class="text-2xl font-bold mb-6 accent-text text-center">Accedi ad Aura Music</h3>
-            
             <input type="email" id="auth-email" placeholder="Email" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:accent-border text-white placeholder-gray-500 mb-3">
             <input type="password" id="auth-password" placeholder="Password" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:accent-border text-white placeholder-gray-500 mb-6">
-            
             <button id="auth-main-button" onclick="handleAuthAction('login')" class="w-full py-3 accent-bg rounded-lg text-white font-bold accent-hover transition">Accedi</button>
-            
             <div class="text-center mt-4">
                 <button id="auth-switch-link" onclick="switchAuthMode('register')" class="text-sm text-gray-400 hover:accent-text transition">Registrati</button>
             </div>
@@ -282,7 +286,6 @@
 
     <div id="artist-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[160] hidden flex items-center justify-center p-4 modal">
         <div class="depth-glass bg-ryzn-bg/90 p-0 rounded-3xl w-full max-w-lg shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]">
-            
             <div class="relative h-48 sm:h-64 w-full">
                 <img id="artist-modal-image" src="" alt="Artist" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-ryzn-bg via-transparent to-transparent"></div>
@@ -294,16 +297,12 @@
                     <p id="artist-modal-genre" class="text-gray-300 text-sm font-medium mt-1 badge inline-block px-2 py-1 rounded-md bg-white/10 backdrop-blur-md border border-white/10">Genere</p>
                 </div>
             </div>
-
             <div class="p-6 overflow-y-auto custom-scrollbar">
                 <div class="mb-6">
                     <h4 class="text-accent-text font-bold mb-2 text-sm uppercase tracking-wider">Biografia</h4>
-                    <p id="artist-modal-bio" class="text-gray-300 leading-relaxed text-sm sm:text-base">
-                        </p>
+                    <p id="artist-modal-bio" class="text-gray-300 leading-relaxed text-sm sm:text-base"></p>
                 </div>
-
-                <div id="artist-modal-socials" class="flex space-x-4 mt-4 pt-4 border-t border-white/10">
-                    </div>
+                <div id="artist-modal-socials" class="flex space-x-4 mt-4 pt-4 border-t border-white/10"></div>
             </div>
         </div>
     </div>
@@ -312,7 +311,6 @@
         <div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative">
             <h3 class="text-xl font-bold mb-4 accent-text">Crea Nuova Sessione</h3>
             <input type="text" id="playlist-name-input" placeholder="Nome della sessione" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:accent-border text-white placeholder-gray-500 mb-4">
-            
             <div class="flex justify-end space-x-3">
                 <button onclick="closeCreatePlaylistModal()" class="px-4 py-2 text-gray-400 hover:text-white transition rounded-lg">Annulla</button>
                 <button onclick="createPlaylist()" class="px-4 py-2 accent-bg rounded-lg text-white font-bold accent-hover transition">Crea</button>
@@ -331,63 +329,67 @@
         </div>
     </div>
 
-    <div id="immersive-mode" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[150] hidden flex flex-col items-center justify-center p-6 modal">
+    <div id="immersive-mode" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[150] hidden flex flex-col items-center justify-center p-6 modal overflow-y-auto">
         
-        <div class="absolute top-6 left-6 flex items-center space-x-4">
+        <div class="absolute top-6 left-6 flex items-center space-x-4 z-10">
             <button onclick="event.stopPropagation(); exitImmersiveMode()" class="text-white/80 hover:text-white transition"><i data-lucide="chevron-down" class="w-8 h-8"></i></button>
             <h2 class="text-xl font-semibold">In Riproduzione</h2>
         </div>
         
-        <div class="flex flex-col items-center w-full max-w-xl md:max-w-2xl pt-20 pb-16 md:pt-0 md:pb-0">
+        <div class="flex flex-col items-center w-full max-w-xl md:max-w-2xl pt-20 pb-10">
             
-            <div id="immersive-player-visual-container" class="w-full max-w-[280px] sm:max-w-sm aspect-square rounded-3xl shadow-2xl shadow-ryzn-accent/30 overflow-hidden bg-black flex items-center justify-center mb-8 sm:mb-10 transition-all duration-300">
+            <div id="immersive-player-visual-container" class="w-full max-w-[280px] sm:max-w-sm aspect-square rounded-3xl shadow-2xl shadow-ryzn-accent/30 overflow-hidden bg-black flex items-center justify-center mb-8 sm:mb-10 transition-all duration-300 relative">
                  <img id="immersive-cover" src="" alt="Album Cover" class="w-full h-full object-cover">
-                 
                  <iframe 
                     id="immersive-video-player" 
-                    width="600" 
-                    height="480" 
-                    src="" 
-                    scrolling="no" 
-                    frameborder="0" 
-                    allowfullscreen="true" 
+                    width="600" height="480" 
+                    src="" scrolling="no" frameborder="0" allowfullscreen="true" 
                     class="w-full h-full object-contain bg-black hidden">
                  </iframe>
-                 </div>
+            </div>
             
-            <div class="flex flex-col items-center space-y-8 max-w-lg w-full">
-                <div class="text-center">
-                    <div id="immersive-title-wrapper" class="title-wrapper max-w-full text-4xl font-extrabold px-4">
-                        <h3 id="immersive-title" class="text-4xl font-extrabold"><span class="marquee">Titolo Brano</span></h3>
+            <div class="flex flex-col items-center space-y-6 max-w-lg w-full px-4">
+                <div class="text-center w-full">
+                    <div id="immersive-title-wrapper" class="title-wrapper max-w-full text-3xl sm:text-4xl font-extrabold mx-auto">
+                        <h3 id="immersive-title" class="text-3xl sm:text-4xl font-extrabold"><span class="marquee">Titolo Brano</span></h3>
                     </div>
-                    <p id="immersive-artist" class="text-xl text-gray-400 truncate px-4">Artista</p>
+                    <p id="immersive-artist" class="text-lg sm:text-xl text-gray-400 truncate mt-2">Artista</p>
                 </div>
                 
-                <button id="switch-to-video-btn" onclick="event.stopPropagation(); toggleImmersiveVisuals()" class="p-2 depth-glass rounded-full text-white hover:bg-white/10 transition hidden">
-                    <i data-lucide="video" class="w-6 h-6"></i>
-                </button>
-
-                <div id="progress-bar-immersive-container" class="w-full h-2 bg-white/20 rounded-full cursor-pointer relative">
-                    <div id="progress-bar-immersive" class="h-2 accent-bg rounded-full" style="width: 0;"></div>
+                <div class="flex space-x-4">
+                    <button id="switch-to-video-btn" onclick="event.stopPropagation(); toggleImmersiveVisuals()" class="p-2 depth-glass rounded-full text-white hover:bg-white/10 transition hidden">
+                        <i data-lucide="video" class="w-5 h-5"></i>
+                    </button>
                 </div>
 
-                <div class="flex space-x-8 items-center">
+                <div id="progress-bar-immersive-container" class="w-full h-2 bg-white/20 rounded-full cursor-pointer relative group">
+                    <div id="progress-bar-immersive" class="h-2 accent-bg rounded-full relative" style="width: 0;">
+                         <div class="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition shadow-md"></div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-6 sm:space-x-10 items-center justify-center w-full">
                     <button id="loop-button-immersive" onclick="event.stopPropagation(); toggleLoop()" class="text-white/70 hover:text-white transition">
-                        <i data-lucide="repeat" class="w-8 h-8"></i>
+                        <i data-lucide="repeat" class="w-6 h-6 sm:w-8 sm:h-8"></i>
                     </button>
                     <button onclick="event.stopPropagation(); skipBackward()" class="text-white/70 hover:text-white transition">
-                        <i data-lucide="skip-back" class="w-8 h-8 fill-current"></i>
+                        <i data-lucide="skip-back" class="w-8 h-8 sm:w-10 sm:h-10 fill-current"></i>
                     </button>
                     <button onclick="event.stopPropagation(); togglePlayPause()" class="p-4 accent-bg rounded-full hover:scale-105 transition shadow-xl shadow-ryzn-accent/50">
-                        <i id="immersive-play-icon" data-lucide="play" class="w-10 h-10 text-ryzn-bg animated-icon"></i> 
+                        <i id="immersive-play-icon" data-lucide="play" class="w-8 h-8 sm:w-10 sm:h-10 text-ryzn-bg animated-icon fill-current"></i> 
                     </button>
                     <button onclick="event.stopPropagation(); skipForward()" class="text-white/70 hover:text-white transition">
-                        <i data-lucide="skip-forward" class="w-8 h-8 fill-current"></i>
+                        <i data-lucide="skip-forward" class="w-8 h-8 sm:w-10 sm:h-10 fill-current"></i>
                     </button>
                     <button onclick="event.stopPropagation(); toggleLike()" id="like-button-immersive" class="text-white/70 hover:text-red-400 transition">
-                        <i data-lucide="heart" class="w-6 h-6 fill-current"></i>
+                        <i data-lucide="heart" class="w-6 h-6 sm:w-8 sm:h-8 fill-current"></i>
                     </button>
                 </div>
+
+                <div id="lyrics-container" class="lyrics-container-spotify hidden">
+                    <p class="text-gray-500 mt-10">Caricamento testo...</p>
+                </div>
+
             </div>
         </div>
     </div>
@@ -516,7 +518,7 @@
         
         // --- Dati Locali ---
         let AURA_MAP = []; 
-        let ARTISTS_DATA = []; // Cache dei dati artisti
+        let ARTISTS_DATA = []; 
         
         let currentTrackData = null;
         let audioPlayer = null; 
@@ -533,9 +535,12 @@
         
         // Riferimenti DOM
         let progressBar, progressBarImmersive, playIcon, immersivePlayIcon, playerTitle, playerArtist, playerCover, immersiveCover, immersiveTitle, immersiveArtist, likeButton, vibeScoreDisplay, progressBarContainer, progressBarImmersiveContainer, loopButtonImmersive, playerBar, switchToVideoBtn, switchToVideoPipBtn;
-        
         let playerTitleWrapper, immersiveTitleWrapper;
         let trackIdToAdd = null; 
+
+        // ⭐ Riferimenti per Lyrics
+        let lyricsContainer = null;
+        let currentLyrics = [];
         
         // --- Mood e Categorie ---
         const MOOD_STYLES = {
@@ -579,32 +584,122 @@
         }
 
         // ====================================================================
-        // GESTIONE DATI (AGGIORNATA)
+        // GESTIONE LYRICS (LRC)
         // ====================================================================
 
-        /**
-         * Logica avanzata per recuperare la copertina corretta
-         */
+        function parseLRC(lrcText) {
+            const lines = lrcText.split('\n');
+            const result = [];
+            const timeReg = /\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\]/;
+
+            lines.forEach(line => {
+                const match = timeReg.exec(line);
+                if (match) {
+                    const min = parseInt(match[1]);
+                    const sec = parseInt(match[2]);
+                    const ms = match[3] ? parseInt(match[3]) : 0;
+                    const time = min * 60 + sec + (ms / 1000);
+                    const text = line.replace(timeReg, '').trim();
+                    if (text) result.push({ time, text });
+                }
+            });
+            return result;
+        }
+
+        async function loadLyrics(lrcUrl) {
+            if (!lrcUrl) {
+                currentLyrics = [];
+                updateLyricsUI();
+                return;
+            }
+            try {
+                const res = await fetch(lrcUrl);
+                if (res.ok) {
+                    const text = await res.text();
+                    currentLyrics = parseLRC(text);
+                    updateLyricsUI();
+                } else {
+                    currentLyrics = [];
+                    updateLyricsUI("Testo non disponibile.");
+                }
+            } catch (e) {
+                console.error("Errore lyrics:", e);
+                currentLyrics = [];
+                updateLyricsUI("Errore caricamento testo.");
+            }
+        }
+
+        function updateLyricsUI(errorMsg = null) {
+            if (!lyricsContainer) return;
+            
+            // Se c'è un errore o nessun testo, nascondi il container e esci
+            if (errorMsg || currentLyrics.length === 0) {
+                lyricsContainer.classList.add('hidden');
+                lyricsContainer.innerHTML = '';
+                return;
+            }
+
+            // Se ci sono testi, mostra il container
+            lyricsContainer.classList.remove('hidden');
+
+            const html = currentLyrics.map((line, index) => `
+                <div class="lyric-line" id="lyric-${index}" onclick="seekToLyric(${line.time})">
+                    ${line.text}
+                </div>
+            `).join('');
+            
+            lyricsContainer.innerHTML = html;
+        }
+
+        window.seekToLyric = function(time) {
+            if(audioPlayer) audioPlayer.currentTime = time;
+            audioPlayer.play();
+        }
+
+        function syncLyricsDisplay() {
+            if (!currentLyrics.length || !lyricsContainer || lyricsContainer.classList.contains('hidden')) return;
+            
+            const currentTime = audioPlayer.currentTime;
+            
+            let activeIndex = -1;
+            for (let i = 0; i < currentLyrics.length; i++) {
+                if (currentTime >= currentLyrics[i].time) {
+                    activeIndex = i;
+                } else {
+                    break;
+                }
+            }
+
+            document.querySelectorAll('.lyric-line').forEach(el => el.classList.remove('active'));
+
+            if (activeIndex !== -1) {
+                const activeLine = document.getElementById(`lyric-${activeIndex}`);
+                if (activeLine) {
+                    activeLine.classList.add('active');
+                    activeLine.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+            }
+        }
+
+
+        // ====================================================================
+        // GESTIONE DATI
+        // ====================================================================
+
         function getCoverUrl(track) {
-            // 1. PRIORITÀ: Se c'è un albumId, cerca la copertina specifica dell'album
             if (track.albumId) {
                 const encodedAlbum = encodeURIComponent(track.albumId.trim());
                 return COVER_BASE_URL + encodedAlbum + ".png";
             }
-            
-            // 2. FALLBACK: Usa la categoria se non c'è album specifico
             if (track.categoryID) {
                 return COVER_BASE_URL + `${track.categoryID}.png`;
             }
-            
-            // 3. ULTIMA SPIAGGIA: Placeholder
             return FALLBACK_COVER_URL; 
         }
 
-
-        /**
-         * Scarica Tracks e Artists, incrocia i dati e popola le variabili globali
-         */
         async function fetchTracks() {
             const container = document.getElementById('home-widgets-container');
             if (container) {
@@ -620,13 +715,11 @@
 
                 if (!tracksResponse.ok) throw new Error(`Impossibile recuperare tracks.json`);
                 
-                // Salva dati artisti globalmente
                 const artistsData = artistsResponse.ok ? await artistsResponse.json() : [];
                 ARTISTS_DATA = artistsData; 
 
                 const tracksData = await tracksResponse.json();
                 
-                // Mappa ID -> Nome per lookup veloce
                 const artistMap = {};
                 if (Array.isArray(artistsData)) {
                     artistsData.forEach(a => {
@@ -643,7 +736,6 @@
                     const encodedFile = encodeURIComponent(normalizedFile);
                     const audioUrl = AUDIO_BASE_URL + encodedFile; 
                     
-                    // Determinazione Nome Artista
                     let finalArtistName = "Aura Choice"; 
                     if (track.artistId && artistMap[track.artistId]) {
                         finalArtistName = artistMap[track.artistId];
@@ -653,7 +745,6 @@
                         finalArtistName = track.artistId;
                     }
                     
-                    // Oggetto temporaneo per calcolo cover
                     const tempTrackObj = { 
                         albumId: track.albumId, 
                         categoryID: track.categoryID 
@@ -663,11 +754,12 @@
                         id: title, 
                         title: title,
                         artist: finalArtistName,
-                        artistId: track.artistId, // ID per il click
-                        albumId: track.albumId,   // ID Album
+                        artistId: track.artistId, 
+                        albumId: track.albumId,
                         cover: getCoverUrl(tempTrackObj), 
                         audioUrl: audioUrl, 
                         videoUrl: track.videoUrl || null, 
+                        lrcUrl: track.lrcUrl || null, // <-- IMPORTANTE
                         categoryID: track.categoryID, 
                         mood: getTrackMood(), 
                         vibe: Math.floor(Math.random() * 100) + 1,
@@ -775,10 +867,8 @@
             showSection('music');
         }
         
-        // --- FUNZIONI PROFILO ARTISTA (NUOVE) ---
-        
+        // --- FUNZIONI PROFILO ARTISTA ---
         function openArtistProfile(artistId) {
-            // Cerca l'artista nei dati globali
             const artist = ARTISTS_DATA.find(a => a.id === artistId);
             
             if (!artist) {
@@ -786,16 +876,13 @@
                 return;
             }
 
-            // Popola il modale
             document.getElementById('artist-modal-name').textContent = artist.name;
             document.getElementById('artist-modal-bio').textContent = artist.bio || "Nessuna biografia disponibile.";
             document.getElementById('artist-modal-genre').textContent = artist.genre || "Artista";
             
-            // Immagine
             const imgEl = document.getElementById('artist-modal-image');
             imgEl.src = artist.imageUrl || FALLBACK_COVER_URL;
 
-            // Socials
             const socialContainer = document.getElementById('artist-modal-socials');
             socialContainer.innerHTML = ''; 
             
@@ -843,6 +930,15 @@
             }
             
             setImmersiveVisual('cover');
+            
+            // Carica i testi se presenti
+            if (track.lrcUrl) {
+                loadLyrics(track.lrcUrl);
+            } else {
+                currentLyrics = [];
+                updateLyricsUI(); // Questo nasconderà il container
+            }
+
             updateUI(track);
             if (playerBar) playerBar.classList.add('active');
         }
@@ -908,6 +1004,8 @@
                 progressBar.style.width = `${percentage}%`;
                 progressBarImmersive.style.width = `${percentage}%`;
             }
+            // Aggiorna scroll testi
+            syncLyricsDisplay();
         }
 
         // --- Immersive Visuals ---
@@ -920,7 +1018,6 @@
                 isImmersiveVideoActive = true;
                 immersiveCover.classList.add('hidden');
                 immersiveVideoPlayer.classList.remove('hidden');
-
             } else {
                 isImmersiveVideoActive = false;
                 immersiveCover.classList.remove('hidden');
@@ -1152,15 +1249,10 @@
             `;
         }
         
-        // NUOVA FUNZIONE: Genera il Banner "Ryzn Contest" con i brani "Ryzn Best"
         function getPromoBannerHtml() {
-             // Filtra i brani con categoryID = 'Ryzn Best'
              const bestTracks = AURA_MAP.filter(t => t.categoryID === 'Ryzn Best').slice(0, 4);
-             
-             // Se non ci sono brani, non mostrare nulla
              if (bestTracks.length === 0) return '';
              
-             // Genera le card 2x2
              const cardsHtml = bestTracks.map(track => `
                 <div onclick="playTrack('${track.id}')" class="bg-white/10 backdrop-blur-md p-3 rounded-xl flex items-center space-x-3 cursor-pointer hover:bg-white/20 transition group">
                     <img src="${track.cover}" class="w-12 h-12 rounded-lg object-cover shadow-lg">
@@ -1208,7 +1300,6 @@
 
             let allWidgetsHtml = '';
 
-            // LOGICA FILTRO MOOD
             if (activeFilter !== 'Trending') {
                 const filteredTracks = AURA_MAP.filter(t => t.mood === activeFilter);
                 const filteredHtml = filteredTracks.map(t => getTrackElement(t, 'grid')).join('');
@@ -1222,21 +1313,15 @@
                 return;
             }
             
-            // ⭐ WIDGET 0: BANNER RYZN CONTEST (INSERITO QUI)
             allWidgetsHtml += getPromoBannerHtml();
 
-            // WIDGET 1: Accesso Rapido
             const quickAccessTracks = AURA_MAP.slice(0, 4); 
             const quickAccessHtml = quickAccessTracks.map(getQuickAccessTrackCard).join('');
             allWidgetsHtml += createWidgetBlock('🎧 Accesso Rapido', 'Riclicca per un nuovo brano.', quickAccessHtml, 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4');
 
-            // WIDGET 2: Mood Grid
             const moodGridHtml = getMoodGridHtml();
             allWidgetsHtml += createWidgetBlock('✨ Mood Select', 'Scegli la vibe perfetta per il tuo momento.', moodGridHtml, 'grid-cols-2 md:grid-cols-4');
             
-            // DISCLAIMER RIMOSSO COME RICHIESTO
-
-            // WIDGET 4: Categorie
             const allCategoryTracks = [];
             CATEGORY_KEYS.forEach(categoryID => {
                 const categoryInfo = CATEGORY_MAP[categoryID];
@@ -1258,7 +1343,6 @@
                 }
             });
 
-            // WIDGET 5: Più Ascoltati
             const popularTracks = [...allCategoryTracks]
                 .sort(() => 0.5 - Math.random())
                 .slice(0, 15);
@@ -1531,7 +1615,6 @@
 
             let htmlContent = '';
 
-            // 1. CERCA ARTISTI
             const foundArtists = ARTISTS_DATA.filter(artist => 
                 artist.name.toLowerCase().includes(query)
             );
@@ -1549,7 +1632,6 @@
                 `).join('');
             }
 
-            // 2. CERCA BRANI
             const foundTracks = AURA_MAP.filter(track => 
                 track.title.toLowerCase().includes(query) || 
                 track.artist.toLowerCase().includes(query)
@@ -1705,6 +1787,9 @@
             
             playerTitleWrapper = document.getElementById('player-title-wrapper');
             immersiveTitleWrapper = document.getElementById('immersive-title-wrapper');
+
+            // ⭐ Riferimento Lyrics
+            lyricsContainer = document.getElementById('lyrics-container');
 
             audioPlayer.addEventListener('play', onPlayerPlay);
             audioPlayer.addEventListener('pause', onPlayerPause);
