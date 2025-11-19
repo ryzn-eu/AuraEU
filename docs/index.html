@@ -100,7 +100,7 @@
              transform: translateY(0);
         }
         
-        /* Modal di Ricerca e Autenticazione */
+        /* Modal Generici */
         .modal {
             animation: fadeIn 0.3s ease-out; /* Animazione Modal */
         }
@@ -178,7 +178,6 @@
             0%   { transform: translate(0, 0); }
             100% { transform: translate(-100%, 0); }
         }
-        /* ------------------------------------------ */
 
         /* --- NUOVI STILI CAROSELLO ORIZZONTALE --- */
         .horizontal-scroll {
@@ -208,7 +207,18 @@
             width: 160px; 
             min-width: 160px;
         }
-        /* ------------------------------------------- */
+        
+        /* Custom Scrollbar per Modale Artista */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
 
     </style>
 </head>
@@ -221,7 +231,6 @@
     <div id="audio-player-container">
         <audio id="audioPlayer" playsinline></audio>
     </div>
-
 
     <div id="auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4 modal">
         <div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative">
@@ -249,6 +258,34 @@
                 <p class="text-center text-gray-500">Inizia a digitare per cercare nella libreria locale.</p>
             </div>
             <button onclick="closeSearchModal()" class="absolute top-3 right-3 text-gray-400 hover:text-white transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+    </div>
+
+    <div id="artist-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[160] hidden flex items-center justify-center p-4 modal">
+        <div class="depth-glass bg-ryzn-bg/90 p-0 rounded-3xl w-full max-w-lg shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]">
+            
+            <div class="relative h-48 sm:h-64 w-full">
+                <img id="artist-modal-image" src="" alt="Artist" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-ryzn-bg via-transparent to-transparent"></div>
+                <button onclick="closeArtistModal()" class="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-white hover:bg-white/20 transition backdrop-blur-sm">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+                <div class="absolute bottom-4 left-6 right-6">
+                    <h2 id="artist-modal-name" class="text-4xl font-extrabold text-white drop-shadow-lg">Nome Artista</h2>
+                    <p id="artist-modal-genre" class="text-gray-300 text-sm font-medium mt-1 badge inline-block px-2 py-1 rounded-md bg-white/10 backdrop-blur-md border border-white/10">Genere</p>
+                </div>
+            </div>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar">
+                <div class="mb-6">
+                    <h4 class="text-accent-text font-bold mb-2 text-sm uppercase tracking-wider">Biografia</h4>
+                    <p id="artist-modal-bio" class="text-gray-300 leading-relaxed text-sm sm:text-base">
+                        </p>
+                </div>
+
+                <div id="artist-modal-socials" class="flex space-x-4 mt-4 pt-4 border-t border-white/10">
+                    </div>
+            </div>
         </div>
     </div>
     
@@ -369,13 +406,13 @@
         
         <hr class="border-white/10 my-6 md:my-10">
 
-
         <section id="music-section" class="section-page active">
             <h2 id="home-greeting" class="text-4xl font-extrabold mb-8 text-white">Buonasera. La tua Vibe è pronta.</h2>
             <div id="home-widgets-container" class="space-y-10">
                 <p class="text-center text-gray-400 col-span-full"><i data-lucide="loader-2" class="w-5 h-5 animate-spin inline-block mr-2"></i> Caricamento in corso...</p>
             </div>
         </section>
+        
         <section id="library-section" class="section-page">
             <h2 class="text-3xl font-bold mb-6">I Tuoi Brani Salvati</h2>
             <div id="liked-tracks-list" class="space-y-3">
@@ -404,7 +441,7 @@
             </div>
         </section>
 
-        </div> 
+    </div> 
     
     <div onclick="enterImmersiveMode()" class="player-bar depth-glass bg-ryzn-bg/80 border-t border-white/10 flex items-center justify-between px-4 sm:px-8 cursor-pointer">
         
@@ -448,21 +485,19 @@
 
 
     <script>
-        // --- CONFIGURAZIONE GITHUB (Sostituisce YouTube) ---
+        // --- CONFIGURAZIONE GITHUB ---
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
-        // ⭐ FIX COPERTINA DI FALLBACK: Usiamo un placeholder generico e affidabile
-        const FALLBACK_COVER_URL = "https://via.placeholder.com/192x192/171717/00BFFF?text=AURA"; 
         
-        // ⭐ FIX: PATH AUDIO CORRETTO: Adesso usa la cartella 'audio/' come nel tuo link funzionante.
+        const FALLBACK_COVER_URL = "https://via.placeholder.com/192x192/171717/00BFFF?text=AURA"; 
         const AUDIO_BASE_URL = GITHUB_RAW_BASE + "audio/"; 
-        // PATH COPERTINE CATEGORY-BASED
         const COVER_BASE_URL = GITHUB_RAW_BASE + "Covers/"; 
         
-        // Percorsi JSON ora assoluti per il FETCH REMOTO
         const TRACKS_JSON_URL = GITHUB_RAW_BASE + "tracks.json"; 
+        const ARTIST_JSON_URL = GITHUB_RAW_BASE + "artist.json"; 
         
-        // --- Dati & Configurazione Locali ---
+        // --- Dati Locali ---
         let AURA_MAP = []; 
+        let ARTISTS_DATA = []; // Cache dei dati artisti
         
         let currentTrackData = null;
         let audioPlayer = null; 
@@ -480,13 +515,10 @@
         // Riferimenti DOM
         let progressBar, progressBarImmersive, playIcon, immersivePlayIcon, playerTitle, playerArtist, playerCover, immersiveCover, immersiveTitle, immersiveArtist, likeButton, vibeScoreDisplay, progressBarContainer, progressBarImmersiveContainer, loopButtonImmersive, playerBar, switchToVideoBtn, switchToVideoPipBtn;
         
-        // ✅ NUOVI RIFERIMENTI DOM PER MARQUEE
         let playerTitleWrapper, immersiveTitleWrapper;
-
-
         let trackIdToAdd = null; 
         
-        // --- Stili e Icone per Mood Grid Migliorata (Natale/Glaciale) ---
+        // --- Mood e Categorie ---
         const MOOD_STYLES = {
             "Invernale": "bg-blue-900/40 border-blue-600 text-blue-300",
             "Party": "bg-red-900/40 border-red-600 text-red-300",
@@ -495,7 +527,6 @@
         };
         const ALL_MOODS = Object.keys(MOOD_STYLES);
         
-        // --- Nuove Categorie Dinamiche (CR1, CR2, CR3, CR4) ---
         const CATEGORY_MAP = {
             'CR1': { title: '🎄 CR1 - Top Hits di Natale', subtitle: 'I brani pop e le hit che scaldano l\'atmosfera delle feste.' },
             'CR2': { title: '🕯️ CR2 - Ballate e Relax', subtitle: 'Melodie lente e dolci per serate tranquille e romantiche.' },
@@ -503,10 +534,9 @@
             'CR4': { title: '❄️ CR4 - Ambient Glaciale', subtitle: 'Musica strumentale e tracce per creare una perfetta vibe invernale.' },
         };
         const CATEGORY_KEYS = Object.keys(CATEGORY_MAP);
-        // -------------------------------------------------------------
         
         // ====================================================================
-        // FUNZIONI HTML5 PLAYER API (Sostituiscono YouTube)
+        // LOGICHE PLAYER
         // ====================================================================
 
         function onTrackEnded() {
@@ -519,84 +549,107 @@
         }
         
         function onPlayerPlay() {
-            togglePlayIcon(false); // false = mostra PAUSE
+            togglePlayIcon(false); 
             updateMediaSession();
             playerBar.classList.add('active');
         }
         
         function onPlayerPause() {
-            togglePlayIcon(true); // true = mostra PLAY
+            togglePlayIcon(true); 
             updateMediaSession();
         }
 
         // ====================================================================
-        // FUNZIONI DI GESTIONE DATI E API (DINAMICHE)
+        // GESTIONE DATI (AGGIORNATA)
         // ====================================================================
 
         /**
-         * Determina l'URL della copertina in base al categoryID del brano.
-         * @param {Object} track - L'oggetto brano da AURA_MAP.
-         * @returns {string} L'URL della copertina.
+         * Logica avanzata per recuperare la copertina corretta
          */
         function getCoverUrl(track) {
-            // ⭐ LOGICA AGGIORNATA PER USARE IL categoryID come nome file Cover
-            if (track.categoryID) {
-                const categoryCoverUrl = COVER_BASE_URL + `${track.categoryID}.png`;
-                return categoryCoverUrl;
+            // 1. PRIORITÀ: Se c'è un albumId, cerca la copertina specifica dell'album
+            if (track.albumId) {
+                const encodedAlbum = encodeURIComponent(track.albumId.trim());
+                return COVER_BASE_URL + encodedAlbum + ".png";
             }
-            // Torna al placeholder se manca la categoria
+            
+            // 2. FALLBACK: Usa la categoria se non c'è album specifico
+            if (track.categoryID) {
+                return COVER_BASE_URL + `${track.categoryID}.png`;
+            }
+            
+            // 3. ULTIMA SPIAGGIA: Placeholder
             return FALLBACK_COVER_URL; 
         }
 
 
         /**
-         * Carica i brani dai JSON remoti usando fetch.
+         * Scarica Tracks e Artists, incrocia i dati e popola le variabili globali
          */
         async function fetchTracks() {
             const container = document.getElementById('home-widgets-container');
             if (container) {
-                container.innerHTML = `<p class="text-center text-gray-400 col-span-full"><i data-lucide="loader-2" class="w-5 h-5 animate-spin inline-block mr-2"></i> Caricamento brani da GitHub... </p>`;
+                container.innerHTML = `<p class="text-center text-gray-400 col-span-full"><i data-lucide="loader-2" class="w-5 h-5 animate-spin inline-block mr-2"></i> Caricamento libreria musicale... </p>`;
                 lucide.createIcons();
             }
 
             try {
-                // Tenta di recuperare SOLO il file tracks.json
-                const tracksResponse = await fetch(TRACKS_JSON_URL);
+                const [tracksResponse, artistsResponse] = await Promise.all([
+                    fetch(TRACKS_JSON_URL),
+                    fetch(ARTIST_JSON_URL)
+                ]);
 
-                if (!tracksResponse.ok) {
-                     // Errore se tracks.json non è trovato (404) o CORS è bloccato (0)
-                     throw new Error(`Impossibile recuperare il file JSON. Controlla che sia su GitHub al path corretto (${TRACKS_JSON_URL}).`);
-                }
+                if (!tracksResponse.ok) throw new Error(`Impossibile recuperare tracks.json`);
+                
+                // Salva dati artisti globalmente
+                const artistsData = artistsResponse.ok ? await artistsResponse.json() : [];
+                ARTISTS_DATA = artistsData; 
 
                 const tracksData = await tracksResponse.json();
                 
-                // Costruisci AURA_MAP
+                // Mappa ID -> Nome per lookup veloce
+                const artistMap = {};
+                if (Array.isArray(artistsData)) {
+                    artistsData.forEach(a => {
+                        if(a.id && a.name) artistMap[a.id] = a.name;
+                    });
+                }
+
                 const tracks = tracksData.tracks || [];
                 const results = tracks.map((track) => {
-                    const title = track.title.trim(); // Normalizzazione
+                    const title = track.title.trim(); 
                     
-                    // NORMALIZZAZIONE E SANIFICAZIONE URL PIÙ ROBUSTA
                     let normalizedFile = track.file.trim(); 
                     normalizedFile = normalizedFile.replace(/\s(\.[a-zA-Z0-9]+)$/, '$1'); 
-                    
-                    // ⭐ USA IL BASE_URL CORRETTO (audio/)
                     const encodedFile = encodeURIComponent(normalizedFile);
                     const audioUrl = AUDIO_BASE_URL + encodedFile; 
                     
-                    // ⭐ FIX: Leggi videoUrl direttamente dall'oggetto track (da tracks.json)
-                    const videoUrl = track.videoUrl || null; 
+                    // Determinazione Nome Artista
+                    let finalArtistName = "Aura Choice"; 
+                    if (track.artistId && artistMap[track.artistId]) {
+                        finalArtistName = artistMap[track.artistId];
+                    } else if (track.artist) {
+                        finalArtistName = track.artist;
+                    } else if (track.artistId) {
+                        finalArtistName = track.artistId;
+                    }
                     
-                    // Chiama la funzione getCoverUrl con l'oggetto track
-                    const cover = getCoverUrl(track); 
-                    
+                    // Oggetto temporaneo per calcolo cover
+                    const tempTrackObj = { 
+                        albumId: track.albumId, 
+                        categoryID: track.categoryID 
+                    };
+
                     return {
                         id: title, 
                         title: title,
-                        artist: "Aura Choise", 
-                        cover: cover,
+                        artist: finalArtistName,
+                        artistId: track.artistId, // ID per il click
+                        albumId: track.albumId,   // ID Album
+                        cover: getCoverUrl(tempTrackObj), 
                         audioUrl: audioUrl, 
-                        videoUrl: videoUrl, // <-- Il videoUrl ora proviene da tracks.json
-                        categoryID: track.categoryID, // <--- AGGIUNTA FONDAMENTALE
+                        videoUrl: track.videoUrl || null, 
+                        categoryID: track.categoryID, 
                         mood: getTrackMood(), 
                         vibe: Math.floor(Math.random() * 100) + 1,
                         color: getRandomAccentColor(), 
@@ -605,23 +658,17 @@
                 });
                 
                 AURA_MAP = results;
-                
                 renderHomePageWidgets(); 
 
             } catch (error) {
-                console.error("Errore nel recupero dei brani locali:", error);
-                container.innerHTML = `<p class="text-center p-4 text-red-400 col-span-full">
-                    <i data-lucide="alert-triangle" class="w-5 h-5 inline-block mr-2"></i> 
-                    Errore nel caricamento dei dati: ${error.message}. <br> 
-                    Se stai usando il file in locale, è probabile che il browser abbia bloccato l'accesso ai file remoti (CORS).
-                </p>`;
+                console.error("Errore:", error);
+                if(container) container.innerHTML = `<p class="text-center text-red-400">Errore: ${error.message}</p>`;
                 AURA_MAP = [];
-                lucide.createIcons();
             }
         }
         
         function getRandomAccentColor() {
-            const colors = ['#00BFFF', '#34D399', '#FCD34D', '#FF007F', '#8B5CF6']; // Glacial, Mint, Gold, Magenta, Violet
+            const colors = ['#00BFFF', '#34D399', '#FCD34D', '#FF007F', '#8B5CF6']; 
             return colors[Math.floor(Math.random() * colors.length)];
         }
         function getRandomAccentRGB() {
@@ -629,7 +676,6 @@
             return rgbs[Math.floor(Math.random() * rgbs.length)];
         }
         function getTrackMood() {
-            // Assegna un mood casuale per i trending
             const moods = ALL_MOODS;
             return moods[Math.floor(Math.random() * moods.length)];
         }
@@ -639,12 +685,11 @@
                 case "Invernale": return "snowflake"; 
                 case "Party": return "sparkles";
                 case "Ambient": return "cloud-drizzle";
-                case "Chill": return "cloud-snow"; // Per variazione con Invernale
+                case "Chill": return "cloud-snow"; 
                 default: return "music";
             }
         }
         
-        // Aggiorna la cronologia di ascolto
         function updateListeningHistory(trackId) {
             listeningHistory = listeningHistory.filter(id => id !== trackId);
             listeningHistory.unshift(trackId);
@@ -653,7 +698,7 @@
         }
 
 
-        // --- Funzioni di Autenticazione (Invariante) ---
+        // --- AUTH ---
         function openAuthModal(mode) {
              document.getElementById('auth-modal').classList.remove('hidden');
              switchAuthMode(mode);
@@ -693,7 +738,6 @@
                  loggedInUser = { email: email, vibeScore: 0 };
                  showToast("Registrazione Eseguita!", 'success');
             } else {
-                 // Simulazione di accesso riuscito
                  loggedInUser = { email: email, vibeScore: 50 }; 
                  showToast("Accesso Eseguito!", 'success');
             }
@@ -712,24 +756,59 @@
             showSection('music');
         }
         
-        /**
-         * Funzioni di riproduzione del player HTML5 e Iframe Video
-         */
-        // ⭐ FUNZIONE playTrack AGGIORNATA: PRIORITÀ AUDIO
+        // --- FUNZIONI PROFILO ARTISTA (NUOVE) ---
+        
+        function openArtistProfile(artistId) {
+            // Cerca l'artista nei dati globali
+            const artist = ARTISTS_DATA.find(a => a.id === artistId);
+            
+            if (!artist) {
+                showToast("Profilo artista non trovato.", "error");
+                return;
+            }
+
+            // Popola il modale
+            document.getElementById('artist-modal-name').textContent = artist.name;
+            document.getElementById('artist-modal-bio').textContent = artist.bio || "Nessuna biografia disponibile.";
+            document.getElementById('artist-modal-genre').textContent = artist.genre || "Artista";
+            
+            // Immagine
+            const imgEl = document.getElementById('artist-modal-image');
+            imgEl.src = artist.imageUrl || FALLBACK_COVER_URL;
+
+            // Socials
+            const socialContainer = document.getElementById('artist-modal-socials');
+            socialContainer.innerHTML = ''; 
+            
+            if (artist.socials && artist.socials.instagram) {
+                socialContainer.innerHTML += `
+                    <a href="${artist.socials.instagram}" target="_blank" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold hover:scale-105 transition shadow-lg">
+                        <i data-lucide="instagram" class="w-5 h-5"></i>
+                        <span>Instagram</span>
+                    </a>
+                `;
+            }
+            
+            document.getElementById('artist-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeArtistModal() {
+            document.getElementById('artist-modal').classList.add('hidden');
+        }
+
+        // --- PLAYBACK ---
         window.playTrack = function(trackId) {
             const track = AURA_MAP.find(t => t.id === trackId);
             if (!track) return;
             currentTrackData = track;
             updateListeningHistory(trackId);
 
-            // 1. Pulisce l'iframe per sicurezza (importante se si passa da video a audio)
             if (immersiveVideoPlayer) immersiveVideoPlayer.src = '';
             
-            // 2. Imposta l'SRC AUDIO
             audioPlayer.src = track.audioUrl;
             audioPlayer.load();
             
-            // 3. Avvia la riproduzione audio
             const attemptPlay = audioPlayer.play();
             if (attemptPlay && typeof attemptPlay.catch === 'function') {
                 attemptPlay.catch(e => {
@@ -738,28 +817,22 @@
                 });
             }
 
-            // 4. Se il video esiste, pre-carica l'iframe con l'SRC
             if (track.videoUrl) {
                  if (immersiveVideoPlayer) {
-                     // Pre-carica l'SRC ma non lo mostra ancora
                      immersiveVideoPlayer.src = track.videoUrl;
                  }
             }
             
-            // 5. Imposta la visuale su COPERTINA (Cover) di default
             setImmersiveVisual('cover');
-
             updateUI(track);
             if (playerBar) playerBar.classList.add('active');
         }
 
-        // ⭐ FUNZIONE togglePlayPause 
         window.togglePlayPause = function() {
             if (!audioPlayer) return;
 
             if (!currentTrackData) {
                 if (AURA_MAP.length > 0) {
-                    // Se non c'è traccia selezionata, riproduci il primo brano
                     playTrack(AURA_MAP[0].id);
                 } else {
                     showToast("Nessun brano caricato da riprodurre.", 'error');
@@ -767,8 +840,6 @@
                 return;
             }
             
-            // Toggle Play/Pause solo per Audio Player
-            // I video iframe gestiscono il loro play/pause internamente
             if (audioPlayer.paused) {
                 audioPlayer.play();
             } else {
@@ -798,16 +869,13 @@
         }
 
         function updateLoopButton(isLooping) {
-            const loopButton = document.getElementById('loop-button-immersive'); // Prende il bottone
-            const loopIcon = loopButton.querySelector('i'); // Prende l'icona interna
+            const loopButton = document.getElementById('loop-button-immersive'); 
+            const loopIcon = loopButton.querySelector('i'); 
             
             if (loopButton && loopIcon) {
-                // 1. Cambia la forma dell'icona (repeat or repeat-one)
                 loopIcon.setAttribute('data-lucide', isLooping ? 'repeat-one' : 'repeat');
-                
-                // 2. Cambia il colore del BOTTONE (che l'icona eredita)
-                loopButton.classList.toggle('accent-text', isLooping); // Colore acceso
-                loopButton.classList.toggle('text-white/70', !isLooping); // Colore grigio
+                loopButton.classList.toggle('accent-text', isLooping); 
+                loopButton.classList.toggle('text-white/70', !isLooping);
             }
             lucide.createIcons();
         }
@@ -823,40 +891,28 @@
             }
         }
 
-        // --- Funzioni Switch A/V Immersivo ---
-        /**
-         * Imposta la visualizzazione Immersiva: 'video' o 'cover' (audio).
-         */
+        // --- Immersive Visuals ---
         function setImmersiveVisual(mode) {
             if(!currentTrackData) return;
-            const icon = switchToVideoBtn ? switchToVideoBtn.querySelector('i') : null; // Riferimento sicuro
-            // Il video è disponibile?
+            const icon = switchToVideoBtn ? switchToVideoBtn.querySelector('i') : null; 
             const videoAvailable = !!currentTrackData.videoUrl;
             
-            // 1. Logica di visualizzazione tra copertina e iframe
             if (mode === 'video' && videoAvailable && immersiveVideoPlayer) {
-                // Modalità Video (Iframe)
                 isImmersiveVideoActive = true;
                 immersiveCover.classList.add('hidden');
                 immersiveVideoPlayer.classList.remove('hidden');
 
             } else {
-                // Modalità Copertina (Audio)
                 isImmersiveVideoActive = false;
                 immersiveCover.classList.remove('hidden');
                 if(immersiveVideoPlayer) immersiveVideoPlayer.classList.add('hidden');
             }
 
-            // 2. Aggiorna i pulsanti di switch (che mostrano l'opzione opposta)
             if (videoAvailable) {
-                // Il pulsante deve essere visibile se il video è disponibile
                 if (switchToVideoBtn) switchToVideoBtn.classList.remove('hidden');
                 if (switchToVideoPipBtn) switchToVideoPipBtn.classList.remove('hidden');
-                
-                // Aggiorna l'icona sul pulsante immersivo
                 if(icon) icon.setAttribute('data-lucide', isImmersiveVideoActive ? 'monitor-dot' : 'video');
             } else {
-                 // Nascondi i pulsanti se il video NON è disponibile
                  if (switchToVideoBtn) switchToVideoBtn.classList.add('hidden');
                  if (switchToVideoPipBtn) switchToVideoPipBtn.classList.add('hidden');
             }
@@ -864,34 +920,23 @@
             lucide.createIcons();
         }
 
-        /**
-         * Alterna tra visuale copertina (audio) e visuale video (iframe)
-         */
         window.toggleImmersiveVisuals = function() {
             event.stopPropagation();
             if (!currentTrackData || !currentTrackData.videoUrl) return;
 
             const newMode = isImmersiveVideoActive ? 'cover' : 'video';
-            
             setImmersiveVisual(newMode);
             
             if(newMode === 'cover') {
-                // Se passo alla copertina: spengo il video e riattivo l'audio
-                if(immersiveVideoPlayer) immersiveVideoPlayer.src = ''; // Spegne l'iframe
+                if(immersiveVideoPlayer) immersiveVideoPlayer.src = ''; 
                 audioPlayer.currentTime = 0;
                 audioPlayer.play();
             } else {
-                // Se passo al video: carico iframe e stoppo l'audio MP3
                  if(immersiveVideoPlayer) immersiveVideoPlayer.src = currentTrackData.videoUrl;
                  audioPlayer.pause();
-                 // Nota: il player video deve auto-avviarsi
             }
         }
         
-        /**
-         * Entra nella modalità full screen immersiva.
-         * @param {string} [preferredMode='audio'] - 'audio' o 'video' per preferire il video.
-         */
         window.enterImmersiveMode = function(preferredMode = 'audio') {
             if (!currentTrackData) {
                 showToast("Seleziona un brano prima.", 'info');
@@ -901,12 +946,9 @@
             document.body.style.overflow = 'hidden';
             updateProgress();
             
-            // Logica per determinare la visualizzazione iniziale
             if (preferredMode === 'video' && currentTrackData.videoUrl) {
-                // Se richiesto esplicitamente 'video', avvia il video
                  toggleImmersiveVisuals(); 
             } else {
-                // Altrimenti, rimane sulla cover (che è la priorità audio)
                  setImmersiveVisual('cover'); 
             }
         }
@@ -933,7 +975,6 @@
             if(progressBarImmersiveContainer) progressBarImmersiveContainer.addEventListener('click', handleSeek);
         }
         
-        // ✅ FUNZIONE CORRETTA: Riferimenti dinamici per l'aggiornamento Lucide
         function togglePlayIcon(isPaused) {
             const currentPlayIcon = document.getElementById('play-icon'); 
             const currentImmersivePlayIcon = document.getElementById('immersive-play-icon');
@@ -945,10 +986,7 @@
                 currentImmersivePlayIcon.setAttribute('data-lucide', isPaused ? 'play' : 'pause');
             }
             
-            // ✅ Fix per l'animazione Marquee
             checkMarqueeStatus(isPaused);
-            
-            // Rimuove e ricrea l'icona basandosi sul nuovo data-lucide
             lucide.createIcons();
         }
         
@@ -957,12 +995,8 @@
 
             setTimeout(() => {
                 try {
-                    // Player Bar: Forziamo la classe 'is-long' se NON in pausa.
                     playerTitleWrapper.classList.toggle('is-long', !isPaused);
-
-                    // Immersive Modal: Forziamo la classe 'is-long' se NON in pausa.
                     immersiveTitleWrapper.classList.toggle('is-long', !isPaused);
-
                 } catch (e) {
                     console.error("Errore Marquee:", e);
                 }
@@ -971,7 +1005,7 @@
 
 
         function updateUI(track) {
-            // Aggiornamento dei titoli con l'HTML del marquee (da fare una volta sola)
+            // Titoli con Marquee
             if (!playerTitle.querySelector('.marquee')) {
                 playerTitle.innerHTML = `<span class="marquee">${track.title}</span>`;
             } else {
@@ -983,23 +1017,25 @@
                 immersiveTitle.querySelector('.marquee').textContent = track.title;
             }
 
-            playerArtist.textContent = track.artist;
-            playerCover.src = track.cover;
+            // AGGIORNAMENTO NOME ARTISTA CLICCABILE
+            if (track.artistId) {
+                const artistHtml = `<span onclick="event.stopPropagation(); openArtistProfile('${track.artistId}')" class="cursor-pointer hover:underline hover:text-white transition">${track.artist}</span>`;
+                playerArtist.innerHTML = artistHtml;
+                immersiveArtist.innerHTML = artistHtml;
+            } else {
+                playerArtist.textContent = track.artist;
+                immersiveArtist.textContent = track.artist;
+            }
 
-            immersiveArtist.textContent = track.artist;
+            playerCover.src = track.cover;
             immersiveCover.src = track.cover;
 
             vibeScoreDisplay.textContent = `Vibe Score: ${track.vibe}/100`;
 
             updateAmbientLight(track.color || '#00BFFF', track.rgb || '0 191 255');
             updateLikeButton(track.id);
-
-            // La logica di visibilità dei pulsanti video è ora gestita in setImmersiveVisual()
             setImmersiveVisual(isImmersiveVideoActive ? 'video' : 'cover'); 
-            
-            // ✅ Controlla subito se il Marquee deve partire
             checkMarqueeStatus(audioPlayer.paused);
-            
             togglePlayIcon(audioPlayer.paused);
             lucide.createIcons();
         }
@@ -1011,7 +1047,6 @@
             if (rgbColor) {
                 document.documentElement.style.setProperty('--ryzn-color-rgb', rgbColor);
             }
-            // Riapplica l'aggiornamento delle icone per refreshare il fill dinamico
             lucide.createIcons(); 
         }
 
@@ -1039,14 +1074,12 @@
         function updateLikeButton(trackId) {
             const isLiked = likedTracks.has(trackId);
             
-            // Player Bar
             const button = document.getElementById('like-button');
             if (button) {
                 button.classList.toggle('text-red-400', isLiked);
                 button.classList.toggle('text-white/50', !isLiked);
             }
 
-            // Immersive Modal
             const buttonImmersive = document.getElementById('like-button-immersive');
             if (buttonImmersive) {
                 buttonImmersive.classList.toggle('text-red-400', isLiked);
@@ -1054,11 +1087,9 @@
             }
         }
 
-        /**
-         * Elemento per la griglia 3x2 dell'Accesso Rapido
-         */
+        // --- Widgets & Rendering ---
+
         function getQuickAccessTrackCard(track) {
-            // Semplificata per il layout Grid 3x2
             return `
                 <div onclick="playTrack('${track.id}')" class="depth-glass p-2 rounded-lg cursor-pointer transition hover:scale-[1.02] border border-transparent hover:accent-border flex items-center space-x-3">
                     <img src="${track.cover}" alt="${track.title}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
@@ -1067,9 +1098,6 @@
             `;
         }
 
-        /**
-         * Elemento standard per la lista orizzontale
-         */
         function getTrackElement(track, layoutType) {
             const containerClasses = layoutType === 'horizontal-scroll' ? 'horizontal-widget-item' : 'w-full';
             const coverClasses = layoutType === 'horizontal-scroll' ? 'w-full h-auto aspect-square rounded-xl' : 'w-16 h-16 rounded-lg';
@@ -1132,7 +1160,7 @@
 
             let allWidgetsHtml = '';
 
-            // --- LOGICA DI FILTRO (Mood) ---
+            // LOGICA FILTRO MOOD
             if (activeFilter !== 'Trending') {
                 const filteredTracks = AURA_MAP.filter(t => t.mood === activeFilter);
                 const filteredHtml = filteredTracks.map(t => getTrackElement(t, 'grid')).join('');
@@ -1146,16 +1174,16 @@
                 return;
             }
 
-            // ⭐ 1. WIDGET: Accesso Rapido (4 brani casuali)
-            const quickAccessTracks = AURA_MAP.slice(0, 4); // Prendi i primi 4 come esempio
+            // WIDGET 1: Accesso Rapido
+            const quickAccessTracks = AURA_MAP.slice(0, 4); 
             const quickAccessHtml = quickAccessTracks.map(getQuickAccessTrackCard).join('');
             allWidgetsHtml += createWidgetBlock('🎧 Accesso Rapido', 'Riclicca per un nuovo brano.', quickAccessHtml, 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4');
 
-            // ⭐ 2. WIDGET: Mood Grid
+            // WIDGET 2: Mood Grid
             const moodGridHtml = getMoodGridHtml();
             allWidgetsHtml += createWidgetBlock('✨ Mood Select', 'Scegli la vibe perfetta per il tuo momento.', moodGridHtml, 'grid-cols-2 md:grid-cols-4');
             
-            // ⭐ 3. WIDGET: Disclaimer Beta
+            // WIDGET 3: Disclaimer
             const disclaimerHtml = createWidgetBlock('⚠️ Informazioni Importanti', 'Beta', `
                  <p class="text-white/90"> Questo programma è in **fase Beta**. Potrebbero essere riscontrati bug o malfunzionamenti. La tua collaborazione è fondamentale per la Vibe perfetta. </p>
                  <p class="text-sm mt-3 text-red-300"> Se trovi i problemi, segnalali per favore su <a href="https://Ryznmusic.it" target="_blank" class="font-bold underline hover:text-white transition">Ryzn Music.it</a>. </p>
@@ -1163,20 +1191,17 @@
 
             allWidgetsHtml += disclaimerHtml;
 
-            // ⭐ 4. WIDGETS: Categorie Dinamiche (CR1, CR2, CR3, CR4)
+            // WIDGET 4: Categorie
             const allCategoryTracks = [];
-            
             CATEGORY_KEYS.forEach(categoryID => {
                 const categoryInfo = CATEGORY_MAP[categoryID];
                 const categoryTracks = AURA_MAP.filter(t => t.categoryID === categoryID);
                 allCategoryTracks.push(...categoryTracks);
 
                 if (categoryTracks.length > 0) {
-                    // Mescola e prendi i primi 10 per lo scroll orizzontale
                     const shuffledTracks = [...categoryTracks] 
                         .sort(() => 0.5 - Math.random())
                         .slice(0, 10);
-                        
                     const tracksHtml = shuffledTracks.map(t => getTrackElement(t, 'horizontal-scroll')).join('');
                     
                     allWidgetsHtml += createWidgetBlock(
@@ -1188,8 +1213,7 @@
                 }
             });
 
-            // ⭐ 5. WIDGET: I Più Ascoltati (Global)
-            // Mescola e prendi i primi 10-15 per simulare i "Più Ascoltati"
+            // WIDGET 5: Più Ascoltati
             const popularTracks = [...allCategoryTracks]
                 .sort(() => 0.5 - Math.random())
                 .slice(0, 15);
@@ -1208,8 +1232,6 @@
             container.innerHTML = allWidgetsHtml;
             lucide.createIcons();
         }
-
-        // --- Altre Funzioni (Invariante) ---
 
         function getLikedTrackElement(track) {
             return `
@@ -1261,8 +1283,7 @@
             showSection('music', mood);
         }
 
-        // --- Funzioni Playlists (Invariante) ---
-
+        // --- Playlists ---
         function generatePlaylistId() {
             return 'pl_' + Date.now();
         }
@@ -1350,7 +1371,7 @@
             saveLocalData();
             showToast(message, 'success');
             closeAddToPlaylistModal();
-            renderPlaylists(); // Aggiorna la vista playlist
+            renderPlaylists();
         }
 
         function renderPlaylists() {
@@ -1364,7 +1385,6 @@
 
             const playlistsHtml = userPlaylists.map(playlist => {
                 const trackCount = playlist.tracks.length;
-                // Prendi le copertine per la visualizzazione della griglia 2x2 (max 4)
                 const covers = playlist.tracks.slice(0, 4).map(trackId => {
                     const track = AURA_MAP.find(t => t.id === trackId);
                     return track ? track.cover : FALLBACK_COVER_URL;
@@ -1402,13 +1422,12 @@
                 showToast("La sessione è vuota.", 'error');
                 return;
             }
-            // Riproduce il primo brano della playlist (logica semplificata)
             playTrack(playlist.tracks[0]);
             showToast(`Avviata sessione: ${playlist.name}`, 'info');
             showSection('music');
         }
         
-        // --- Funzioni UI Generiche ---
+        // --- UI Generica ---
 
         function showSection(sectionId, filter = 'Trending') {
             const sections = document.querySelectorAll('.section-page');
@@ -1432,7 +1451,6 @@
                 }
             }
             
-            // Aggiorna titolo di benvenuto
             const greeting = document.getElementById('home-greeting');
             if (greeting) {
                 const hour = new Date().getHours();
@@ -1462,35 +1480,58 @@
             const resultsContainer = document.getElementById('search-results');
             
             if (query.length < 2) {
-                resultsContainer.innerHTML = '<p class="text-center text-gray-500">Inizia a digitare per cercare nella libreria locale.</p>';
+                resultsContainer.innerHTML = '<p class="text-center text-gray-500">Inizia a digitare...</p>';
                 return;
             }
 
-            const results = AURA_MAP.filter(track => 
+            let htmlContent = '';
+
+            // 1. CERCA ARTISTI
+            const foundArtists = ARTISTS_DATA.filter(artist => 
+                artist.name.toLowerCase().includes(query)
+            );
+
+            if (foundArtists.length > 0) {
+                htmlContent += `<h4 class="text-xs font-bold text-gray-400 uppercase mb-2 mt-2">Artisti</h4>`;
+                htmlContent += foundArtists.map(artist => `
+                    <div onclick="openArtistProfile('${artist.id}'); closeSearchModal();" class="flex items-center space-x-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 cursor-pointer transition mb-2 border border-white/5">
+                        <img src="${artist.imageUrl || FALLBACK_COVER_URL}" alt="${artist.name}" class="w-12 h-12 rounded-full object-cover border border-white/10">
+                        <div>
+                            <p class="font-bold text-white text-base">${artist.name}</p>
+                            <p class="text-xs text-gray-400">Artista</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // 2. CERCA BRANI
+            const foundTracks = AURA_MAP.filter(track => 
                 track.title.toLowerCase().includes(query) || 
                 track.artist.toLowerCase().includes(query)
             );
 
-            if (results.length === 0) {
-                resultsContainer.innerHTML = `<p class="text-center text-gray-500">Nessun risultato trovato per "${query}".</p>`;
-                return;
+            if (foundTracks.length > 0) {
+                htmlContent += `<h4 class="text-xs font-bold text-gray-400 uppercase mb-2 mt-4">Brani</h4>`;
+                htmlContent += foundTracks.map(track => `
+                    <div onclick="playTrack('${track.id}'); closeSearchModal();" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/10 cursor-pointer transition">
+                        <img src="${track.cover}" alt="${track.title}" class="w-10 h-10 rounded-md object-cover">
+                        <div class="truncate">
+                            <p class="font-bold text-white truncate text-sm">${track.title}</p>
+                            <p class="text-xs text-gray-400 truncate">${track.artist}</p>
+                        </div>
+                    </div>`
+                ).join('');
             }
 
-            const resultsHtml = results.map(track => 
-                `<div onclick="playTrack('${track.id}'); closeSearchModal();" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/10 cursor-pointer transition">
-                    <img src="${track.cover}" alt="${track.title}" class="w-10 h-10 rounded-md object-cover">
-                    <div class="truncate">
-                        <p class="font-bold text-white truncate text-sm">${track.title}</p>
-                        <p class="text-xs text-gray-400 truncate">${track.artist}</p>
-                    </div>
-                </div>`
-            ).join('');
-            
-            resultsContainer.innerHTML = resultsHtml;
+            if (foundArtists.length === 0 && foundTracks.length === 0) {
+                resultsContainer.innerHTML = `<p class="text-center text-gray-500">Nessun risultato per "${query}".</p>`;
+            } else {
+                resultsContainer.innerHTML = htmlContent;
+            }
         }
 
 
-        // --- Funzioni di Storage e Inizializzazione ---
+        // --- Storage & Init ---
 
         function loadLocalData() {
             const liked = localStorage.getItem('aura_liked_tracks');
@@ -1571,7 +1612,6 @@
             }, 5000);
         }
 
-        // --- Funzione Neve (Snowflakes) ---
         function createSnowflakes() {
             const snowContainer = document.getElementById('snow-container');
             if (!snowContainer) return;
@@ -1581,15 +1621,10 @@
                 const flake = document.createElement('div');
                 flake.className = 'flake';
                 flake.textContent = '❅'; 
-
-                // Posizione iniziale casuale (da -10% a 100% della larghezza)
                 const startX = Math.random() * 110 - 10; 
-                // Dimensione casuale
                 const size = Math.random() * 10 + 8; 
-                // Durata della caduta
-                const duration = Math.random() * 10 + 5; // tra 5s e 15s
-                // Ritardo casuale
-                const delay = Math.random() * 5; // tra 0s e 5s
+                const duration = Math.random() * 10 + 5; 
+                const delay = Math.random() * 5; 
 
                 flake.style.left = `${startX}vw`;
                 flake.style.fontSize = `${size}px`;
@@ -1601,18 +1636,12 @@
         }
         
         function getDOMElements() {
-            // Player HTML5
             audioPlayer = document.getElementById('audioPlayer');
-            // ==========================================================
-            // --- RIFERIMENTO AL PLAYER VIDEO (il tuo iframe) ---
-            // ==========================================================
             immersiveVideoPlayer = document.getElementById('immersive-video-player'); 
-            // ==========================================================
             
-            switchToVideoBtn = document.getElementById('switch-to-video-btn'); // Modal switch
-            switchToVideoPipBtn = document.getElementById('switch-to-video-pip'); // PIP switch
+            switchToVideoBtn = document.getElementById('switch-to-video-btn'); 
+            switchToVideoPipBtn = document.getElementById('switch-to-video-pip'); 
 
-            // UI Player
             progressBar = document.getElementById('progress-bar');
             progressBarImmersive = document.getElementById('progress-bar-immersive');
             playerTitle = document.getElementById('player-title');
@@ -1620,23 +1649,18 @@
             playerCover = document.getElementById('player-cover');
             playerBar = document.querySelector('.player-bar'); 
 
-            // UI Immersiva
             immersiveCover = document.getElementById('immersive-cover');
             immersiveTitle = document.getElementById('immersive-title');
             immersiveArtist = document.getElementById('immersive-artist');
             loopButtonImmersive = document.getElementById('loop-button-immersive');
             
-            // UI Generiche
             vibeScoreDisplay = document.getElementById('vibe-score-display');
             progressBarContainer = document.getElementById('progress-bar-container');
             progressBarImmersiveContainer = document.getElementById('progress-bar-immersive-container');
             
-            // ✅ Riferimenti Wrapper Marquee
             playerTitleWrapper = document.getElementById('player-title-wrapper');
             immersiveTitleWrapper = document.getElementById('immersive-title-wrapper');
 
-
-            // Aggiungi Listeners
             audioPlayer.addEventListener('play', onPlayerPlay);
             audioPlayer.addEventListener('pause', onPlayerPause);
             audioPlayer.addEventListener('timeupdate', updateProgress);
@@ -1645,14 +1669,11 @@
             setupSeekListeners();
         }
 
-        // --- Media Session API (per Controlli Android/iOS) ---
-
         function updateMediaSession() {
             if (!('mediaSession' in navigator) || !currentTrackData) return;
 
             const isPlaying = !audioPlayer.paused;
             
-            // Azioni standard
             navigator.mediaSession.setActionHandler('play', () => audioPlayer.play());
             navigator.mediaSession.setActionHandler('pause', () => audioPlayer.pause());
             navigator.mediaSession.setActionHandler('seekbackward', () => skipBackward());
@@ -1660,7 +1681,6 @@
             navigator.mediaSession.setActionHandler('nexttrack', () => skipForward());
             navigator.mediaSession.setActionHandler('previoustrack', () => skipBackward());
 
-            // Metadati
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: currentTrackData.title,
                 artist: currentTrackData.artist,
@@ -1684,7 +1704,6 @@
 
         async function initializeAppContent() {
             
-            // ✅ REGISTRAZIONE SERVICE WORKER (PWA) - Percorso corretto: './service_worker.js'
             if ('serviceWorker' in navigator) {
                 try {
                     const registration = await navigator.serviceWorker.register('./service_worker.js');
@@ -1695,17 +1714,13 @@
             }
 
             loadLocalData();
-            
             getDOMElements(); 
             createSnowflakes(); 
             
-            // ⭐ ABILITA IL FETCH DEI JSON REMOTI
             await fetchTracks(); 
             
             updateAmbientLight('#00BFFF', '0 191 255'); 
-            
             updateLoopButton(isLooping); 
-            
             showSection('music'); 
             
              if (playerBar) playerBar.classList.remove('active'); 
