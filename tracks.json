@@ -95,6 +95,54 @@
             "artist": "Icy.030",
             "albumId": "Aura", 
             "albumTitle": "Aura" 
+        },
+        {
+            "id": "Icy.030",
+            "title": "Aura",
+            "file": "aura.mp3",
+            "categoryID": "Ryzn Best",
+            "videoUrl": "",
+            "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/aura.lrc",
+            "artistId": "Icy.030",
+            "artist": "Icy.030",
+            "albumId": "Aura", 
+            "albumTitle": "Aura" 
+        },
+        {
+            "id": "Icy.030",
+            "title": "Ton Silence",
+            "file": "tons.mp3",
+            "categoryID": "Ryzn Best",
+            "videoUrl": "",
+            "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/tons.lrc",
+            "artistId": "Icy.030",
+            "artist": "Icy.030",
+            "albumId": "Aura", 
+            "albumTitle": "Aura" 
+        },
+        {
+            "id": "Icy.030",
+            "title": "Klein",
+            "file": "klein.mp3",
+            "categoryID": "Ryzn Best",
+            "videoUrl": "",
+            "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/klein.lrc",
+            "artistId": "Icy.030",
+            "artist": "Icy.030",
+            "albumId": "Aura", 
+            "albumTitle": "Aura" 
+        },
+        {
+            "id": "Icy.030",
+            "title": "Asco",
+            "file": "asco.mp3",
+            "categoryID": "Ryzn Best",
+            "videoUrl": "",
+            "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/asco.lrc",
+            "artistId": "Icy.030",
+            "artist": "Icy.030",
+            "albumId": "Aura", 
+            "albumTitle": "Aura" 
         }
     ]
 }
