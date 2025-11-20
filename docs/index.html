@@ -202,41 +202,6 @@
             letter-spacing: 1px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
-        /* Nuovo stile per il layout a tabella del banner */
-        .promo-table-layout {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 12px; 
-            max-width: 500px; 
-            margin: 0 auto; 
-        }
-        .promo-card {
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px; /* Spaziatura tra immagine e testo */
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .promo-card:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        /* Classe specifica per la dimensione della cover nel banner */
-        .promo-cover-img {
-            width: 40px; /* Ridotto leggermente (w-10) */
-            height: 40px; /* Ridotto leggermente (h-10) */
-            border-radius: 8px;
-            object-fit: cover;
-            flex-shrink: 0; /* Assicura che l'immagine mantenga la dimensione */
-        }
-
 
         /* --- STILI LYRICS SPOTIFY-STYLE --- */
         .lyrics-container-spotify {
@@ -338,6 +303,36 @@
                     <p id="artist-modal-bio" class="text-gray-300 leading-relaxed text-sm sm:text-base"></p>
                 </div>
                 <div id="artist-modal-socials" class="flex space-x-4 mt-4 pt-4 border-t border-white/10"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="album-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[160] hidden flex items-center justify-center p-4 modal">
+        <div class="depth-glass bg-ryzn-bg/90 p-0 rounded-3xl w-full max-w-lg shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]">
+            
+            <div class="relative h-48 sm:h-64 w-full flex-shrink-0">
+                <img id="album-modal-image" src="" alt="Album Cover" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-ryzn-bg via-transparent to-transparent"></div>
+                
+                <button onclick="closeAlbumModal()" class="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-white hover:bg-white/20 transition backdrop-blur-sm z-20">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+                
+                <div class="absolute bottom-4 left-6 right-6">
+                    <h2 id="album-modal-title" class="text-3xl sm:text-4xl font-extrabold text-white drop-shadow-lg truncate">Titolo Album</h2>
+                    <p id="album-modal-artist" class="text-gray-300 text-sm font-medium mt-1">Artista</p>
+                </div>
+            </div>
+
+            <div class="p-4 overflow-y-auto custom-scrollbar flex-grow">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Tracce</span>
+                    <button id="album-play-all" class="p-3 accent-bg rounded-full hover:scale-105 transition shadow-lg shadow-ryzn-accent/50">
+                        <i data-lucide="play" class="w-5 h-5 text-ryzn-bg fill-ryzn-bg"></i>
+                    </button>
+                </div>
+                <div id="album-track-list" class="space-y-2">
+                    </div>
             </div>
         </div>
     </div>
@@ -780,36 +775,22 @@
                         finalArtistName = track.artistId;
                     }
                     
-                    // --- LOGICA ID UNICO PER IL PROBLEMA LRC ---
-                    let uniqueId = track.id;
-                    if (!uniqueId || uniqueId === finalArtistName || uniqueId === "Icy.030") {
-                        // Crea un ID univoco se manca o se è l'ID duplicato "Icy.030"
-                        const baseTitle = title.replace(/[^\w]/g, '').substring(0, 10);
-                        uniqueId = (track.artistId || 'Aura') + '-' + baseTitle + '-' + track.categoryID;
-                    }
-                    
-                    // Correzione URL LRC per Mi Fai.. (se non codificato)
-                    let lrcUrl = track.lrcUrl;
-                    if (lrcUrl && lrcUrl.includes("Mi Fai")) {
-                        lrcUrl = lrcUrl.replace("Mi Fai.lrc", "Mi%20Fai.lrc");
-                    }
-                    // ---------------------------------------------
-                    
                     const tempTrackObj = { 
                         albumId: track.albumId, 
                         categoryID: track.categoryID 
                     };
 
                     return {
-                        id: uniqueId, 
+                        id: title, 
                         title: title,
                         artist: finalArtistName,
                         artistId: track.artistId, 
                         albumId: track.albumId,
+                        albumTitle: track.albumTitle || track.albumId, // Aggiornato per supportare titoli album
                         cover: getCoverUrl(tempTrackObj), 
                         audioUrl: audioUrl, 
                         videoUrl: track.videoUrl || null, 
-                        lrcUrl: lrcUrl || null,
+                        lrcUrl: track.lrcUrl || null,
                         categoryID: track.categoryID, 
                         mood: getTrackMood(), 
                         vibe: Math.floor(Math.random() * 100) + 1,
@@ -917,7 +898,8 @@
             showSection('music');
         }
         
-        // --- FUNZIONI PROFILO ARTISTA ---
+        // --- FUNZIONI PROFILO ARTISTA E ALBUM ---
+        
         function openArtistProfile(artistId) {
             const artist = ARTISTS_DATA.find(a => a.id === artistId);
             
@@ -951,6 +933,50 @@
 
         function closeArtistModal() {
             document.getElementById('artist-modal').classList.add('hidden');
+        }
+
+        // --- FUNZIONI GESTIONE ALBUM (AGGIUNTA) ---
+        function openAlbumPage(albumId) {
+            const albumTracks = AURA_MAP.filter(t => t.albumId === albumId);
+
+            if (albumTracks.length === 0) {
+                showToast("Album vuoto o non trovato.", "error");
+                return;
+            }
+
+            const firstTrack = albumTracks[0];
+            
+            document.getElementById('album-modal-title').textContent = firstTrack.albumTitle || albumId;
+            document.getElementById('album-modal-artist').textContent = firstTrack.artist;
+            document.getElementById('album-modal-image').src = firstTrack.cover;
+
+            const playAllBtn = document.getElementById('album-play-all');
+            playAllBtn.onclick = function() {
+                playTrack(firstTrack.id); 
+            };
+
+            const listContainer = document.getElementById('album-track-list');
+            listContainer.innerHTML = albumTracks.map((track, index) => `
+                <div onclick="playTrack('${track.id}')" class="flex items-center justify-between p-3 rounded-lg hover:bg-white/10 transition group cursor-pointer border-b border-white/5 last:border-0">
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <span class="text-gray-500 font-mono text-sm w-6 text-center group-hover:text-accent-text">${index + 1}</span>
+                        <div class="truncate">
+                            <p class="text-white font-medium truncate group-hover:text-accent-text transition">${track.title}</p>
+                            <p class="text-xs text-gray-500 truncate">${track.artist}</p>
+                        </div>
+                    </div>
+                    <button class="text-gray-500 hover:text-white opacity-0 group-hover:opacity-100 transition">
+                        <i data-lucide="play-circle" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            document.getElementById('album-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeAlbumModal() {
+            document.getElementById('album-modal').classList.add('hidden');
         }
 
         // --- PLAYBACK ---
@@ -1299,15 +1325,14 @@
             `;
         }
         
-        // FUNZIONE MODIFICATA PER IL LAYOUT A TABELLA 2x2 E SPACING CORRETTO
         function getPromoBannerHtml() {
              const bestTracks = AURA_MAP.filter(t => t.categoryID === 'Ryzn Best').slice(0, 4);
              if (bestTracks.length === 0) return '';
              
              const cardsHtml = bestTracks.map(track => `
-                <div onclick="playTrack('${track.id}')" class="promo-card">
-                    <img src="${track.cover}" class="promo-cover-img object-cover shadow-lg">
-                    <div class="min-w-0 flex-grow">
+                <div onclick="playTrack('${track.id}')" class="bg-white/10 backdrop-blur-md p-3 rounded-xl flex items-center space-x-3 cursor-pointer hover:bg-white/20 transition group">
+                    <img src="${track.cover}" class="w-12 h-12 rounded-lg object-cover shadow-lg">
+                    <div class="min-w-0">
                         <p class="font-bold text-white text-sm truncate">${track.title}</p>
                         <p class="text-xs text-white/70 truncate">RYZN Music Group</p>
                     </div>
@@ -1317,7 +1342,7 @@
              return `
                 <div class="promo-banner">
                     <h3 class="promo-title">Ryzn Xmas Contest</h3>
-                    <div class="promo-table-layout">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         ${cardsHtml}
                     </div>
                 </div>
@@ -1655,6 +1680,7 @@
             document.getElementById('search-modal').classList.add('hidden');
         }
 
+        // --- FUNZIONE DI RICERCA AGGIORNATA ---
         function performSearch() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
             const resultsContainer = document.getElementById('search-results');
@@ -1666,12 +1692,13 @@
 
             let htmlContent = '';
 
+            // 1. Cerca Artisti
             const foundArtists = ARTISTS_DATA.filter(artist => 
                 artist.name.toLowerCase().includes(query)
             );
 
             if (foundArtists.length > 0) {
-                htmlContent += `<h4 class="text-xs font-bold text-gray-400 uppercase mb-2 mt-2">Artisti</h4>`;
+                htmlContent += `<h4 class="text-xs font-bold text-gray-400 uppercase mb-2 mt-2 sticky top-0 bg-ryzn-bg/90 backdrop-blur p-2 z-10">Artisti</h4>`;
                 htmlContent += foundArtists.map(artist => `
                     <div onclick="openArtistProfile('${artist.id}'); closeSearchModal();" class="flex items-center space-x-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 cursor-pointer transition mb-2 border border-white/5">
                         <img src="${artist.imageUrl || FALLBACK_COVER_URL}" alt="${artist.name}" class="w-12 h-12 rounded-full object-cover border border-white/10">
@@ -1683,17 +1710,51 @@
                 `).join('');
             }
 
+            // 2. Cerca Album (LOGICA NUOVA)
+            const uniqueAlbums = {};
+            AURA_MAP.forEach(track => {
+                if (track.albumId) {
+                    if (!uniqueAlbums[track.albumId]) {
+                        uniqueAlbums[track.albumId] = {
+                            id: track.albumId,
+                            title: track.albumTitle || track.albumId, 
+                            artist: track.artist,
+                            cover: track.cover
+                        };
+                    }
+                }
+            });
+
+            const foundAlbums = Object.values(uniqueAlbums).filter(album => 
+                album.title.toLowerCase().includes(query)
+            );
+
+            if (foundAlbums.length > 0) {
+                htmlContent += `<h4 class="text-xs font-bold text-gray-400 uppercase mb-2 mt-4 sticky top-0 bg-ryzn-bg/90 backdrop-blur p-2 z-10">Album</h4>`;
+                htmlContent += foundAlbums.map(album => `
+                    <div onclick="openAlbumPage('${album.id}'); closeSearchModal();" class="flex items-center space-x-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 cursor-pointer transition mb-2 border border-white/5">
+                        <img src="${album.cover}" alt="${album.title}" class="w-12 h-12 rounded-md object-cover shadow-md">
+                        <div class="truncate">
+                            <p class="font-bold text-white text-base truncate">${album.title}</p>
+                            <p class="text-xs text-gray-400 truncate">Album • ${album.artist}</p>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500 ml-auto"></i>
+                    </div>
+                `).join('');
+            }
+
+            // 3. Cerca Brani
             const foundTracks = AURA_MAP.filter(track => 
                 track.title.toLowerCase().includes(query) || 
                 track.artist.toLowerCase().includes(query)
             );
 
             if (foundTracks.length > 0) {
-                htmlContent += `<h4 class="text-xs font-bold text-gray-400 uppercase mb-2 mt-4">Brani</h4>`;
+                htmlContent += `<h4 class="text-xs font-bold text-gray-400 uppercase mb-2 mt-4 sticky top-0 bg-ryzn-bg/90 backdrop-blur p-2 z-10">Brani</h4>`;
                 htmlContent += foundTracks.map(track => `
                     <div onclick="playTrack('${track.id}'); closeSearchModal();" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/10 cursor-pointer transition">
                         <img src="${track.cover}" alt="${track.title}" class="w-10 h-10 rounded-md object-cover">
-                        <div class="truncate">
+                        <div class="truncate flex-grow">
                             <p class="font-bold text-white truncate text-sm">${track.title}</p>
                             <p class="text-xs text-gray-400 truncate">${track.artist}</p>
                         </div>
@@ -1701,10 +1762,11 @@
                 ).join('');
             }
 
-            if (foundArtists.length === 0 && foundTracks.length === 0) {
+            if (foundArtists.length === 0 && foundAlbums.length === 0 && foundTracks.length === 0) {
                 resultsContainer.innerHTML = `<p class="text-center text-gray-500">Nessun risultato per "${query}".</p>`;
             } else {
                 resultsContainer.innerHTML = htmlContent;
+                lucide.createIcons();
             }
         }
 
@@ -1865,7 +1927,7 @@
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: currentTrackData.title,
                 artist: currentTrackData.artist,
-                album: 'Aura Music Choise',
+                album: currentTrackData.albumTitle || 'Aura Music Choice',
                  artwork: [
                      { src: currentTrackData.cover, sizes: '192x192', type: 'image/jpeg' },
                  ]
