@@ -24,7 +24,9 @@
         }
 
         /* Classi Tailwind Dinamiche */
-        .ryzn-bg { background-color: var(--ryzn-bg-color); }
+        .ryzn-bg { 
+            background-color: var(--ryzn-bg-color); 
+        }
         .accent-text { color: var(--ryzn-color-hex); }
         .accent-bg { background-color: var(--ryzn-color-hex); }
         .accent-border { border-color: var(--ryzn-color-hex); }
@@ -55,15 +57,34 @@
             transition: transform 0.2s ease, opacity 0.2s ease, fill 0.3s ease;
         }
         
-        /* Layout Base */
+        /* Layout Base & SFONDO PERSONALIZZATO */
         body {
             background-color: var(--ryzn-bg-color);
+            /* URL Raw dell'immagine GitHub */
+            background-image: url('https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User/Foto.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Fissa l'immagine durante lo scroll */
+            background-repeat: no-repeat;
+            
             color: white;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             padding-bottom: 96px; 
             overflow-x: hidden;
+        }
+        
+        /* Overlay scuro opzionale per migliorare leggibilità testo su sfondo immagine */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6); 
+            z-index: -1;
         }
 
         .container-app {
@@ -1336,17 +1357,17 @@
             `;
         }
         
-        // MODIFICATO: Titolo e aggiunta container countdown
+        // MODIFICATO: GRIGLIA 2x2 SU MOBILE
         function getPromoBannerHtml() {
              const bestTracks = AURA_MAP.filter(t => t.categoryID === 'Ryzn Best').slice(0, 4);
              if (bestTracks.length === 0) return '';
              
              const cardsHtml = bestTracks.map(track => `
-                <div onclick="playTrack('${track.id}')" class="bg-white/10 backdrop-blur-md p-3 rounded-xl flex items-center space-x-3 cursor-pointer hover:bg-white/20 transition group">
-                    <img src="${track.cover}" class="w-12 h-12 rounded-lg object-cover shadow-lg">
+                <div onclick="playTrack('${track.id}')" class="bg-white/10 backdrop-blur-md p-2 sm:p-3 rounded-xl flex items-center space-x-2 sm:space-x-3 cursor-pointer hover:bg-white/20 transition group">
+                    <img src="${track.cover}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover shadow-lg flex-shrink-0">
                     <div class="min-w-0">
-                        <p class="font-bold text-white text-sm truncate">${track.title}</p>
-                        <p class="text-xs text-white/70 truncate">RYZN Music Group</p>
+                        <p class="font-bold text-white text-xs sm:text-sm truncate">${track.title}</p>
+                        <p class="text-[10px] sm:text-xs text-white/70 truncate">RYZN Music Group</p>
                     </div>
                 </div>
              `).join('');
@@ -1354,7 +1375,7 @@
              return `
                 <div class="promo-banner">
                     <h3 class="promo-title">Ryzn Top 4 (Demo)</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-2 sm:gap-4">
                         ${cardsHtml}
                     </div>
                     <div id="promo-countdown-text" class="promo-countdown"></div>
@@ -1454,7 +1475,7 @@
             startCountdownTicker();
         }
         
-        // --- FUNZIONE COUNTDOWN AGGIUNTA ---
+        // --- FUNZIONE COUNTDOWN ---
         function startCountdownTicker() {
              const el = document.getElementById('promo-countdown-text');
              if(!el) return;
