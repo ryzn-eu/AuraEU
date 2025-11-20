@@ -202,6 +202,41 @@
             letter-spacing: 1px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        
+        /* Nuovo stile per il layout a tabella del banner */
+        .promo-table-layout {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 12px; 
+            max-width: 500px; 
+            margin: 0 auto; 
+        }
+        .promo-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Spaziatura tra immagine e testo */
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .promo-card:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        /* Classe specifica per la dimensione della cover nel banner */
+        .promo-cover-img {
+            width: 40px; /* Ridotto leggermente (w-10) */
+            height: 40px; /* Ridotto leggermente (h-10) */
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0; /* Assicura che l'immagine mantenga la dimensione */
+        }
+
 
         /* --- STILI LYRICS SPOTIFY-STYLE --- */
         .lyrics-container-spotify {
@@ -745,13 +780,28 @@
                         finalArtistName = track.artistId;
                     }
                     
+                    // --- LOGICA ID UNICO PER IL PROBLEMA LRC ---
+                    let uniqueId = track.id;
+                    if (!uniqueId || uniqueId === finalArtistName || uniqueId === "Icy.030") {
+                        // Crea un ID univoco se manca o se è l'ID duplicato "Icy.030"
+                        const baseTitle = title.replace(/[^\w]/g, '').substring(0, 10);
+                        uniqueId = (track.artistId || 'Aura') + '-' + baseTitle + '-' + track.categoryID;
+                    }
+                    
+                    // Correzione URL LRC per Mi Fai.. (se non codificato)
+                    let lrcUrl = track.lrcUrl;
+                    if (lrcUrl && lrcUrl.includes("Mi Fai")) {
+                        lrcUrl = lrcUrl.replace("Mi Fai.lrc", "Mi%20Fai.lrc");
+                    }
+                    // ---------------------------------------------
+                    
                     const tempTrackObj = { 
                         albumId: track.albumId, 
                         categoryID: track.categoryID 
                     };
 
                     return {
-                        id: title, 
+                        id: uniqueId, 
                         title: title,
                         artist: finalArtistName,
                         artistId: track.artistId, 
@@ -759,7 +809,7 @@
                         cover: getCoverUrl(tempTrackObj), 
                         audioUrl: audioUrl, 
                         videoUrl: track.videoUrl || null, 
-                        lrcUrl: track.lrcUrl || null, // <-- IMPORTANTE
+                        lrcUrl: lrcUrl || null,
                         categoryID: track.categoryID, 
                         mood: getTrackMood(), 
                         vibe: Math.floor(Math.random() * 100) + 1,
@@ -1249,14 +1299,15 @@
             `;
         }
         
+        // FUNZIONE MODIFICATA PER IL LAYOUT A TABELLA 2x2 E SPACING CORRETTO
         function getPromoBannerHtml() {
              const bestTracks = AURA_MAP.filter(t => t.categoryID === 'Ryzn Best').slice(0, 4);
              if (bestTracks.length === 0) return '';
              
              const cardsHtml = bestTracks.map(track => `
-                <div onclick="playTrack('${track.id}')" class="bg-white/10 backdrop-blur-md p-3 rounded-xl flex items-center space-x-3 cursor-pointer hover:bg-white/20 transition group">
-                    <img src="${track.cover}" class="w-12 h-12 rounded-lg object-cover shadow-lg">
-                    <div class="min-w-0">
+                <div onclick="playTrack('${track.id}')" class="promo-card">
+                    <img src="${track.cover}" class="promo-cover-img object-cover shadow-lg">
+                    <div class="min-w-0 flex-grow">
                         <p class="font-bold text-white text-sm truncate">${track.title}</p>
                         <p class="text-xs text-white/70 truncate">RYZN Music Group</p>
                     </div>
@@ -1266,7 +1317,7 @@
              return `
                 <div class="promo-banner">
                     <h3 class="promo-title">Ryzn Xmas Contest</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="promo-table-layout">
                         ${cardsHtml}
                     </div>
                 </div>
