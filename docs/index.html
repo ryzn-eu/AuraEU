@@ -57,25 +57,35 @@
             transition: transform 0.2s ease, opacity 0.2s ease, fill 0.3s ease;
         }
         
-        /* Layout Base & SFONDO PERSONALIZZATO */
-        body {
-            background-color: var(--ryzn-bg-color);
-            /* URL Raw dell'immagine GitHub */
+        /* --- FIX SFONDO MOBILE --- */
+        /* Container dedicato per l'immagine fissa */
+        .fixed-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2; /* Dietro a tutto */
             background-image: url('https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User/Foto.png');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed; /* Fissa l'immagine durante lo scroll */
             background-repeat: no-repeat;
-            
+            pointer-events: none; /* Assicura che non blocchi i click */
+        }
+
+        /* Layout Base */
+        body {
+            background-color: transparent; /* Trasparente per vedere il div fixed-background */
             color: white;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             padding-bottom: 96px; 
             overflow-x: hidden;
+            position: relative;
         }
         
-        /* Overlay scuro opzionale per migliorare leggibilità testo su sfondo immagine */
+        /* Overlay scuro per migliorare leggibilità testo su sfondo immagine */
         body::before {
             content: '';
             position: fixed;
@@ -84,7 +94,8 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.6); 
-            z-index: -1;
+            z-index: -1; /* Sopra l'immagine, sotto il contenuto */
+            pointer-events: none;
         }
 
         .container-app {
@@ -93,6 +104,7 @@
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
+            z-index: 1; /* Assicura che il contenuto sia sopra l'overlay */
         }
 
         .section-page {
@@ -205,7 +217,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 
-        /* Banner Contest - MODIFICATO COLORE */
+        /* Banner Contest */
         .promo-banner {
             /* Azzurro (#00BFFF) to Verde Boreale (#005C53) */
             background: linear-gradient(135deg, #00BFFF 0%, #005C53 100%);
@@ -282,6 +294,8 @@
     </style>
 </head>
 <body class="ryzn-bg">
+
+    <div class="fixed-background"></div>
 
     <div id="snow-container" class="snow-container"></div>
 
