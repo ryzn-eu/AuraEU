@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,11 +42,40 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        /* Premium Gold Effect */
+        /* Premium Gold Effect & Animations */
         .premium-gold {
             background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
             box-shadow: 0 10px 25px -5px rgba(255, 215, 0, 0.4);
             border: 1px solid #FFF8DC;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-150%) skewX(-20deg); }
+            50% { transform: translateX(150%) skewX(-20deg); }
+            100% { transform: translateX(150%) skewX(-20deg); }
+        }
+
+        .premium-shine {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 80%;
+            height: 100%;
+            background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+            transform: skewX(-20deg);
+            animation: shimmer 3s infinite;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .floating-icon {
+            animation: floatIcon 3s ease-in-out infinite;
         }
 
         /* Stile Logo con Gradiente Dinamico */
@@ -224,7 +253,6 @@
 
         /* Banner Contest */
         .promo-banner {
-            /* Azzurro (#00BFFF) to Verde Boreale (#005C53) */
             background: linear-gradient(135deg, #00BFFF 0%, #005C53 100%);
             border-radius: 24px;
             padding: 24px;
@@ -241,7 +269,6 @@
             letter-spacing: 1px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        /* Nuovo stile per il countdown */
         .promo-countdown {
             text-align: center;
             margin-top: 20px;
@@ -559,18 +586,24 @@
                         </select>
                     </div>
 
-                    <button id="btn-logout" onclick="handleLogout()" class="w-full px-4 py-2 bg-red-600 rounded-lg text-white font-bold hover:bg-red-700 transition mt-4">Disconnetti</button>
+                    <button id="btn-logout" type="button" onclick="handleLogout()" class="w-full px-4 py-3 bg-red-600/80 hover:bg-red-600 border border-red-500/30 rounded-lg text-white font-bold transition flex items-center justify-center gap-2 mt-4 cursor-pointer z-50 relative">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                        <span id="txt-logout-btn">Disconnetti</span>
+                    </button>
                 </div>
 
-                <div class="premium-gold p-6 rounded-xl flex flex-col justify-between relative overflow-hidden text-black">
-                     <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-3xl"></div>
-                     <div>
+                <div class="premium-gold p-6 rounded-xl flex flex-col justify-between relative overflow-hidden text-black group">
+                     <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/30 rounded-full blur-3xl animate-pulse"></div>
+                     <div class="premium-shine"></div>
+                     
+                     <div class="relative z-10">
                          <h3 class="text-2xl font-black uppercase tracking-wider mb-2 flex items-center gap-2">
-                            <i data-lucide="crown" class="w-6 h-6"></i> Premium
+                            <i data-lucide="crown" class="w-8 h-8 floating-icon fill-black/20"></i> Premium
                          </h3>
                          <p class="font-medium text-black/80" id="txt-premium-desc">Accesso esclusivo attivo.</p>
                      </div>
-                     <div class="mt-6 text-center border-t border-black/10 pt-4">
+                     
+                     <div class="relative z-10 mt-6 text-center border-t border-black/10 pt-4">
                          <p class="text-xs font-bold uppercase tracking-widest opacity-70 mb-1" id="txt-countdown-label">Scadenza Offerta (1 Aprile)</p>
                          <div id="premium-countdown-timer" class="text-2xl font-mono font-bold">00g 00h 00m 00s</div>
                      </div>
@@ -660,16 +693,29 @@
         let activeFilter = 'Trending'; 
 
         // --- MULTILINGUA ---
-        let currentLang = 'it';
+        let currentLang = 'en'; // Default
         const TRANSLATIONS = {
             it: {
+                // UI Core
                 greeting_m: "Buongiorno.", greeting_a: "Buon Pomeriggio.", greeting_e: "Buonasera.", vibe_ready: "La tua Vibe è pronta.",
                 discover: "Scopri", sessions: "Le Tue Sessioni", saved_tracks: "I Tuoi Brani Salvati", profile: "Profilo Utente",
                 login_btn: "Accedi con questo dispositivo", logout_btn: "Disconnetti", search_ph: "Cerca...", 
                 create_session: "Crea Sessione", create_session_modal: "Crea Nuova Sessione", add_session: "Aggiungi a Sessione",
                 cancel: "Annulla", create: "Crea", history: "Cronologia Ascolti", language: "Lingua / Language",
                 premium_desc: "Accesso esclusivo attivo.", countdown_lbl: "Scadenza Offerta (1 Aprile)",
-                status_guest: "Stato: Disconnesso", status_user: "Utente ID:", now_playing: "In Riproduzione"
+                status_guest: "Stato: Disconnesso", status_user: "Utente ID:", now_playing: "In Riproduzione",
+                // Home Widgets
+                quick_access: "🎧 Accesso Rapido", quick_access_sub: "Riclicca per un nuovo brano.",
+                mood_select: "✨ Mood Select", mood_select_sub: "Scegli la vibe perfetta per il tuo momento.",
+                trending_title: "🔥 I Più Ascoltati", trending_sub: "Una selezione casuale tra tutte le nostre sessioni più popolari.",
+                results: "Risultati:", results_sub: "Brani filtrati in base al mood selezionato.",
+                back_home: "Torna alla Home",
+                // Categories (CR1 - CR4)
+                cat_cr1_title: "🎄 CR1 - Top Hits", cat_cr1_sub: "I brani pop e le hit che scaldano l'atmosfera.",
+                cat_cr2_title: "🕯️ CR2 - Ballate e Relax", cat_cr2_sub: "Melodie lente e dolci per serate tranquille e romantiche.",
+                cat_cr3_title: "🔔 CR3 - I Classici", cat_cr3_sub: "Le tracce tradizionali sempre attuali.",
+                cat_cr4_title: "❄️ CR4 - Ambient Vibe", cat_cr4_sub: "Musica strumentale e tracce per creare un mood perfetto.",
+                promo_title: "Ryzn Top 4", promo_sub: "RYZN Music Group"
             },
             en: {
                 greeting_m: "Good Morning.", greeting_a: "Good Afternoon.", greeting_e: "Good Evening.", vibe_ready: "Your Vibe is ready.",
@@ -678,7 +724,19 @@
                 create_session: "Create Session", create_session_modal: "New Session", add_session: "Add to Session",
                 cancel: "Cancel", create: "Create", history: "Listening History", language: "Language",
                 premium_desc: "Exclusive access active.", countdown_lbl: "Offer Expires (April 1st)",
-                status_guest: "Status: Guest", status_user: "User ID:", now_playing: "Now Playing"
+                status_guest: "Status: Guest", status_user: "User ID:", now_playing: "Now Playing",
+                // Home Widgets
+                quick_access: "🎧 Quick Access", quick_access_sub: "Click again for a new track.",
+                mood_select: "✨ Mood Select", mood_select_sub: "Choose the perfect vibe for your moment.",
+                trending_title: "🔥 Trending Now", trending_sub: "A random selection from our most popular sessions.",
+                results: "Results:", results_sub: "Tracks filtered by selected mood.",
+                back_home: "Back to Home",
+                // Categories
+                cat_cr1_title: "🎄 CR1 - Top Hits", cat_cr1_sub: "Pop songs and hits to warm up the atmosphere.",
+                cat_cr2_title: "🕯️ CR2 - Ballads & Relax", cat_cr2_sub: "Slow, sweet melodies for quiet romantic evenings.",
+                cat_cr3_title: "🔔 CR3 - Classics", cat_cr3_sub: "Traditional tracks that are always current.",
+                cat_cr4_title: "❄️ CR4 - Ambient Vibe", cat_cr4_sub: "Instrumental music to create the perfect mood.",
+                promo_title: "Ryzn Top 4", promo_sub: "RYZN Music Group"
             },
             ro: {
                 greeting_m: "Bună dimineața.", greeting_a: "Bună ziua.", greeting_e: "Bună seara.", vibe_ready: "Vibe-ul tău este gata.",
@@ -687,7 +745,19 @@
                 create_session: "Creează Sesiune", create_session_modal: "Sesiune Nouă", add_session: "Adaugă la Sesiune",
                 cancel: "Anulare", create: "Creează", history: "Istoric Ascultare", language: "Limbă",
                 premium_desc: "Acces exclusiv activ.", countdown_lbl: "Oferta Expiră (1 Aprilie)",
-                status_guest: "Stare: Oaspete", status_user: "Utilizator ID:", now_playing: "Acum Redă"
+                status_guest: "Stare: Oaspete", status_user: "Utilizator ID:", now_playing: "Acum Redă",
+                // Home Widgets
+                quick_access: "🎧 Acces Rapid", quick_access_sub: "Click din nou pentru o melodie nouă.",
+                mood_select: "✨ Selectare Mood", mood_select_sub: "Alege vibrația perfectă pentru momentul tău.",
+                trending_title: "🔥 Cele mai ascultate", trending_sub: "O selecție aleatorie din cele mai populare sesiuni.",
+                results: "Rezultate:", results_sub: "Melodii filtrate după starea selectată.",
+                back_home: "Înapoi la Acasă",
+                // Categories
+                cat_cr1_title: "🎄 CR1 - Top Hits", cat_cr1_sub: "Melodii pop și hituri pentru a încălzi atmosfera.",
+                cat_cr2_title: "🕯️ CR2 - Balade și Relaxare", cat_cr2_sub: "Melodii lente și dulci pentru seri liniștite și romantice.",
+                cat_cr3_title: "🔔 CR3 - Clasice", cat_cr3_sub: "Piese tradiționale care sunt mereu actuale.",
+                cat_cr4_title: "❄️ CR4 - Ambient Vibe", cat_cr4_sub: "Muzică instrumentală pentru a crea starea perfectă.",
+                promo_title: "Ryzn Top 4", promo_sub: "Grupul Muzical RYZN"
             },
             de: {
                 greeting_m: "Guten Morgen.", greeting_a: "Guten Tag.", greeting_e: "Guten Abend.", vibe_ready: "Dein Vibe ist bereit.",
@@ -696,7 +766,19 @@
                 create_session: "Session erstellen", create_session_modal: "Neue Session", add_session: "Zur Session hinzufügen",
                 cancel: "Abbrechen", create: "Erstellen", history: "Hörverlauf", language: "Sprache",
                 premium_desc: "Exklusiver Zugang aktiv.", countdown_lbl: "Angebot endet (1. April)",
-                status_guest: "Status: Gast", status_user: "Benutzer ID:", now_playing: "Jetzt läuft"
+                status_guest: "Status: Gast", status_user: "Benutzer ID:", now_playing: "Jetzt läuft",
+                // Home Widgets
+                quick_access: "🎧 Schnellzugriff", quick_access_sub: "Klicken Sie erneut für einen neuen Titel.",
+                mood_select: "✨ Stimmungswahl", mood_select_sub: "Wähle den perfekten Vibe für deinen Moment.",
+                trending_title: "🔥 Beliebt", trending_sub: "Eine zufällige Auswahl aus unseren beliebtesten Sessions.",
+                results: "Ergebnisse:", results_sub: "Titel gefiltert nach ausgewählter Stimmung.",
+                back_home: "Zurück zur Startseite",
+                // Categories
+                cat_cr1_title: "🎄 CR1 - Top Hits", cat_cr1_sub: "Popsongs und Hits, um die Atmosphäre aufzuwärmen.",
+                cat_cr2_title: "🕯️ CR2 - Balladen & Entspannung", cat_cr2_sub: "Langsame, süße Melodien für ruhige romantische Abende.",
+                cat_cr3_title: "🔔 CR3 - Klassiker", cat_cr3_sub: "Traditionelle Titel, die immer aktuell sind.",
+                cat_cr4_title: "❄️ CR4 - Ambient Vibe", cat_cr4_sub: "Instrumentalmusik für die perfekte Stimmung.",
+                promo_title: "Ryzn Top 4", promo_sub: "RYZN Music Group"
             },
             es: {
                 greeting_m: "Buenos días.", greeting_a: "Buenas tardes.", greeting_e: "Buenas noches.", vibe_ready: "Tu Vibe está lista.",
@@ -705,7 +787,19 @@
                 create_session: "Crear Sesión", create_session_modal: "Nueva Sesión", add_session: "Añadir a Sesión",
                 cancel: "Cancelar", create: "Crear", history: "Historial de escucha", language: "Idioma",
                 premium_desc: "Acceso exclusivo activo.", countdown_lbl: "Oferta expira (1 de Abril)",
-                status_guest: "Estado: Invitado", status_user: "Usuario ID:", now_playing: "Reproduciendo"
+                status_guest: "Estado: Invitado", status_user: "Usuario ID:", now_playing: "Reproduciendo",
+                // Home Widgets
+                quick_access: "🎧 Acceso Rápido", quick_access_sub: "Haz clic de nuevo para una nueva canción.",
+                mood_select: "✨ Selección de Mood", mood_select_sub: "Elige la vibra perfecta para tu momento.",
+                trending_title: "🔥 Tendencias", trending_sub: "Una selección aleatoria de nuestras sesiones más populares.",
+                results: "Resultados:", results_sub: "Canciones filtradas por el estado de ánimo seleccionado.",
+                back_home: "Volver al Inicio",
+                // Categories
+                cat_cr1_title: "🎄 CR1 - Top Hits", cat_cr1_sub: "Canciones pop y éxitos para calentar el ambiente.",
+                cat_cr2_title: "🕯️ CR2 - Baladas y Relax", cat_cr2_sub: "Melodías lentas y dulces para noches románticas y tranquilas.",
+                cat_cr3_title: "🔔 CR3 - Clásicos", cat_cr3_sub: "Temas tradicionales que siempre son actuales.",
+                cat_cr4_title: "❄️ CR4 - Ambient Vibe", cat_cr4_sub: "Música instrumental para crear el ambiente perfecto.",
+                promo_title: "Ryzn Top 4", promo_sub: "RYZN Music Group"
             },
             ru: {
                 greeting_m: "Доброе утро.", greeting_a: "Добрый день.", greeting_e: "Добрый вечер.", vibe_ready: "Твой вайб готов.",
@@ -714,7 +808,19 @@
                 create_session: "Создать сессию", create_session_modal: "Новая сессия", add_session: "Добавить в сессию",
                 cancel: "Отмена", create: "Создать", history: "История", language: "Язык",
                 premium_desc: "Эксклюзивный доступ активен.", countdown_lbl: "Предложение истекает (1 апреля)",
-                status_guest: "Статус: Гость", status_user: "ID польз.:", now_playing: "Сейчас играет"
+                status_guest: "Статус: Гость", status_user: "ID польз.:", now_playing: "Сейчас играет",
+                // Home Widgets
+                quick_access: "🎧 Быстрый доступ", quick_access_sub: "Нажмите снова для нового трека.",
+                mood_select: "✨ Выбор настроения", mood_select_sub: "Выберите идеальный вайб для вашего момента.",
+                trending_title: "🔥 Популярное", trending_sub: "Случайная подборка из наших самых популярных сессий.",
+                results: "Результаты:", results_sub: "Треки, отфильтрованные по выбранному настроению.",
+                back_home: "Назад на главную",
+                // Categories
+                cat_cr1_title: "🎄 CR1 - Топ Хиты", cat_cr1_sub: "Поп-песни и хиты, чтобы согреть атмосферу.",
+                cat_cr2_title: "🕯️ CR2 - Баллады и Релакс", cat_cr2_sub: "Медленные, сладкие мелодии для тихих романтических вечеров.",
+                cat_cr3_title: "🔔 CR3 - Классика", cat_cr3_sub: "Традиционные треки, которые всегда актуальны.",
+                cat_cr4_title: "❄️ CR4 - Эмбиент Вайб", cat_cr4_sub: "Инструментальная музыка для создания идеального настроения.",
+                promo_title: "Ryzn Топ 4", promo_sub: "Музыкальная группа RYZN"
             },
             ar: {
                 greeting_m: "صباح الخير.", greeting_a: "مساء الخير.", greeting_e: "مساء الخير.", vibe_ready: "أجواؤك جاهزة.",
@@ -723,8 +829,28 @@
                 create_session: "إنشاء جلسة", create_session_modal: "جلسة جديدة", add_session: "إضافة إلى الجلسة",
                 cancel: "إلغاء", create: "إنشاء", history: "سجل الاستماع", language: "لغة",
                 premium_desc: "وصول حصري نشط.", countdown_lbl: "ينتهي العرض (1 أبريل)",
-                status_guest: "الحالة: ضيف", status_user: "معرف المستخدم:", now_playing: "يتم التشغيل الآن"
+                status_guest: "الحالة: ضيف", status_user: "معرف المستخدم:", now_playing: "يتم التشغيل الآن",
+                // Home Widgets
+                quick_access: "🎧 الوصول السريع", quick_access_sub: "انقر مرة أخرى للحصول على مقطع جديد.",
+                mood_select: "✨ اختيار المزاج", mood_select_sub: "اختر الأجواء المثالية للحظتك.",
+                trending_title: "🔥 الأكثر رواجاً", trending_sub: "مجموعة مختارة عشوائياً من جلساتنا الأكثر شعبية.",
+                results: "النتائج:", results_sub: "المقاطع التي تمت تصفيتها حسب المزاج المختار.",
+                back_home: "العودة إلى الصفحة الرئيسية",
+                // Categories
+                cat_cr1_title: "🎄 CR1 - أفضل الأغاني", cat_cr1_sub: "أغاني البوب والنجاحات لتدفئة الجو.",
+                cat_cr2_title: "🕯️ CR2 - أغاني وقصائد", cat_cr2_sub: "ألحان بطيئة وحلوة لأمسيات رومانسية هادئة.",
+                cat_cr3_title: "🔔 CR3 - كلاسيكيات", cat_cr3_sub: "المقاطع التقليدية التي تكون دائماً حديثة.",
+                cat_cr4_title: "❄️ CR4 - أجواء محيطة", cat_cr4_sub: "موسيقى آلية لخلق المزاج المثالي.",
+                promo_title: "أفضل 4 Ryzn", promo_sub: "مجموعة RYZN الموسيقية"
             }
+        };
+        
+        // Mappa delle chiavi di traduzione per le categorie
+        const CATEGORY_KEYS_MAP = {
+            'CR1': { titleKey: 'cat_cr1_title', subKey: 'cat_cr1_sub' },
+            'CR2': { titleKey: 'cat_cr2_title', subKey: 'cat_cr2_sub' },
+            'CR3': { titleKey: 'cat_cr3_title', subKey: 'cat_cr3_sub' },
+            'CR4': { titleKey: 'cat_cr4_title', subKey: 'cat_cr4_sub' },
         };
         
         // Riferimenti DOM
@@ -744,14 +870,7 @@
             "Chill": "bg-cyan-900/40 border-cyan-600 text-cyan-300"
         };
         const ALL_MOODS = Object.keys(MOOD_STYLES);
-        
-        const CATEGORY_MAP = {
-            'CR1': { title: '🎄 CR1 - Top Hits', subtitle: 'I brani pop e le hit che scaldano l\'atmosfera.' },
-            'CR2': { title: '🕯️ CR2 - Ballate e Relax', subtitle: 'Melodie lente e dolci per serate tranquille e romantiche.' },
-            'CR3': { title: '🔔 CR3 - I Classici', subtitle: 'Le tracce tradizionali sempre attuali.' },
-            'CR4': { title: '❄️ CR4 - Ambient Vibe', subtitle: 'Musica strumentale e tracce per creare un mood perfetto.' },
-        };
-        const CATEGORY_KEYS = Object.keys(CATEGORY_MAP);
+        const CATEGORY_KEYS = Object.keys(CATEGORY_KEYS_MAP);
         
         // ====================================================================
         // LOGICHE PLAYER
@@ -947,7 +1066,7 @@
                         title: title,
                         artist: finalArtistName,
                         artistId: track.artistId, 
-                        albumId: track.albumId,
+                        albumId: track.albumId, 
                         albumTitle: track.albumTitle || track.albumId, 
                         cover: getCoverUrl(tempTrackObj), 
                         audioUrl: audioUrl, 
@@ -995,10 +1114,8 @@
         }
         
         function updateListeningHistory(trackId) {
-            // Rimuovi duplicati se esistono già, metti in cima
             listeningHistory = listeningHistory.filter(id => id !== trackId);
             listeningHistory.unshift(trackId);
-            // Mantieni solo gli ultimi 20
             listeningHistory = listeningHistory.slice(0, 20);
             localStorage.setItem('aura_listening_history', JSON.stringify(listeningHistory));
             renderHistory();
@@ -1031,11 +1148,13 @@
         }
 
         function handleLogout() {
-            loggedInUser = null;
-            saveLocalData();
-            updateAuthUI(null);
-            showToast("Disconnessione Eseguita.", 'info');
-            showSection('music');
+            if (confirm("Sei sicuro di voler disconnettere questo dispositivo?")) {
+                loggedInUser = null;
+                saveLocalData();
+                updateAuthUI(null);
+                showToast("Disconnessione Eseguita.", 'info');
+                showSection('music');
+            }
         }
 
         // --- MULTILINGUA & UI TEXT UPDATE ---
@@ -1065,7 +1184,7 @@
             
             // Buttons
             if(document.getElementById('txt-create-btn')) document.getElementById('txt-create-btn').textContent = t.create_session;
-            if(document.getElementById('btn-logout')) document.getElementById('btn-logout').textContent = t.logout_btn;
+            if(document.getElementById('txt-logout-btn')) document.getElementById('txt-logout-btn').textContent = t.logout_btn;
             if(document.getElementById('auth-btn-text')) document.getElementById('auth-btn-text').textContent = t.login_btn;
             
             // Modals
@@ -1086,6 +1205,11 @@
             currentLang = lang;
             localStorage.setItem('aura_lang', lang);
             updateLanguageUI();
+            
+            // Forziamo il re-render della home se siamo nella home
+            if(document.getElementById('music-section').classList.contains('active')) {
+                renderHomePageWidgets();
+            }
         }
         
         // --- FUNZIONI PROFILO ARTISTA E ALBUM ---
@@ -1516,6 +1640,9 @@
              const bestTracks = AURA_MAP.filter(t => t.categoryID === 'Ryzn Best').slice(0, 4);
              if (bestTracks.length === 0) return '';
              
+             // Usa traduzioni
+             const t = TRANSLATIONS[currentLang];
+
              const cardsHtml = bestTracks.map(track => `
                 <div onclick="playTrack('${track.id}')" class="bg-white/10 backdrop-blur-md p-2 sm:p-3 rounded-xl flex items-center space-x-2 sm:space-x-3 cursor-pointer hover:bg-white/20 transition group">
                     <img src="${track.cover}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover shadow-lg flex-shrink-0">
@@ -1528,7 +1655,7 @@
 
              return `
                 <div class="promo-banner">
-                    <h3 class="promo-title">Ryzn Top 4</h3>
+                    <h3 class="promo-title">${t.promo_title}</h3>
                     <div class="grid grid-cols-2 gap-2 sm:gap-4">
                         ${cardsHtml}
                     </div>
@@ -1554,6 +1681,9 @@
         function renderHomePageWidgets() {
             const container = document.getElementById('home-widgets-container');
             if (!container) return;
+            
+            // Ottieni testi tradotti
+            const t = TRANSLATIONS[currentLang];
 
             if (AURA_MAP.length === 0) {
                  if(container.innerHTML.indexOf('Errore') === -1) {
@@ -1569,10 +1699,10 @@
                 const filteredHtml = filteredTracks.map(t => getTrackElement(t, 'grid')).join('');
                 const backButtonHtml = `
                     <button onclick="showSection('music', 'Trending')" class="flex items-center text-gray-400 hover:accent-text transition mb-6">
-                        <i data-lucide="arrow-left" class="w-6 h-6 mr-2"></i> Torna alla Home
+                        <i data-lucide="arrow-left" class="w-6 h-6 mr-2"></i> ${t.back_home}
                     </button>
                 `;
-                container.innerHTML = backButtonHtml + createWidgetBlock(`Risultati: ${activeFilter}`, 'Brani filtrati in base al mood selezionato.', filteredHtml, 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3');
+                container.innerHTML = backButtonHtml + createWidgetBlock(`${t.results} ${activeFilter}`, t.results_sub, filteredHtml, 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3');
                 lucide.createIcons();
                 return;
             }
@@ -1581,14 +1711,18 @@
 
             const quickAccessTracks = AURA_MAP.slice(0, 4); 
             const quickAccessHtml = quickAccessTracks.map(getQuickAccessTrackCard).join('');
-            allWidgetsHtml += createWidgetBlock('🎧 Accesso Rapido', 'Riclicca per un nuovo brano.', quickAccessHtml, 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4');
+            allWidgetsHtml += createWidgetBlock(t.quick_access, t.quick_access_sub, quickAccessHtml, 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4');
 
             const moodGridHtml = getMoodGridHtml();
-            allWidgetsHtml += createWidgetBlock('✨ Mood Select', 'Scegli la vibe perfetta per il tuo momento.', moodGridHtml, 'grid-cols-2 md:grid-cols-4');
+            allWidgetsHtml += createWidgetBlock(t.mood_select, t.mood_select_sub, moodGridHtml, 'grid-cols-2 md:grid-cols-4');
             
             const allCategoryTracks = [];
             CATEGORY_KEYS.forEach(categoryID => {
-                const categoryInfo = CATEGORY_MAP[categoryID];
+                // Usa le chiavi di traduzione
+                const catKeys = CATEGORY_KEYS_MAP[categoryID];
+                const catTitle = t[catKeys.titleKey] || categoryID;
+                const catSub = t[catKeys.subKey] || "";
+
                 const categoryTracks = AURA_MAP.filter(t => t.categoryID === categoryID);
                 allCategoryTracks.push(...categoryTracks);
 
@@ -1599,8 +1733,8 @@
                     const tracksHtml = shuffledTracks.map(t => getTrackElement(t, 'horizontal-scroll')).join('');
                     
                     allWidgetsHtml += createWidgetBlock(
-                        categoryInfo.title,
-                        categoryInfo.subtitle,
+                        catTitle,
+                        catSub,
                         tracksHtml,
                         'horizontal-scroll' 
                     );
@@ -1615,8 +1749,8 @@
             
             if (popularTracksHtml) {
                 allWidgetsHtml += createWidgetBlock(
-                    '🔥 I Più Ascoltati', 
-                    'Una selezione casuale tra tutte le nostre sessioni più popolari.', 
+                    t.trending_title, 
+                    t.trending_sub, 
                     popularTracksHtml, 
                     'horizontal-scroll'
                 );
@@ -2041,13 +2175,27 @@
             const history = localStorage.getItem('aura_listening_history');
             if (history) listeningHistory = JSON.parse(history);
             
-            // Lingua
-            const lang = localStorage.getItem('aura_lang');
-            if (lang && TRANSLATIONS[lang]) {
-                currentLang = lang;
-                const selector = document.getElementById('language-selector');
-                if(selector) selector.value = lang;
+            // --- AUTO LANGUAGE DETECTION ---
+            const savedLang = localStorage.getItem('aura_lang');
+            if (savedLang && TRANSLATIONS[savedLang]) {
+                // Se l'utente ha salvato una preferenza, usala
+                currentLang = savedLang;
+            } else {
+                // Rileva la lingua del browser
+                const browserLang = navigator.language || navigator.userLanguage; // es: "it-IT", "en-US"
+                const shortLang = browserLang.split('-')[0].toLowerCase(); // es: "it", "en"
+                
+                // Se supportata, imposta quella, altrimenti fallback (en)
+                if (TRANSLATIONS[shortLang]) {
+                    currentLang = shortLang;
+                } else {
+                    currentLang = 'en'; // Fallback a inglese
+                }
             }
+
+            // Aggiorna selettore
+            const selector = document.getElementById('language-selector');
+            if(selector) selector.value = currentLang;
 
             updateAuthUI(loggedInUser);
         }
@@ -2063,6 +2211,7 @@
         function updateAuthUI(user) {
             const authButton = document.getElementById('auth-button-header');
             const profileInfo = document.getElementById('profile-info');
+            const logoutBtn = document.getElementById('btn-logout');
             const t = TRANSLATIONS[currentLang];
 
             if (authButton) {
@@ -2079,10 +2228,16 @@
                     authButton.onclick = () => openAuthModal('device');
                 }
             }
+            
+            if (logoutBtn) {
+                // Nascondi se non loggato, mostra se loggato
+                logoutBtn.style.display = user ? 'flex' : 'none';
+            }
 
             if (profileInfo) {
                 profileInfo.textContent = user ? `${t.status_user} ${user.email.split('-')[1]}` : t.status_guest;
             }
+            lucide.createIcons();
         }
 
         function showToast(message, type = 'info') {
