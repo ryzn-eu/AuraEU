@@ -332,7 +332,7 @@
     <div id="toast-container"></div>
     
     <div id="audio-player-container">
-        <audio id="audioPlayer" playsinline></audio>
+        <audio id="audioPlayer" playsinline preload="auto"></audio>
     </div>
 
     <div id="auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4 modal">
@@ -879,16 +879,18 @@
         function onTrackEnded() {
             if (isLooping) {
                 audioPlayer.currentTime = 0;
-                audioPlayer.play();
+                audioPlayer.play().catch(e => console.warn("Loop play error", e));
             } else {
+                // Chiamata diretta per evitare stack troppo profondi
                 skipForward();
             }
         }
         
         function onPlayerPlay() {
             togglePlayIcon(false); 
-            updateMediaSession();
-            playerBar.classList.add('active');
+            // FIX: updateMediaSession qui potrebbe essere ridondante se già chiamato in playTrack
+            // ma male non fa per sicurezza UI
+            if(playerBar) playerBar.classList.add('active');
         }
         
         function onPlayerPause() {
@@ -1301,13 +1303,24 @@
 
             if (immersiveVideoPlayer) immersiveVideoPlayer.src = '';
             
+            // FIX: Assegnamo la nuova sorgente
             audioPlayer.src = track.audioUrl;
-            audioPlayer.load();
+            
+            // --- FIX CRITICO: Rimosso audioPlayer.load() ---
+            // Il browser carica automaticamente quando cambi .src. 
+            // Forzare .load() in background spesso rompe la catena di riproduzione.
             
             const attemptPlay = audioPlayer.play();
             if (attemptPlay && typeof attemptPlay.catch === 'function') {
-                attemptPlay.catch(e => {
-                    console.error("Autoplay Audio bloccato:", e);
+                attemptPlay
+                .then(() => {
+                    // La riproduzione è effettivamente partita
+                    updateMediaSession();
+                    if (playerBar) playerBar.classList.add('active');
+                })
+                .catch(e => {
+                    console.error("Autoplay Audio bloccato (Background):", e);
+                    // Tentativo di recupero: se fallisce, aggiorniamo l'icona
                     togglePlayIcon(true);
                 });
             }
@@ -1328,7 +1341,6 @@
             }
 
             updateUI(track);
-            if (playerBar) playerBar.classList.add('active');
         }
 
         window.togglePlayPause = function() {
@@ -2329,7 +2341,8 @@
             audioPlayer.addEventListener('ended', onTrackEnded);
             
             audioPlayer.addEventListener('loadedmetadata', () => {
-                updateMediaSession(); 
+                // Facoltativo: metadati già pronti
+                // updateMediaSession(); 
             });
 
             setupSeekListeners();
