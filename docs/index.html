@@ -1306,22 +1306,30 @@
             // FIX: Assegnamo la nuova sorgente
             audioPlayer.src = track.audioUrl;
             
-            // --- FIX CRITICO: Rimosso audioPlayer.load() ---
-            // Il browser carica automaticamente quando cambi .src. 
-            // Forzare .load() in background spesso rompe la catena di riproduzione.
+            // --- FIX CRITICO PER MOBILE BACKGROUND ---
+            // Aggiorniamo i metadati SUBITO, in modo sincrono, prima che parta l'audio.
+            // Questo permette al sistema operativo di registrare il cambio traccia 
+            // anche se l'app è in background.
+            updateMediaSession();
+            // ------------------------------------------
             
             const attemptPlay = audioPlayer.play();
             if (attemptPlay && typeof attemptPlay.catch === 'function') {
                 attemptPlay
                 .then(() => {
                     // La riproduzione è effettivamente partita
-                    updateMediaSession();
+                    if ('mediaSession' in navigator) {
+                        navigator.mediaSession.playbackState = 'playing';
+                    }
                     if (playerBar) playerBar.classList.add('active');
                 })
                 .catch(e => {
                     console.error("Autoplay Audio bloccato (Background):", e);
                     // Tentativo di recupero: se fallisce, aggiorniamo l'icona
                     togglePlayIcon(true);
+                    if ('mediaSession' in navigator) {
+                        navigator.mediaSession.playbackState = 'paused';
+                    }
                 });
             }
 
@@ -2340,9 +2348,9 @@
             audioPlayer.addEventListener('timeupdate', updateProgress);
             audioPlayer.addEventListener('ended', onTrackEnded);
             
+            // FIX: Aggiorna la media session (soprattutto la durata) quando i metadati sono caricati
             audioPlayer.addEventListener('loadedmetadata', () => {
-                // Facoltativo: metadati già pronti
-                // updateMediaSession(); 
+                updateMediaSession(); 
             });
 
             setupSeekListeners();
@@ -2384,9 +2392,8 @@
 
         function updateMediaSession() {
             if (!('mediaSession' in navigator) || !currentTrackData) return;
-
-            const isPlaying = !audioPlayer.paused;
             
+            // Definiamo i metadati per il blocco schermo
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: currentTrackData.title,
                 artist: currentTrackData.artist,
@@ -2397,6 +2404,9 @@
                  ]
             });
 
+            const isPlaying = audioPlayer && !audioPlayer.paused;
+            navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+
             if ('setPositionState' in navigator.mediaSession) {
                  if (audioPlayer.duration && !isNaN(audioPlayer.duration) && audioPlayer.duration !== Infinity) {
                     try {
@@ -2406,12 +2416,11 @@
                             position: audioPlayer.currentTime
                         });
                     } catch (error) {
+                        // Ignora errori di aggiornamento posizione se il media non è pronto
                         console.warn("Errore aggiornamento posizione mediaSession:", error);
                     }
                  }
             }
-            
-            navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
         }
 
 
