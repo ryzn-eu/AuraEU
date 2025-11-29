@@ -510,7 +510,6 @@
 
         window.addEventListener('load', () => {
             setTimeout(() => {
-                // Per sicurezza, parte nascosto e controlla dopo un attimo
                 checkPWAStatus();
             }, 100);
             
@@ -632,7 +631,6 @@
             if(document.getElementById('txt-sessions')) document.getElementById('txt-sessions').textContent = t.sessions;
             if(document.getElementById('txt-profile-title')) document.getElementById('txt-profile-title').textContent = t.profile;
             if(document.getElementById('txt-history-title')) document.getElementById('txt-history-title').textContent = t.history;
-            // ... (altri update omessi per brevità ma il concetto è chiaro)
             updateAuthUI(loggedInUser);
         }
 
@@ -659,16 +657,19 @@
         }
         function closeAlbumModal() { document.getElementById('album-modal').classList.add('hidden'); }
 
-        // Playback
+        // Playback - FIX BACKGROUND AUDIO (FORZATO .load())
         window.playTrack = function(trackId) {
             const track = AURA_MAP.find(t => t.id === trackId);
             if (!track) return;
             currentTrackData = track;
             updateListeningHistory(trackId);
             if (immersiveVideoPlayer) immersiveVideoPlayer.src = '';
-            audioPlayer.src = track.audioUrl;
             
-            updateMediaSession();
+            // --- FIX CRITICO iOS BACKGROUND ---
+            audioPlayer.src = track.audioUrl;
+            audioPlayer.load(); // FORZA IL CARICAMENTO
+            updateMediaSession(); 
+            // ---------------------------------
             
             const attemptPlay = audioPlayer.play();
             if (attemptPlay && typeof attemptPlay.catch === 'function') {
