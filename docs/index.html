@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aura</title>
     
     <link rel="icon" href="https://via.placeholder.com/192x192">
@@ -354,7 +354,8 @@
     <div class="fixed-background"></div>
     
     <div id="install-blocker" class="hidden">
-        <div class="max-w-md w-full bg-white/10 border border-white/20 p-8 rounded-3xl shadow-2xl">
+        <div class="max-w-md w-full bg-white/10 border border-white/20 p-8 rounded-3xl shadow-2xl relative">
+            
             <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
                 <i data-lucide="download" class="w-10 h-10 accent-text install-arrow"></i>
             </div>
@@ -375,6 +376,7 @@
             </div>
             
             <p class="text-xs text-gray-500">Apri l'app dalla Home per continuare.</p>
+
         </div>
     </div>
 
@@ -924,18 +926,32 @@
         const CATEGORY_KEYS = Object.keys(CATEGORY_KEYS_MAP);
         
         // ====================================================================
-        // LOGICHE PWA CHECK & POPUP BLOCK
+        // LOGICHE PWA CHECK & POPUP BLOCK (CORRETTO)
         // ====================================================================
         
         function checkIfPWA() {
-            // Controlla se è in modalità standalone (PWA installata)
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                                 (window.navigator.standalone === true); // iOS Safari legacy
-                                 
-            if (!isStandalone) {
-                // Se NON è standalone (è nel browser), mostra il blocco
-                document.getElementById('install-blocker').classList.remove('hidden');
-                document.body.style.overflow = 'hidden'; // Blocca scroll
+            // Controlli multipli per essere sicuri al 100% che sia PWA
+            
+            // 1. Standard moderno
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            
+            // 2. iOS Safari (legacy ma vitale per iPhone)
+            const isIOS = window.navigator.standalone === true;
+            
+            // 3. Android TWA o altre modalità full screen
+            const isFullScreen = window.matchMedia('(display-mode: fullscreen)').matches;
+            const isMinimalUi = window.matchMedia('(display-mode: minimal-ui)').matches;
+            
+            // 4. Verifica se l'app è in un referrer di app Android (TWA)
+            const isAndroidApp = document.referrer.startsWith('android-app://');
+
+            // Se UNA QUALSIASI di queste è vera, siamo in PWA o app installata
+            if (isStandalone || isIOS || isFullScreen || isMinimalUi || isAndroidApp) {
+                // È una PWA -> NASCONDI POPUP
+                return true; 
+            } else {
+                // È un Browser -> MOSTRA POPUP
+                return false;
             }
         }
         
@@ -2501,8 +2517,17 @@
                 }
             }
             
-            // CONTROLLO PWA: Se non è installata, mostra popup
-            checkIfPWA();
+            // --- CONTROLLO PWA AGGIORNATO ---
+            // Usiamo setTimeout per dare tempo al browser di settare le proprietà window
+            setTimeout(() => {
+                if (!checkIfPWA()) {
+                    // Se NON è PWA, mostra il blocco
+                    document.getElementById('install-blocker').classList.remove('hidden');
+                    document.body.style.overflow = 'hidden'; // Blocca scroll
+                } else {
+                    console.log("App avviata in modalità PWA/Standalone.");
+                }
+            }, 100); // 100ms di ritardo per sicurezza
 
             loadLocalData();
             getDOMElements(); 
