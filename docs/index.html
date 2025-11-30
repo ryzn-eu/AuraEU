@@ -112,7 +112,9 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 200; }
-        #audio-player-container { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
+        
+        /* FIX AUDIO CONTAINER PER IOS */
+        #audio-player-container { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
         
         .snow-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; overflow: hidden;
@@ -657,30 +659,44 @@
         }
         function closeAlbumModal() { document.getElementById('album-modal').classList.add('hidden'); }
 
-        // Playback - FIX BACKGROUND AUDIO (FORZATO .load())
+        // --- PLAYBACK ENGINE FIX PER IOS (LOAD + PAUSE) ---
         window.playTrack = function(trackId) {
             const track = AURA_MAP.find(t => t.id === trackId);
             if (!track) return;
+            
+            // 1. Fermare l'audio precedente
+            audioPlayer.pause();
+            
+            // 2. Aggiornare lo stato
             currentTrackData = track;
             updateListeningHistory(trackId);
+            
             if (immersiveVideoPlayer) immersiveVideoPlayer.src = '';
             
-            // --- FIX CRITICO iOS BACKGROUND ---
+            // 3. Assegnare la nuova sorgente
             audioPlayer.src = track.audioUrl;
-            audioPlayer.load(); // FORZA IL CARICAMENTO
-            updateMediaSession(); 
-            // ---------------------------------
+            audioPlayer.currentTime = 0;
             
+            // 4. FIX: Forzare il caricamento del buffer
+            audioPlayer.load();
+            
+            // 5. Aggiornare metadati (Subito, per il blocco schermo)
+            updateMediaSession();
+            
+            // 6. Avviare la riproduzione
             const attemptPlay = audioPlayer.play();
             if (attemptPlay && typeof attemptPlay.catch === 'function') {
                 attemptPlay.then(() => {
                     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
                     if (playerBar) playerBar.classList.add('active');
                 }).catch(e => {
+                    console.error("Playback error:", e);
                     togglePlayIcon(true);
                     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
                 });
             }
+            
+            // 7. UI e Video
             if (track.videoUrl && immersiveVideoPlayer) immersiveVideoPlayer.src = track.videoUrl;
             setImmersiveVisual('cover');
             if (track.lrcUrl) loadLyrics(track.lrcUrl); else { currentLyrics = []; updateLyricsUI(); }
