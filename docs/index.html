@@ -113,7 +113,6 @@
         
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 200; }
         
-        /* FIX AUDIO CONTAINER PER IOS */
         #audio-player-container { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
         
         .snow-container {
@@ -468,6 +467,9 @@
         let currentTrackData = null, audioPlayer = null, immersiveVideoPlayer = null, isImmersiveVideoActive = false; 
         let likedTracks = new Set(), userPlaylists = [], isLooping = false, loggedInUser = null, listeningHistory = []; 
         let activeFilter = 'Trending', currentLang = 'en';
+        
+        // --- VARIABILE CRITICA PER IL FIX DI IOS ---
+        let isTransitioning = false; // Impedisce doppi salti o conflitti
 
         const TRANSLATIONS = {
             it: { greeting_m: "Buongiorno.", greeting_a: "Buon Pomeriggio.", greeting_e: "Buonasera.", vibe_ready: "La tua Vibe è pronta.", discover: "Scopri", sessions: "Le Tue Sessioni", saved_tracks: "I Tuoi Brani Salvati", profile: "Profilo Utente", login_btn: "Accedi con questo dispositivo", logout_btn: "Disconnetti", search_ph: "Cerca...", create_session: "Crea Sessione", create_session_modal: "Crea Nuova Sessione", add_session: "Aggiungi a Sessione", cancel: "Annulla", create: "Crea", history: "Cronologia Ascolti", language: "Lingua / Language", premium_desc: "Accesso esclusivo attivo.", countdown_lbl: "Scadenza Offerta (1 Aprile)", status_guest: "Stato: Disconnesso", status_user: "Utente ID:", now_playing: "In Riproduzione", quick_access: "🎧 Accesso Rapido", quick_access_sub: "Riclicca per un nuovo brano.", mood_select: "✨ Mood Select", mood_select_sub: "Scegli la vibe perfetta per il tuo momento.", trending_title: "🔥 I Più Ascoltati", trending_sub: "Una selezione casuale tra tutte le nostre sessioni più popolari.", results: "Risultati:", results_sub: "Brani filtrati in base al mood selezionato.", back_home: "Torna alla Home", cat_cr1_title: "🎄 CR1 - Top Hits", cat_cr1_sub: "I brani pop e le hit che scaldano l'atmosfera.", cat_cr2_title: "🕯️ CR2 - Ballate e Relax", cat_cr2_sub: "Melodie lente e dolci per serate tranquille e romantiche.", cat_cr3_title: "🔔 CR3 - I Classici", cat_cr3_sub: "Le tracce tradizionali sempre attuali.", cat_cr4_title: "❄️ CR4 - Ambient Vibe", cat_cr4_sub: "Musica strumentale e tracce per creare un mood perfetto.", promo_title: "Ryzn Top 4", promo_sub: "RYZN Music Group" },
@@ -524,7 +526,15 @@
         // --- LOGICHE APP COMPLETE ---
         
         function onTrackEnded() {
-            if (isLooping) { audioPlayer.currentTime = 0; audioPlayer.play().catch(e => console.warn("Loop error", e)); } else { skipForward(); }
+            if (isLooping) { 
+                audioPlayer.currentTime = 0; 
+                audioPlayer.play().catch(e => console.warn("Loop error", e)); 
+            } else { 
+                // Se viene chiamato da ended nativo, verifica se non stiamo già transizionando
+                if (!isTransitioning) {
+                    skipForward(); 
+                }
+            }
         }
         function onPlayerPlay() { togglePlayIcon(false); if(playerBar) playerBar.classList.add('active'); }
         function onPlayerPause() { togglePlayIcon(true); updateMediaSession(); }
@@ -659,44 +669,36 @@
         }
         function closeAlbumModal() { document.getElementById('album-modal').classList.add('hidden'); }
 
-        // --- PLAYBACK ENGINE FIX PER IOS (LOAD + PAUSE) ---
+        // --- PLAYBACK ENGINE FIX PER IOS (PRE-END SKIP) ---
         window.playTrack = function(trackId) {
             const track = AURA_MAP.find(t => t.id === trackId);
             if (!track) return;
             
-            // 1. Fermare l'audio precedente
-            audioPlayer.pause();
-            
-            // 2. Aggiornare lo stato
+            // RESET
+            isTransitioning = false; 
             currentTrackData = track;
             updateListeningHistory(trackId);
             
             if (immersiveVideoPlayer) immersiveVideoPlayer.src = '';
             
-            // 3. Assegnare la nuova sorgente
+            // --- FIX CRITICO: Cambio SRC e PLAY immediato ---
             audioPlayer.src = track.audioUrl;
-            audioPlayer.currentTime = 0;
             
-            // 4. FIX: Forzare il caricamento del buffer
-            audioPlayer.load();
-            
-            // 5. Aggiornare metadati (Subito, per il blocco schermo)
+            // Aggiorna subito i metadati per il lock screen
             updateMediaSession();
             
-            // 6. Avviare la riproduzione
             const attemptPlay = audioPlayer.play();
             if (attemptPlay && typeof attemptPlay.catch === 'function') {
                 attemptPlay.then(() => {
                     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
                     if (playerBar) playerBar.classList.add('active');
                 }).catch(e => {
-                    console.error("Playback error:", e);
+                    // Errore silenzioso in background, normale
                     togglePlayIcon(true);
                     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
                 });
             }
             
-            // 7. UI e Video
             if (track.videoUrl && immersiveVideoPlayer) immersiveVideoPlayer.src = track.videoUrl;
             setImmersiveVisual('cover');
             if (track.lrcUrl) loadLyrics(track.lrcUrl); else { currentLyrics = []; updateLyricsUI(); }
@@ -907,7 +909,36 @@
             setupMediaSessionHandlers();
         }
         function handleSeek(e) { if(audioPlayer) { const r = e.currentTarget.getBoundingClientRect(); audioPlayer.currentTime = ((e.clientX - r.left)/r.width) * audioPlayer.duration; } }
-        function updateProgress() { if(audioPlayer && progressBar) progressBar.style.width = (audioPlayer.currentTime/audioPlayer.duration)*100 + '%'; if(progressBarImmersive) progressBarImmersive.style.width = progressBar.style.width; syncLyricsDisplay(); }
+        
+        // --- HACK IOS AGGIORNATO (Pre-End Trigger 0.5s prima della fine) ---
+        function updateProgress() { 
+            if(audioPlayer && progressBar) {
+                const duration = audioPlayer.duration;
+                const currentTime = audioPlayer.currentTime;
+                
+                progressBar.style.width = (currentTime/duration)*100 + '%'; 
+                if(progressBarImmersive) progressBarImmersive.style.width = progressBar.style.width; 
+                
+                // *** CUORE DEL FIX ***
+                // Se mancano meno di 0.5 secondi alla fine (ma siamo ancora > 0)
+                // e NON siamo in pausa, e NON abbiamo ancora avviato la transizione...
+                if (duration > 0 && (duration - currentTime) < 0.5 && !audioPlayer.paused && !isTransitioning) {
+                    console.log("iOS Pre-End Skip Triggered!");
+                    isTransitioning = true; // Blocca chiamate multiple
+                    
+                    // Chiama direttamente il cambio traccia SENZA aspettare 'ended'
+                    if (isLooping) {
+                       audioPlayer.currentTime = 0;
+                       isTransitioning = false; // Reset immediato per loop
+                    } else {
+                       skipForward();
+                    }
+                }
+                
+                syncLyricsDisplay(); 
+            }
+        }
+        
         function updateMediaSession() { 
              if(!currentTrackData || !('mediaSession' in navigator)) return;
              navigator.mediaSession.metadata = new MediaMetadata({ title: currentTrackData.title, artist: currentTrackData.artist, artwork: [{ src: currentTrackData.cover, sizes: '512x512', type: 'image/png' }] });
