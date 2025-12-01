@@ -530,7 +530,8 @@
                 audioPlayer.currentTime = 0; 
                 audioPlayer.play().catch(e => console.warn("Loop error", e)); 
             } else { 
-                // Se viene chiamato da ended nativo, verifica se non stiamo già transizionando
+                // Se arriviamo qui è perché la canzone è finita DAVVERO.
+                // Verifica se non stiamo già transizionando per evitare doppi salti
                 if (!isTransitioning) {
                     skipForward(); 
                 }
@@ -669,40 +670,55 @@
         }
         function closeAlbumModal() { document.getElementById('album-modal').classList.add('hidden'); }
 
-        // --- PLAYBACK ENGINE FIX PER IOS (PRE-END SKIP) ---
+        // --- PLAYBACK ENGINE FIX PER IOS (AUDIO FIRST) ---
         window.playTrack = function(trackId) {
             const track = AURA_MAP.find(t => t.id === trackId);
             if (!track) return;
             
-            // RESET
-            isTransitioning = false; 
-            currentTrackData = track;
-            updateListeningHistory(trackId);
+            isTransitioning = false; // Reset stato transizione
             
-            if (immersiveVideoPlayer) immersiveVideoPlayer.src = '';
-            
-            // --- FIX CRITICO: Cambio SRC e PLAY immediato ---
+            // 1. AUDIO IMMEDIATO (Prima di ogni altra cosa)
             audioPlayer.src = track.audioUrl;
             
-            // Aggiorna subito i metadati per il lock screen
-            updateMediaSession();
+            // 2. Play (Restituisce Promise)
+            const playPromise = audioPlayer.play();
             
-            const attemptPlay = audioPlayer.play();
-            if (attemptPlay && typeof attemptPlay.catch === 'function') {
-                attemptPlay.then(() => {
+            // 3. Gestione Promise Audio
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Audio partito con successo
                     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
                     if (playerBar) playerBar.classList.add('active');
-                }).catch(e => {
-                    // Errore silenzioso in background, normale
+                    
+                    // Ora possiamo fare le cose pesanti in sicurezza
+                    postPlayUpdates(track);
+                })
+                .catch(error => {
+                    console.error("Playback failed:", error);
                     togglePlayIcon(true);
-                    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
                 });
+            } else {
+                // Fallback per browser vecchi
+                postPlayUpdates(track);
             }
+        }
+        
+        // Funzione separata per aggiornamenti UI/Dati (non blocca l'audio)
+        function postPlayUpdates(track) {
+            currentTrackData = track;
             
+            // Update History e Storage (potenzialmente lenti)
+            updateListeningHistory(track.id); 
+            
+            // Update UI
+            if (immersiveVideoPlayer) immersiveVideoPlayer.src = '';
             if (track.videoUrl && immersiveVideoPlayer) immersiveVideoPlayer.src = track.videoUrl;
             setImmersiveVisual('cover');
+            
             if (track.lrcUrl) loadLyrics(track.lrcUrl); else { currentLyrics = []; updateLyricsUI(); }
+            
             updateUI(track);
+            updateMediaSession(); // Aggiorna lockscreen
         }
 
         // UI Helpers
@@ -919,7 +935,7 @@
                 progressBar.style.width = (currentTime/duration)*100 + '%'; 
                 if(progressBarImmersive) progressBarImmersive.style.width = progressBar.style.width; 
                 
-                // *** CUORE DEL FIX ***
+                // *** CUORE DEL FIX: Pre-End Skip ***
                 // Se mancano meno di 0.5 secondi alla fine (ma siamo ancora > 0)
                 // e NON siamo in pausa, e NON abbiamo ancora avviato la transizione...
                 if (duration > 0 && (duration - currentTime) < 0.5 && !audioPlayer.paused && !isTransitioning) {
