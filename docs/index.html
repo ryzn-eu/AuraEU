@@ -14,6 +14,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
         /* Variabili di Tema Dinamiche */
         :root {
@@ -329,6 +331,57 @@
             <button onclick="closeAddToPlaylistModal()" class="absolute top-3 right-3 text-gray-400 hover:text-white transition"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
     </div>
+    
+    <div id="share-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[160] hidden flex items-center justify-center p-4 modal">
+        <div class="depth-glass bg-ryzn-bg p-6 rounded-3xl w-full max-w-sm shadow-2xl relative flex flex-col items-center">
+            <h3 class="text-xl font-bold mb-6 accent-text">Condividi Vibe</h3>
+            
+            <div id="share-preview-container" class="w-full aspect-[4/5] rounded-xl overflow-hidden shadow-2xl mb-6 relative group cursor-pointer transform transition hover:scale-[1.02]">
+                <div id="share-card-content" class="w-full h-full p-6 flex flex-col justify-between relative bg-gradient-to-br from-gray-900 to-black">
+                    <div id="share-card-bg" class="absolute inset-0 opacity-40 mix-blend-overlay bg-cover bg-center"></div>
+                    
+                    <div class="relative z-10 flex justify-between items-center opacity-80">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+                            <span class="text-xs font-bold tracking-widest uppercase text-white">Aura Music</span>
+                        </div>
+                    </div>
+
+                    <div class="relative z-10 self-center w-40 h-40 sm:w-48 sm:h-48 shadow-2xl my-4">
+                        <img id="share-card-cover" src="" class="w-full h-full object-cover rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.5)]" crossorigin="anonymous">
+                    </div>
+
+                    <div class="relative z-10 mt-auto">
+                        <h2 id="share-card-title" class="text-2xl font-black text-white leading-tight mb-1 drop-shadow-md line-clamp-2">Titolo</h2>
+                        <p id="share-card-artist" class="text-lg text-gray-200 font-medium drop-shadow-sm">Artista</p>
+                        
+                        <div class="flex items-end gap-1 h-6 mt-4 opacity-70">
+                            <div class="w-1 bg-white h-3 rounded-full"></div>
+                            <div class="w-1 bg-white h-6 rounded-full"></div>
+                            <div class="w-1 bg-white h-4 rounded-full"></div>
+                            <div class="w-1 bg-white h-full rounded-full"></div>
+                            <div class="w-1 bg-white h-5 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 w-full">
+                <button onclick="downloadShareImage()" class="p-4 bg-white/10 hover:bg-white/20 rounded-xl flex flex-col items-center justify-center gap-2 transition group">
+                    <i data-lucide="download" class="w-6 h-6 text-white group-hover:scale-110 transition"></i>
+                    <span class="text-xs font-medium text-gray-300">Salva Immagine</span>
+                </button>
+                <button onclick="shareNativeLink()" class="p-4 accent-bg rounded-xl flex flex-col items-center justify-center gap-2 accent-hover transition shadow-lg shadow-ryzn-accent/20">
+                    <i data-lucide="share-2" class="w-6 h-6 text-white"></i>
+                    <span class="text-xs font-bold text-white">Condividi Link</span>
+                </button>
+            </div>
+
+            <button onclick="closeShareModal()" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-white transition rounded-full hover:bg-white/10">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </div>
 
     <div id="immersive-mode" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[150] hidden flex flex-col items-center justify-center p-6 modal overflow-y-auto">
         <div class="absolute top-6 left-6 flex items-center space-x-4 z-10">
@@ -450,6 +503,11 @@
         <div class="flex items-center justify-end space-x-4 w-1/3">
             <button id="switch-to-video-pip" onclick="event.stopPropagation(); enterImmersiveMode('video')" class="text-white/50 hover:text-white transition hidden"><i data-lucide="monitor-dot" class="w-5 h-5"></i></button>
             <button id="add-to-playlist-button" onclick="event.stopPropagation(); openAddToPlaylistModal()" class="text-white/50 hover:text-white transition"><i data-lucide="list-plus" class="w-5 h-5"></i></button>
+            
+            <button onclick="event.stopPropagation(); openShareModal()" class="text-white/50 hover:text-white transition">
+                <i data-lucide="share-2" class="w-5 h-5"></i>
+            </button>
+            
             <button id="like-button" onclick="event.stopPropagation(); toggleLike()" class="text-white/50 hover:text-red-400 transition"><i data-lucide="heart" class="w-5 h-5 fill-current"></i></button>
         </div>
         <div id="progress-bar-container" class="absolute bottom-0 left-0 w-full h-1 bg-transparent cursor-pointer"><div id="progress-bar" class="h-1 accent-bg" style="width: 0;"></div></div>
@@ -885,6 +943,96 @@
             else if(sid==='playlists') renderPlaylists();
             else if(sid==='profile') renderHistory();
             updateLanguageUI();
+        }
+        
+        // --- FUNZIONI SHARE (CONDIVISIONE) ---
+        function openShareModal() {
+            if (!currentTrackData) return;
+
+            // Popola i dati della card
+            document.getElementById('share-card-title').innerText = currentTrackData.title;
+            document.getElementById('share-card-artist').innerText = currentTrackData.artist;
+            
+            // Gestione Immagine (Cross-Origin è importante per html2canvas)
+            const coverImg = document.getElementById('share-card-cover');
+            coverImg.crossOrigin = "anonymous";
+            coverImg.src = currentTrackData.cover;
+
+            // Gestione Colori Sfondo (Usa il colore della traccia o fallback)
+            const cardContent = document.getElementById('share-card-content');
+            const color = currentTrackData.color || '#555';
+            // Crea un gradiente basato sul colore della vibe
+            cardContent.style.background = `linear-gradient(135deg, ${color} 0%, #000000 100%)`;
+            
+            // Mostra il modale
+            document.getElementById('share-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeShareModal() {
+            document.getElementById('share-modal').classList.add('hidden');
+        }
+
+        function downloadShareImage() {
+            const element = document.getElementById('share-card-content');
+            const btnIcon = document.querySelector('button[onclick="downloadShareImage()"] i');
+            
+            // Feedback visivo loading
+            const originalIcon = btnIcon.getAttribute('data-lucide');
+            btnIcon.setAttribute('data-lucide', 'loader-2');
+            btnIcon.classList.add('animate-spin');
+            lucide.createIcons();
+
+            // Generazione Canvas
+            html2canvas(element, {
+                useCORS: true, // Fondamentale per le immagini esterne
+                scale: 2, // Migliore qualità (Retina)
+                backgroundColor: null
+            }).then(canvas => {
+                // Crea link download
+                const link = document.createElement('a');
+                link.download = `Aura_Share_${currentTrackData.title.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // Reset Icona
+                btnIcon.classList.remove('animate-spin');
+                btnIcon.setAttribute('data-lucide', 'check');
+                lucide.createIcons();
+                setTimeout(() => {
+                    btnIcon.setAttribute('data-lucide', 'download');
+                    lucide.createIcons();
+                }, 2000);
+            }).catch(err => {
+                console.error("Errore generazione immagine:", err);
+                showToast("Errore creazione immagine");
+                btnIcon.classList.remove('animate-spin');
+                btnIcon.setAttribute('data-lucide', 'alert-circle');
+                lucide.createIcons();
+            });
+        }
+
+        async function shareNativeLink() {
+            if (!currentTrackData) return;
+            
+            // Link simulato
+            const shareData = {
+                title: `Ascolta ${currentTrackData.title} su Aura`,
+                text: `Sto ascoltando "${currentTrackData.title}" di ${currentTrackData.artist}. Vibe: ${currentTrackData.vibe}/100.`,
+                url: window.location.href
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    // Fallback copia appunti
+                    await navigator.clipboard.writeText(`${shareData.text} \n${shareData.url}`);
+                    showToast("Link copiato negli appunti!");
+                }
+            } catch (err) {
+                console.log('Share chiuso o errore:', err);
+            }
         }
 
         // Utils
