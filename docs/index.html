@@ -69,6 +69,23 @@
             50% { transform: translateY(-5px); }
         }
         .floating-icon { animation: floatIcon 3s ease-in-out infinite; }
+        
+        /* Animazione Waveform per Share Card */
+        @keyframes soundWave {
+            0% { height: 20%; }
+            50% { height: 100%; }
+            100% { height: 20%; }
+        }
+        .wave-bar {
+            background-color: white;
+            border-radius: 999px;
+            animation: soundWave 1s ease-in-out infinite;
+        }
+        .wave-bar:nth-child(1) { animation-duration: 0.8s; height: 40%; }
+        .wave-bar:nth-child(2) { animation-duration: 1.2s; height: 80%; }
+        .wave-bar:nth-child(3) { animation-duration: 0.9s; height: 50%; }
+        .wave-bar:nth-child(4) { animation-duration: 1.1s; height: 90%; }
+        .wave-bar:nth-child(5) { animation-duration: 0.7s; height: 60%; }
 
         .logo-aura { font-size: 2.5rem; font-weight: 900; }
         .logo-text {
@@ -355,12 +372,12 @@
                         <h2 id="share-card-title" class="text-2xl font-black text-white leading-tight mb-1 drop-shadow-md line-clamp-2">Titolo</h2>
                         <p id="share-card-artist" class="text-lg text-gray-200 font-medium drop-shadow-sm">Artista</p>
                         
-                        <div class="flex items-end gap-1 h-6 mt-4 opacity-70">
-                            <div class="w-1 bg-white h-3 rounded-full"></div>
-                            <div class="w-1 bg-white h-6 rounded-full"></div>
-                            <div class="w-1 bg-white h-4 rounded-full"></div>
-                            <div class="w-1 bg-white h-full rounded-full"></div>
-                            <div class="w-1 bg-white h-5 rounded-full"></div>
+                        <div class="flex items-end gap-1 h-8 mt-4 opacity-80">
+                            <div class="w-1.5 wave-bar"></div>
+                            <div class="w-1.5 wave-bar"></div>
+                            <div class="w-1.5 wave-bar"></div>
+                            <div class="w-1.5 wave-bar"></div>
+                            <div class="w-1.5 wave-bar"></div>
                         </div>
                     </div>
                 </div>
@@ -369,11 +386,11 @@
             <div class="grid grid-cols-2 gap-3 w-full">
                 <button onclick="downloadShareImage()" class="p-4 bg-white/10 hover:bg-white/20 rounded-xl flex flex-col items-center justify-center gap-2 transition group">
                     <i data-lucide="download" class="w-6 h-6 text-white group-hover:scale-110 transition"></i>
-                    <span class="text-xs font-medium text-gray-300">Salva Immagine</span>
+                    <span class="text-xs font-medium text-gray-300">Scarica Img</span>
                 </button>
-                <button onclick="shareNativeLink()" class="p-4 accent-bg rounded-xl flex flex-col items-center justify-center gap-2 accent-hover transition shadow-lg shadow-ryzn-accent/20">
-                    <i data-lucide="share-2" class="w-6 h-6 text-white"></i>
-                    <span class="text-xs font-bold text-white">Condividi Link</span>
+                <button onclick="shareCanvasNative()" class="p-4 accent-bg rounded-xl flex flex-col items-center justify-center gap-2 accent-hover transition shadow-lg shadow-ryzn-accent/20">
+                    <i data-lucide="instagram" class="w-6 h-6 text-white"></i>
+                    <span class="text-xs font-bold text-white">Condividi Storia</span>
                 </button>
             </div>
 
@@ -975,64 +992,56 @@
 
         function downloadShareImage() {
             const element = document.getElementById('share-card-content');
-            const btnIcon = document.querySelector('button[onclick="downloadShareImage()"] i');
             
-            // Feedback visivo loading
-            const originalIcon = btnIcon.getAttribute('data-lucide');
-            btnIcon.setAttribute('data-lucide', 'loader-2');
-            btnIcon.classList.add('animate-spin');
-            lucide.createIcons();
-
             // Generazione Canvas
             html2canvas(element, {
-                useCORS: true, // Fondamentale per le immagini esterne
-                scale: 2, // Migliore qualità (Retina)
-                backgroundColor: null
+                useCORS: true, 
+                scale: 2, 
+                backgroundColor: null,
+                // Nota: html2canvas ignora le animazioni CSS, quindi la card sarà statica
             }).then(canvas => {
-                // Crea link download
                 const link = document.createElement('a');
                 link.download = `Aura_Share_${currentTrackData.title.replace(/\s+/g, '_')}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                
-                // Reset Icona
-                btnIcon.classList.remove('animate-spin');
-                btnIcon.setAttribute('data-lucide', 'check');
-                lucide.createIcons();
-                setTimeout(() => {
-                    btnIcon.setAttribute('data-lucide', 'download');
-                    lucide.createIcons();
-                }, 2000);
             }).catch(err => {
                 console.error("Errore generazione immagine:", err);
                 showToast("Errore creazione immagine");
-                btnIcon.classList.remove('animate-spin');
-                btnIcon.setAttribute('data-lucide', 'alert-circle');
-                lucide.createIcons();
             });
         }
-
-        async function shareNativeLink() {
-            if (!currentTrackData) return;
+        
+        // Funzione per condividere l'immagine direttamente su Instagram/Social (se supportato)
+        function shareCanvasNative() {
+            const element = document.getElementById('share-card-content');
             
-            // Link simulato
-            const shareData = {
-                title: `Ascolta ${currentTrackData.title} su Aura`,
-                text: `Sto ascoltando "${currentTrackData.title}" di ${currentTrackData.artist}. Vibe: ${currentTrackData.vibe}/100.`,
-                url: window.location.href
-            };
-
-            try {
-                if (navigator.share) {
-                    await navigator.share(shareData);
-                } else {
-                    // Fallback copia appunti
-                    await navigator.clipboard.writeText(`${shareData.text} \n${shareData.url}`);
-                    showToast("Link copiato negli appunti!");
-                }
-            } catch (err) {
-                console.log('Share chiuso o errore:', err);
-            }
+            html2canvas(element, {
+                useCORS: true, 
+                scale: 2, 
+                backgroundColor: null
+            }).then(canvas => {
+                canvas.toBlob(async (blob) => {
+                    if (!blob) return;
+                    
+                    const file = new File([blob], "aura_story.png", { type: "image/png" });
+                    
+                    // Controlla se il browser supporta la condivisione di file
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Aura Music Vibe',
+                                text: `Ascolta ${currentTrackData.title} su Aura Music.`
+                            });
+                        } catch (err) {
+                            console.log("Condivisione annullata o fallita", err);
+                        }
+                    } else {
+                        // Fallback: Scarica l'immagine se la condivisione nativa non va
+                        showToast("Condivisione diretta non supportata. Scarico immagine...");
+                        downloadShareImage();
+                    }
+                }, 'image/png');
+            });
         }
 
         // Utils
@@ -1084,13 +1093,10 @@
                 if(progressBarImmersive) progressBarImmersive.style.width = progressBar.style.width; 
                 
                 // *** CUORE DEL FIX: Pre-End Skip ***
-                // Se mancano meno di 0.5 secondi alla fine (ma siamo ancora > 0)
-                // e NON siamo in pausa, e NON abbiamo ancora avviato la transizione...
                 if (duration > 0 && (duration - currentTime) < 0.5 && !audioPlayer.paused && !isTransitioning) {
                     console.log("iOS Pre-End Skip Triggered!");
                     isTransitioning = true; // Blocca chiamate multiple
                     
-                    // Chiama direttamente il cambio traccia SENZA aspettare 'ended'
                     if (isLooping) {
                        audioPlayer.currentTime = 0;
                        isTransitioning = false; // Reset immediato per loop
@@ -1103,11 +1109,19 @@
             }
         }
         
+        // --- MEDIA SESSION BLINDATA (Solo Logo) ---
         function updateMediaSession() { 
-             if(!currentTrackData || !('mediaSession' in navigator)) return;
-             navigator.mediaSession.metadata = new MediaMetadata({ title: currentTrackData.title, artist: currentTrackData.artist, artwork: [{ src: currentTrackData.cover, sizes: '512x512', type: 'image/png' }] });
+             if(!('mediaSession' in navigator)) return;
+             // USIAMO DATI STATICI PER EVITARE BUG NEL CAMBIO TRACCIA IN BACKGROUND
+             navigator.mediaSession.metadata = new MediaMetadata({ 
+                 title: "Aura Player", 
+                 artist: "Ryzn Music Group", 
+                 // Logo statico ad alta risoluzione o fallback
+                 artwork: [{ src: "https://via.placeholder.com/512x512/171717/00BFFF?text=AURA", sizes: '512x512', type: 'image/png' }] 
+             });
              navigator.mediaSession.playbackState = !audioPlayer.paused ? 'playing' : 'paused';
         }
+        
         function setupMediaSessionHandlers() { 
             if('mediaSession' in navigator) {
                 navigator.mediaSession.setActionHandler('play', ()=>audioPlayer.play());
