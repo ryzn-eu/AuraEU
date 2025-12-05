@@ -13,8 +13,9 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script src="./media-controller.js"></script>
     
     <style>
         /* Variabili di Tema Dinamiche */
@@ -961,7 +962,7 @@
             else if(sid==='profile') renderHistory();
             updateLanguageUI();
         }
-        
+
         // --- FUNZIONI SHARE (CONDIVISIONE) ---
         function openShareModal() {
             if (!currentTrackData) return;
