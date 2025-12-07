@@ -4,9 +4,9 @@
   "display": "standalone",
   "name": "Aura.horizon",
   "orientation": "any",
-  "scope": "/",
+  "scope": "/AuraEU/",
   "short_name": "Aura",
-  "start_url": "/",
+  "start_url": "/AuraEU/",
   "theme_color": "#000000",
   "description": "By Horizon",
   "icons": [
