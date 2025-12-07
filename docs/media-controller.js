@@ -47,9 +47,17 @@ class AuraMediaController {
         // Questi handler chiamano le funzioni globali definite in index.html
         // Usiamo window.functionName per collegarci al codice principale
         
+        // 1. DISABILITIAMO ESPLICITAMENTE Play e Pause nel sistema in background
+        // Impostandoli a null, i bottoni verranno disabilitati o nascosti nel control center
+        try {
+            navigator.mediaSession.setActionHandler('play', null);
+            navigator.mediaSession.setActionHandler('pause', null);
+        } catch (error) {
+            console.log("Play/Pause disable not supported");
+        }
+
+        // 2. Manteniamo attivi solo Skip e Seek
         const actions = [
-            ['play', () => { if(window.togglePlayPause) window.togglePlayPause(); }],
-            ['pause', () => { if(window.togglePlayPause) window.togglePlayPause(); }],
             ['previoustrack', () => { if(window.skipBackward) window.skipBackward(); }],
             ['nexttrack', () => { if(window.skipForward) window.skipForward(); }],
             ['seekto', (details) => { 
