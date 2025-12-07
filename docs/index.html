@@ -273,8 +273,15 @@
                 blocker.classList.remove('hidden'); document.body.style.overflow = 'hidden';
             }
         }
-        function forceRecheckPWA() { document.getElementById('install-blocker').classList.add('hidden'); document.body.style.overflow = 'auto'; }
+        
+        // FIX GATEKEEPER: Se l'utente clicca ma è nel browser, ricarica e il blocco torna.
+        function forceRecheckPWA() { 
+            window.location.reload();
+        }
+        
         window.addEventListener('load', checkPWAStatus);
+        // Aggiunta per compatibilità iOS cache
+        window.addEventListener('pageshow', checkPWAStatus);
 
         // --- CORE FUNCTIONS ---
         
