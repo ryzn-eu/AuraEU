@@ -57,7 +57,7 @@
 
         /* LOGO STYLE */
         .logo-aura { font-size: 2.5rem; font-weight: 900; }
-        .logo-text { background: linear-gradient(45deg, var(--ryzn-color-hex), #B3E0FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-fill-color: transparent; }
+        /* Rimosso il logo-text gradient style perché non serve più */
     </style>
 </head>
 <body class="ryzn-bg">
@@ -130,9 +130,8 @@
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center space-x-8">
                 <a href="#" onclick="showSection('music')" class="cursor-pointer">
-                    <h1 class="logo-aura flex items-center space-x-2">
-                        <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="w-10 h-10 object-contain" alt="Aura">
-                        <span class="logo-text">Aura</span>
+                    <h1 class="logo-aura flex items-center">
+                        <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="h-10 w-auto object-contain" alt="Aura">
                     </h1>
                 </a>
                 <nav class="hidden sm:flex space-x-6 text-gray-400 text-lg font-medium"><button id="nav-music" onclick="showSection('music')" class="nav-item hover:accent-text transition pb-1">Scopri</button></nav>
