@@ -16,7 +16,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
-        /* STILI BASE - Nessuna modifica necessaria qui */
+        /* STILI BASE */
         :root { --ryzn-color-hex: #00BFFF; --ryzn-color-rgb: 0 191 255; --ryzn-bg-color: #171717; }
         .ryzn-bg { background-color: var(--ryzn-bg-color); }
         .accent-text { color: var(--ryzn-color-hex); }
@@ -40,15 +40,24 @@
         .title-wrapper { overflow: hidden; white-space: nowrap; } .marquee { display: inline-block; animation: marquee 10s linear infinite; padding-left: 100%; animation-play-state: paused; } .title-wrapper.is-long .marquee { animation-play-state: running; } @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
         .horizontal-scroll { display: flex; overflow-x: auto; padding-bottom: 1rem; gap: 1rem; scrollbar-width: thin; } .horizontal-widget-item { flex: 0 0 160px; width: 160px; }
         .promo-banner { background: linear-gradient(135deg, #00BFFF 0%, #005C53 100%); border-radius: 24px; padding: 24px; margin-bottom: 40px; }
+        
+        /* TESTI (LYRICS) STYLES */
         .lyrics-container-spotify { width: 100%; height: 180px; overflow-y: auto; padding: 10px 0; text-align: center; margin-top: 20px; mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); scrollbar-width: none; }
         .lyric-line { font-size: 1.1rem; line-height: 1.6; color: rgba(255, 255, 255, 0.4); margin-bottom: 12px; transition: all 0.4s; cursor: pointer; padding: 4px 10px; border-radius: 8px; } .lyric-line.active { color: #ffffff; transform: scale(1.08); font-weight: 800; }
+        
+        /* PWA INSTALL BLOCKER */
         #install-blocker { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(15px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; transition: opacity 0.3s ease; }
         #install-blocker.hidden { display: none !important; opacity: 0; pointer-events: none; }
         .install-arrow { animation: bounce 2s infinite; } @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
-        /* Wave bar animation for Share Card */
+        
+        /* Wave bar animation */
         @keyframes soundWave { 0% { height: 20%; } 50% { height: 100%; } 100% { height: 20%; } }
         .wave-bar { background-color: white; border-radius: 999px; animation: soundWave 1s ease-in-out infinite; }
         .wave-bar:nth-child(1) { animation-duration: 0.8s; height: 40%; } .wave-bar:nth-child(2) { animation-duration: 1.2s; height: 80%; } .wave-bar:nth-child(3) { animation-duration: 0.9s; height: 50%; } .wave-bar:nth-child(4) { animation-duration: 1.1s; height: 90%; } .wave-bar:nth-child(5) { animation-duration: 0.7s; height: 60%; }
+
+        /* LOGO STYLE */
+        .logo-aura { font-size: 2.5rem; font-weight: 900; }
+        .logo-text { background: linear-gradient(45deg, var(--ryzn-color-hex), #B3E0FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-fill-color: transparent; }
     </style>
 </head>
 <body class="ryzn-bg">
@@ -119,7 +128,15 @@
     
     <div class="container-app">
         <header class="flex justify-between items-center mb-8">
-            <div class="flex items-center space-x-8"><a href="#" onclick="showSection('music')" class="cursor-pointer"><h1 class="logo-aura flex items-center space-x-2"><i data-lucide="sparkles" class="w-7 h-7 accent-text fill-ryzn-accent/30"></i><span class="logo-text">Aura</span></h1></a><nav class="hidden sm:flex space-x-6 text-gray-400 text-lg font-medium"><button id="nav-music" onclick="showSection('music')" class="nav-item hover:accent-text transition pb-1">Scopri</button></nav></div>
+            <div class="flex items-center space-x-8">
+                <a href="#" onclick="showSection('music')" class="cursor-pointer">
+                    <h1 class="logo-aura flex items-center space-x-2">
+                        <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="w-10 h-10 object-contain" alt="Aura">
+                        <span class="logo-text">Aura</span>
+                    </h1>
+                </a>
+                <nav class="hidden sm:flex space-x-6 text-gray-400 text-lg font-medium"><button id="nav-music" onclick="showSection('music')" class="nav-item hover:accent-text transition pb-1">Scopri</button></nav>
+            </div>
             <div class="flex items-center space-x-3">
                  <button onclick="showSection('playlists')" class="p-2 depth-glass rounded-full text-white hover:bg-white/10 transition"><i data-lucide="list-music" class="w-6 h-6"></i></button>
                  <button onclick="showSection('library')" class="p-2 depth-glass rounded-full text-white hover:bg-white/10 transition"><i data-lucide="heart" class="w-6 h-6 fill-current"></i></button>
@@ -143,7 +160,15 @@
                     <div id="vibe-score-display" class="text-xl accent-text font-bold">Vibe Score: 0/100</div>
                     <div class="pt-4 border-t border-white/10">
                         <label class="block text-gray-400 text-sm mb-2" id="txt-language-label">Lingua</label>
-                        <select id="language-selector" onchange="changeLanguage(this.value)" class="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white"><option value="it">Italiano 🇮🇹</option><option value="en">English 🇬🇧</option></select>
+                        <select id="language-selector" onchange="changeLanguage(this.value)" class="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white">
+                            <option value="it">Italiano 🇮🇹</option>
+                            <option value="en">English 🇬🇧</option>
+                            <option value="ro">Română 🇷🇴</option>
+                            <option value="de">Deutsch 🇩🇪</option>
+                            <option value="es">Español 🇪🇸</option>
+                            <option value="ru">Русский 🇷🇺</option>
+                            <option value="ar">العربية 🇸🇦</option>
+                        </select>
                     </div>
                     <button id="btn-logout" onclick="handleLogout()" class="w-full px-4 py-3 bg-red-600/80 hover:bg-red-600 border border-red-500/30 rounded-lg text-white font-bold transition flex items-center justify-center gap-2 mt-4"><i data-lucide="log-out" class="w-5 h-5"></i><span id="txt-logout-btn">Esci</span></button>
                 </div>
@@ -192,12 +217,20 @@
         
         let isTransitioning = false; 
 
-        const TRANSLATIONS={it:{greeting_m:"Buongiorno.",greeting_a:"Buon Pomeriggio.",greeting_e:"Buonasera.",vibe_ready:"La tua Vibe è pronta.",discover:"Scopri",sessions:"Le Tue Sessioni",saved_tracks:"I Tuoi Brani Salvati",profile:"Profilo Utente",login_btn:"Accedi con questo dispositivo",logout_btn:"Disconnetti",search_ph:"Cerca...",create_session:"Crea Sessione",create_session_modal:"Crea Nuova Sessione",add_session:"Aggiungi a Sessione",cancel:"Annulla",create:"Crea",history:"Cronologia Ascolti",language:"Lingua",premium_desc:"Accesso esclusivo attivo.",countdown_lbl:"Scadenza Offerta (1 Aprile)",status_guest:"Stato: Disconnesso",status_user:"Utente ID:",now_playing:"In Riproduzione",quick_access:"🎧 Accesso Rapido",quick_access_sub:"Riclicca per un nuovo brano.",mood_select:"✨ Mood Select",mood_select_sub:"Scegli la vibe perfetta.",trending_title:"🔥 I Più Ascoltati",trending_sub:"Selezione casuale.",results:"Risultati:",results_sub:"Brani filtrati.",back_home:"Torna alla Home",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Hit atmosfera.",cat_cr2_title:"🕯️ CR2 - Ballate e Relax",cat_cr2_sub:"Melodie lente.",cat_cr3_title:"🔔 CR3 - I Classici",cat_cr3_sub:"Tracce tradizionali.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Musica strumentale.",promo_title:"Ryzn Top 4",promo_sub:"RYZN Music Group"},en:{greeting_m:"Good Morning.",greeting_a:"Good Afternoon.",greeting_e:"Good Evening.",vibe_ready:"Your Vibe is ready.",discover:"Discover",sessions:"Your Sessions",saved_tracks:"Saved Tracks",profile:"User Profile",login_btn:"Login with this device",logout_btn:"Logout",search_ph:"Search...",create_session:"Create Session",create_session_modal:"New Session",add_session:"Add to Session",cancel:"Cancel",create:"Create",history:"Listening History",language:"Language",premium_desc:"Exclusive access active.",countdown_lbl:"Offer Expires (April 1st)",status_guest:"Status: Guest",status_user:"User ID:",now_playing:"Now Playing",quick_access:"🎧 Quick Access",quick_access_sub:"Click again.",mood_select:"✨ Mood Select",mood_select_sub:"Choose vibe.",trending_title:"🔥 Trending Now",trending_sub:"Random selection.",results:"Results:",results_sub:"Filtered tracks.",back_home:"Back to Home",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Pop songs.",cat_cr2_title:"🕯️ CR2 - Ballads & Relax",cat_cr2_sub:"Slow melodies.",cat_cr3_title:"🔔 CR3 - Classics",cat_cr3_sub:"Traditional tracks.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumental music.",promo_title:"Ryzn Top 4",promo_sub:"RYZN Music Group"}};
+        const TRANSLATIONS={
+            it:{greeting_m:"Buongiorno.",greeting_a:"Buon Pomeriggio.",greeting_e:"Buonasera.",vibe_ready:"La tua Vibe è pronta.",discover:"Scopri",sessions:"Le Tue Sessioni",saved_tracks:"I Tuoi Brani Salvati",profile:"Profilo Utente",login_btn:"Accedi con questo dispositivo",logout_btn:"Disconnetti",search_ph:"Cerca...",create_session:"Crea Sessione",create_session_modal:"Crea Nuova Sessione",add_session:"Aggiungi a Sessione",cancel:"Annulla",create:"Crea",history:"Cronologia Ascolti",language:"Lingua",premium_desc:"Accesso esclusivo attivo.",countdown_lbl:"Scadenza Offerta (1 Aprile)",status_guest:"Stato: Disconnesso",status_user:"Utente ID:",now_playing:"In Riproduzione",quick_access:"🎧 Accesso Rapido",quick_access_sub:"Riclicca per un nuovo brano.",mood_select:"✨ Mood Select",mood_select_sub:"Scegli la vibe perfetta.",trending_title:"🔥 I Più Ascoltati",trending_sub:"Selezione casuale.",results:"Risultati:",results_sub:"Brani filtrati.",back_home:"Torna alla Home",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Hit atmosfera.",cat_cr2_title:"🕯️ CR2 - Ballate e Relax",cat_cr2_sub:"Melodie lente.",cat_cr3_title:"🔔 CR3 - I Classici",cat_cr3_sub:"Tracce tradizionali.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Musica strumentale.",promo_title:"Ryzn Top 4",promo_sub:"RYZN Music Group"},
+            en:{greeting_m:"Good Morning.",greeting_a:"Good Afternoon.",greeting_e:"Good Evening.",vibe_ready:"Your Vibe is ready.",discover:"Discover",sessions:"Your Sessions",saved_tracks:"Saved Tracks",profile:"User Profile",login_btn:"Login with this device",logout_btn:"Logout",search_ph:"Search...",create_session:"Create Session",create_session_modal:"New Session",add_session:"Add to Session",cancel:"Cancel",create:"Create",history:"Listening History",language:"Language",premium_desc:"Exclusive access active.",countdown_lbl:"Offer Expires (April 1st)",status_guest:"Status: Guest",status_user:"User ID:",now_playing:"Now Playing",quick_access:"🎧 Quick Access",quick_access_sub:"Click again.",mood_select:"✨ Mood Select",mood_select_sub:"Choose vibe.",trending_title:"🔥 Trending Now",trending_sub:"Random selection.",results:"Results:",results_sub:"Filtered tracks.",back_home:"Back to Home",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Pop songs.",cat_cr2_title:"🕯️ CR2 - Ballads & Relax",cat_cr2_sub:"Slow melodies.",cat_cr3_title:"🔔 CR3 - Classics",cat_cr3_sub:"Traditional tracks.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumental music.",promo_title:"Ryzn Top 4",promo_sub:"RYZN Music Group"},
+            ro:{greeting_m:"Bună dimineața.",greeting_a:"Bună ziua.",greeting_e:"Bună seara.",vibe_ready:"Vibe-ul tău este gata.",discover:"Descoperă",sessions:"Sesiunile Tale",saved_tracks:"Melodii Salvate",profile:"Profil Utilizator",login_btn:"Autentificare cu acest dispozitiv",logout_btn:"Deconectare",search_ph:"Căutare...",create_session:"Creează Sesiune",create_session_modal:"Sesiune Nouă",add_session:"Adaugă la Sesiune",cancel:"Anulare",create:"Creează",history:"Istoric Ascultare",language:"Limbă",premium_desc:"Acces exclusiv activ.",countdown_lbl:"Oferta Expiră (1 Aprilie)",status_guest:"Stare: Oaspete",status_user:"Utilizator ID:",now_playing:"Acum Redă",quick_access:"🎧 Acces Rapid",quick_access_sub:"Click din nou pentru o melodie nouă.",mood_select:"✨ Selectare Mood",mood_select_sub:"Alege vibrația perfectă pentru momentul tău.",trending_title:"🔥 Cele mai ascultate",trending_sub:"O selecție aleatorie din cele mai populare sesiuni.",results:"Rezultate:",results_sub:"Melodii filtrate după starea selectată.",back_home:"Înapoi la Acasă",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Melodii pop și hituri pentru a încălzi atmosfera.",cat_cr2_title:"🕯️ CR2 - Balade și Relaxare",cat_cr2_sub:"Melodii lente și dulci pentru seri liniștite și romantice.",cat_cr3_title:"🔔 CR3 - Clasice",cat_cr3_sub:"Piese tradiționale care sunt mereu actuale.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Muzică instrumentală pentru a crea starea perfectă.",promo_title:"Ryzn Top 4",promo_sub:"Grupul Muzical RYZN"},
+            de:{greeting_m:"Guten Morgen.",greeting_a:"Guten Tag.",greeting_e:"Guten Abend.",vibe_ready:"Dein Vibe ist bereit.",discover:"Entdecken",sessions:"Deine Sessions",saved_tracks:"Gespeicherte Titel",profile:"Benutzerprofil",login_btn:"Mit diesem Gerät anmelden",logout_btn:"Abmelden",search_ph:"Suchen...",create_session:"Session erstellen",create_session_modal:"Neue Session",add_session:"Zur Session hinzufügen",cancel:"Abbrechen",create:"Erstellen",history:"Hörverlauf",language:"Sprache",premium_desc:"Exklusiver Zugang aktiv.",countdown_lbl:"Angebot endet (1. April)",status_guest:"Status: Gast",status_user:"Benutzer ID:",now_playing:"Jetzt läuft",quick_access:"🎧 Schnellzugriff",quick_access_sub:"Klicken Sie erneut für einen neuen Titel.",mood_select:"✨ Stimmungswahl",mood_select_sub:"Wähle den perfekten Vibe für deinen Moment.",trending_title:"🔥 Beliebt",trending_sub:"Eine zufällige Auswahl aus unseren beliebtesten Sessions.",results:"Ergebnisse:",results_sub:"Titel gefiltert nach ausgewählter Stimmung.",back_home:"Zurück zur Startseite",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Popsongs und Hits, um die Atmosphäre aufzuwärmen.",cat_cr2_title:"🕯️ CR2 - Balladen & Entspannung",cat_cr2_sub:"Langsame, süße Melodien für ruhige romantische Abende.",cat_cr3_title:"🔔 CR3 - Klassiker",cat_cr3_sub:"Traditionelle Titel, die immer aktuell sind.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumentalmusik für die perfekte Stimmung.",promo_title:"Ryzn Top 4",promo_sub:"RYZN Music Group"},
+            es:{greeting_m:"Buenos días.",greeting_a:"Buenas tardes.",greeting_e:"Buenas noches.",vibe_ready:"Tu Vibe está lista.",discover:"Descubrir",sessions:"Tus Sesiones",saved_tracks:"Canciones Guardadas",profile:"Perfil de Usuario",login_btn:"Acceder con este dispositivo",logout_btn:"Cerrar sesión",search_ph:"Buscar...",create_session:"Crear Sesión",create_session_modal:"Nueva Sesión",add_session:"Añadir a Sesión",cancel:"Cancelar",create:"Crear",history:"Historial de escucha",language:"Idioma",premium_desc:"Acceso exclusivo activo.",countdown_lbl:"Oferta expira (1 de Abril)",status_guest:"Estado: Invitado",status_user:"Usuario ID:",now_playing:"Reproduciendo",quick_access:"🎧 Acceso Rápido",quick_access_sub:"Haz clic de nuevo para una nueva canción.",mood_select:"✨ Selección de Mood",mood_select_sub:"Elige la vibra perfecta para tu momento.",trending_title:"🔥 Tendencias",trending_sub:"Una selección aleatoria de nuestras sesiones más populares.",results:"Resultados:",results_sub:"Canciones filtradas por el estado de ánimo seleccionado.",back_home:"Volver al Inicio",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Canciones pop y éxitos para calentar el ambiente.",cat_cr2_title:"🕯️ CR2 - Baladas y Relax",cat_cr2_sub:"Melodías lentas y dulces para noches románticas y tranquilas.",cat_cr3_title:"🔔 CR3 - Clásicos",cat_cr3_sub:"Temas tradicionales que siempre son actuales.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Música instrumental para crear el ambiente perfecto.",promo_title:"Ryzn Top 4",promo_sub:"RYZN Music Group"},
+            ru:{greeting_m:"Доброе утро.",greeting_a:"Добрый день.",greeting_e:"Добрый вечер.",vibe_ready:"Твой вайб готов.",discover:"Обзор",sessions:"Твои сессии",saved_tracks:"Сохраненные треки",profile:"Профиль",login_btn:"Войти с этого устройства",logout_btn:"Выйти",search_ph:"Поиск...",create_session:"Создать сессию",create_session_modal:"Новая сессия",add_session:"Добавить в сессию",cancel:"Отмена",create:"Создать",history:"История",language:"Язык",premium_desc:"Эксклюзивный доступ активен.",countdown_lbl:"Предложение истекает (1 апреля)",status_guest:"Статус: Гость",status_user:"ID польз.:",now_playing:"Сейчас играет",quick_access:"🎧 Быстрый доступ",quick_access_sub:"Нажмите снова для нового трека.",mood_select:"✨ Выбор настроения",mood_select_sub:"Выберите идеальный вайб для вашего момента.",trending_title:"🔥 Популярное",trending_sub:"Случайная подборка из наших самых популярных сессий.",results:"Результаты:",results_sub:"Треки, отфильтрованные по выбранному настроению.",back_home:"Назад на главную",cat_cr1_title:"🎄 CR1 - Топ Хиты",cat_cr1_sub:"Поп-песни и хиты, чтобы согреть атмосферу.",cat_cr2_title:"🕯️ CR2 - Баллады и Релакс",cat_cr2_sub:"Медленные, сладкие мелодии для тихих романтических вечеров.",cat_cr3_title:"🔔 CR3 - Классика",cat_cr3_sub:"Традиционные треки, которые всегда актуальны.",cat_cr4_title:"❄️ CR4 - Эмбиент Вайб",cat_cr4_sub:"Инструментальная музыка для создания идеального настроения.",promo_title:"Ryzn Топ 4",promo_sub:"Музыкальная группа RYZN"},
+            ar:{greeting_m:"صباح الخير.",greeting_a:"مساء الخير.",greeting_e:"مساء الخير.",vibe_ready:"أجواؤك جاهزة.",discover:"اكتشف",sessions:"جلساتك",saved_tracks:"الأغاني المحفوظة",profile:"الملف الشخصي",login_btn:"تسجيل الدخول بهذا الجهاز",logout_btn:"تسجيل الخروج",search_ph:"بحث...",create_session:"إنشاء جلسة",create_session_modal:"جلسة جديدة",add_session:"إضافة إلى الجلسة",cancel:"إلغاء",create:"إنشاء",history:"سجل الاستماع",language:"لغة",premium_desc:"وصول حصري نشط.",countdown_lbl:"ينتهي العرض (1 أبريل)",status_guest:"الحالة: ضيف",status_user:"معرف المستخدم:",now_playing:"يتم التشغيل الآن",quick_access:"🎧 الوصول السريع",quick_access_sub:"انقر مرة أخرى للحصول على مقطع جديد.",mood_select:"✨ اختيار المزاج",mood_select_sub:"اختر الأجواء المثالية للحظتك.",trending_title:"🔥 الأكثر رواجاً",trending_sub:"مجموعة مختارة عشوائياً من جلساتنا الأكثر شعبية.",results:"النتائج:",results_sub:"المقاطع التي تمت تصفيتها حسب المزاج المختار.",back_home:"العودة إلى الصفحة الرئيسية",cat_cr1_title:"🎄 CR1 - أفضل الأغاني",cat_cr1_sub:"أغاني البوب والنجاحات لتدفئة الجو.",cat_cr2_title:"🕯️ CR2 - أغاني وقصائد",cat_cr2_sub:"ألحان بطيئة وحلوة لأمسيات رومانسية هادئة.",cat_cr3_title:"🔔 CR3 - كلاسيكيات",cat_cr3_sub:"المقاطع التقليدية التي تكون دائماً حديثة.",cat_cr4_title:"❄️ CR4 - أجواء محيطة",cat_cr4_sub:"موسيقى آلية لخلق المزاج المثالي.",promo_title:"أفضل 4 Ryzn",promo_sub:"مجموعة RYZN الموسيقية"}
+        };
         const CATEGORY_KEYS_MAP = { 'CR1': { titleKey: 'cat_cr1_title', subKey: 'cat_cr1_sub' }, 'CR2': { titleKey: 'cat_cr2_title', subKey: 'cat_cr2_sub' }, 'CR3': { titleKey: 'cat_cr3_title', subKey: 'cat_cr3_sub' }, 'CR4': { titleKey: 'cat_cr4_title', subKey: 'cat_cr4_sub' } };
         const MOOD_STYLES = { "Invernale": "bg-blue-900/40 border-blue-600 text-blue-300", "Party": "bg-red-900/40 border-red-600 text-red-300", "Ambient": "bg-gray-800/40 border-gray-600 text-gray-300", "Chill": "bg-cyan-900/40 border-cyan-600 text-cyan-300" };
         const ALL_MOODS = Object.keys(MOOD_STYLES); const CATEGORY_KEYS = Object.keys(CATEGORY_KEYS_MAP);
 
-        // --- PWA LOGIC ---
+        // --- PWA LOGIC (RIPRISTINATA LOGICA SEVERA INDEX 3) ---
         function checkPWAStatus() {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
             const isIOS = window.navigator.standalone === true;
@@ -206,7 +239,8 @@
             if (isStandalone || isIOS) {
                 blocker.classList.add('hidden'); document.body.style.overflow = 'auto';
             } else {
-                // blocker.classList.remove('hidden'); document.body.style.overflow = 'hidden';
+                // Rimosso il commento per attivare il blocco, come richiesto
+                blocker.classList.remove('hidden'); document.body.style.overflow = 'hidden';
             }
         }
         function forceRecheckPWA() { document.getElementById('install-blocker').classList.add('hidden'); document.body.style.overflow = 'auto'; }
@@ -214,7 +248,6 @@
 
         // --- CORE FUNCTIONS ---
         
-        // 1. PLAY TRACK - FIX DEFINITIVO (TIMER + METADATA DINAMICI)
         window.playTrack = function(trackId) {
             const track = AURA_MAP.find(t => t.id === trackId);
             if (!track) return;
@@ -228,7 +261,7 @@
             // Audio Start
             audioPlayer.src = track.audioUrl;
             
-            // AGGIORNAMENTO MEDIA SESSION CON DATI VERI (FIXED)
+            // AGGIORNAMENTO MEDIA SESSION
             updateMediaSession();
             
             audioPlayer.play().then(() => {
@@ -245,7 +278,7 @@
             updateUI(track);
         }
 
-        // 2. UPDATE PROGRESS CON PRE-END SKIP (0.5s prima della fine)
+        // UPDATE PROGRESS CON PRE-END SKIP
         function updateProgress() { 
             if(audioPlayer && progressBar) {
                 const duration = audioPlayer.duration;
@@ -254,7 +287,7 @@
                 progressBar.style.width = (currentTime/duration)*100 + '%'; 
                 if(progressBarImmersive) progressBarImmersive.style.width = progressBar.style.width; 
                 
-                // FIX IOS BACKGROUND: Salta prima che finisca
+                // FIX IOS BACKGROUND
                 if (duration > 0 && (duration - currentTime) < 0.5 && !audioPlayer.paused && !isTransitioning) {
                     isTransitioning = true;
                     if (isLooping) { audioPlayer.currentTime = 0; audioPlayer.play(); isTransitioning = false; }
@@ -276,11 +309,9 @@
         function onPlayerPlay() { togglePlayIcon(false); if(playerBar) playerBar.classList.add('active'); }
         function onPlayerPause() { togglePlayIcon(true); updateMediaSession(); }
         
-        // MEDIA SESSION CORRETTA (DATI DINAMICI)
         function updateMediaSession() { 
              if(!currentTrackData || !('mediaSession' in navigator)) return;
              
-             // ORA USA I DATI VERI DELLA CANZONE
              navigator.mediaSession.metadata = new MediaMetadata({ 
                  title: currentTrackData.title, 
                  artist: currentTrackData.artist, 
@@ -300,8 +331,11 @@
 
         function setupMediaSessionHandlers() { 
             if('mediaSession' in navigator) {
-                navigator.mediaSession.setActionHandler('play', ()=>audioPlayer.play());
-                navigator.mediaSession.setActionHandler('pause', ()=>audioPlayer.pause());
+                // CONTROLLI PLAY/STOP DISABILITATI SU MEDIA SESSION (IOS CONTROL CENTER)
+                // navigator.mediaSession.setActionHandler('play', ()=>audioPlayer.play());
+                // navigator.mediaSession.setActionHandler('pause', ()=>audioPlayer.pause());
+                
+                // MANTENUTI SKIP E SEEK
                 navigator.mediaSession.setActionHandler('previoustrack', ()=>skipBackward());
                 navigator.mediaSession.setActionHandler('nexttrack', ()=>skipForward());
                 navigator.mediaSession.setActionHandler('seekto', (d) => {
@@ -310,11 +344,23 @@
             }
         }
 
-        // ... (Altre funzioni standard: fetchTracks, updateUI, ecc. invariate) ...
+        // ... (Altre funzioni standard) ...
         
         function parseLRC(t){const l=t.split('\n'),r=[],g=/\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\]/;l.forEach(x=>{const m=g.exec(x);if(m){r.push({time:parseInt(m[1])*60+parseInt(m[2])+(m[3]?parseInt(m[3])/1000:0),text:x.replace(g,'').trim()})}});return r}
         async function loadLyrics(u){if(!u){currentLyrics=[];updateLyricsUI();return}try{const r=await fetch(u);if(r.ok)currentLyrics=parseLRC(await r.text());else currentLyrics=[]}catch(e){currentLyrics=[]}updateLyricsUI()}
-        function updateLyricsUI(){if(!lyricsContainer)return;lyricsContainer.innerHTML=currentLyrics.length?currentLyrics.map((l,i)=>`<div class="lyric-line" id="lyric-${i}" onclick="seekToLyric(${l.time})">${l.text}</div>`).join(''):''}
+        
+        // FIX LYRICS UI: Mostra il contenitore se ci sono testi
+        function updateLyricsUI(){
+            if(!lyricsContainer) return;
+            if(currentLyrics.length > 0) {
+                lyricsContainer.classList.remove('hidden');
+                lyricsContainer.innerHTML = currentLyrics.map((l,i)=>`<div class="lyric-line" id="lyric-${i}" onclick="seekToLyric(${l.time})">${l.text}</div>`).join('');
+            } else {
+                lyricsContainer.classList.add('hidden');
+                lyricsContainer.innerHTML = '';
+            }
+        }
+        
         window.seekToLyric=function(t){audioPlayer.currentTime=t;audioPlayer.play()}
         function syncLyricsDisplay(){if(!currentLyrics.length||!lyricsContainer)return;const t=audioPlayer.currentTime;let idx=-1;for(let i=0;i<currentLyrics.length;i++){if(t>=currentLyrics[i].time)idx=i;else break}document.querySelectorAll('.lyric-line').forEach(e=>e.classList.remove('active'));if(idx!==-1){const el=document.getElementById(`lyric-${idx}`);if(el){el.classList.add('active');el.scrollIntoView({behavior:'smooth',block:'center'})}}}
         
@@ -365,6 +411,23 @@
         }
         function handleLogout() {
             if (confirm("Logout?")) { loggedInUser = null; saveLocalData(); updateAuthUI(null); showSection('music'); }
+        }
+        
+        // FIX ICONA PROFILO: Aggiunto lucide.createIcons() alla fine
+        function updateAuthUI(u) {
+            if(u) {
+                 const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en'];
+                 document.getElementById('auth-button-header').innerHTML = '<i data-lucide="user-check" class="w-6 h-6 text-green-400"></i>';
+                 const statusUser = t.status_user || "User ID:";
+                 document.getElementById('profile-info').textContent = `${statusUser} ${u.email.substr(0,12)}...`;
+                 if(document.getElementById('vibe-score-display')) document.getElementById('vibe-score-display').textContent = `Vibe Score: ${u.vibeScore}/100`;
+            } else {
+                 const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en'];
+                 document.getElementById('auth-button-header').innerHTML = '<i data-lucide="user" class="w-6 h-6"></i>';
+                 const statusGuest = t.status_guest || "Status: Guest";
+                 document.getElementById('profile-info').textContent = statusGuest;
+            }
+            lucide.createIcons(); // FIX: Ridisegna l'icona
         }
 
         function updateLanguageUI() {
@@ -475,7 +538,7 @@
             if (AURA_MAP.length === 0) { if(container.innerHTML.indexOf('Err')===-1) container.innerHTML = '<p>Loading...</p>'; return; }
             
             let html = '';
-            // Promo Banner (Example)
+            // Promo Banner
             const best = AURA_MAP.filter(t=>t.categoryID==='Ryzn Best').slice(0,4);
             if(best.length) {
                 html += `<div class="promo-banner"><h3 class="promo-title">${t.promo_title}</h3><div class="grid grid-cols-2 gap-2 sm:gap-4">${best.map(tr=>`<div onclick="playTrack('${tr.id}')" class="bg-white/10 backdrop-blur p-2 rounded-xl flex items-center space-x-2 cursor-pointer"><img src="${tr.cover}" class="w-10 h-10 rounded-lg"><div class="min-w-0"><p class="font-bold text-xs truncate">${tr.title}</p></div></div>`).join('')}</div><div id="promo-countdown-text" class="promo-countdown"></div></div>`;
@@ -491,7 +554,7 @@
             html += createWidgetBlock(t.trending_title, t.trending_sub, AURA_MAP.slice(0,10).map(t=>getTrackElement(t, 'horizontal-scroll')).join(''), 'horizontal-scroll');
 
             container.innerHTML = html;
-            lucide.createIcons(); // <--- IMPORTANTE: RENDERIZZA LE ICONE DEI WIDGET
+            lucide.createIcons();
             startCountdownTicker();
         }
 
@@ -499,7 +562,7 @@
              const el = document.getElementById('promo-countdown-text'); const elP = document.getElementById('premium-countdown-timer');
              function update() {
                  const now = new Date();
-                 if(el) { /* Logic omitted for brevity */ el.textContent = "Christmas Soon!"; }
+                 if(el) { el.textContent = "Christmas Soon!"; }
                  if(elP) { const diff = new Date(now.getFullYear(), 3, 1) - now; elP.textContent = Math.floor(diff/86400000) + "g"; }
              }
              update(); setInterval(update, 1000);
@@ -557,7 +620,7 @@
             res.innerHTML = trs.map(t=>`<div onclick="playTrack('${t.id}');closeSearchModal()" class="p-2 border-b border-white/10 cursor-pointer">${t.title} - ${t.artist}</div>`).join('');
         }
 
-        // Section Nav
+        // Section Nav con FIX icone
         function showSection(sid, filter='Trending') {
             document.querySelectorAll('.section-page').forEach(s=>s.classList.remove('active'));
             document.getElementById(sid+'-section').classList.add('active');
@@ -567,28 +630,24 @@
             else if(sid==='playlists') renderPlaylists();
             else if(sid==='profile') renderHistory();
             updateLanguageUI();
+            lucide.createIcons(); // FIX: Ridisegna le icone al cambio sezione
         }
 
         // --- FUNZIONI SHARE (CONDIVISIONE) ---
         function openShareModal() {
             if (!currentTrackData) return;
 
-            // Popola i dati della card
             document.getElementById('share-card-title').innerText = currentTrackData.title;
             document.getElementById('share-card-artist').innerText = currentTrackData.artist;
             
-            // Gestione Immagine (Cross-Origin è importante per html2canvas)
             const coverImg = document.getElementById('share-card-cover');
             coverImg.crossOrigin = "anonymous";
             coverImg.src = currentTrackData.cover;
 
-            // Gestione Colori Sfondo (Usa il colore della traccia o fallback)
             const cardContent = document.getElementById('share-card-content');
             const color = currentTrackData.color || '#555';
-            // Crea un gradiente basato sul colore della vibe
             cardContent.style.background = `linear-gradient(135deg, ${color} 0%, #000000 100%)`;
             
-            // Mostra il modale
             document.getElementById('share-modal').classList.remove('hidden');
             lucide.createIcons();
         }
@@ -599,14 +658,7 @@
 
         function downloadShareImage() {
             const element = document.getElementById('share-card-content');
-            
-            // Generazione Canvas
-            html2canvas(element, {
-                useCORS: true, 
-                scale: 2, 
-                backgroundColor: null,
-                // Nota: html2canvas ignora le animazioni CSS, quindi la card sarà statica
-            }).then(canvas => {
+            html2canvas(element, { useCORS: true, scale: 2, backgroundColor: null }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `Aura_Share_${currentTrackData.title.replace(/\s+/g, '_')}.png`;
                 link.href = canvas.toDataURL('image/png');
@@ -617,21 +669,12 @@
             });
         }
         
-        // Funzione per condividere l'immagine direttamente su Instagram/Social (se supportato)
         function shareCanvasNative() {
             const element = document.getElementById('share-card-content');
-            
-            html2canvas(element, {
-                useCORS: true, 
-                scale: 2, 
-                backgroundColor: null
-            }).then(canvas => {
+            html2canvas(element, { useCORS: true, scale: 2, backgroundColor: null }).then(canvas => {
                 canvas.toBlob(async (blob) => {
                     if (!blob) return;
-                    
                     const file = new File([blob], "aura_story.png", { type: "image/png" });
-                    
-                    // Controlla se il browser supporta la condivisione di file
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         try {
                             await navigator.share({
@@ -639,11 +682,8 @@
                                 title: 'Aura Music Vibe',
                                 text: `Ascolta ${currentTrackData.title} su Aura Music.`
                             });
-                        } catch (err) {
-                            console.log("Condivisione annullata o fallita", err);
-                        }
+                        } catch (err) { console.log("Condivisione annullata o fallita", err); }
                     } else {
-                        // Fallback: Scarica l'immagine se la condivisione nativa non va
                         showToast("Condivisione diretta non supportata. Scarico immagine...");
                         downloadShareImage();
                     }
@@ -691,15 +731,6 @@
         function handleSeek(e) { if(audioPlayer) { const r = e.currentTarget.getBoundingClientRect(); audioPlayer.currentTime = ((e.clientX - r.left)/r.width) * audioPlayer.duration; } }
         function updateProgress() { if(audioPlayer && progressBar) progressBar.style.width = (audioPlayer.currentTime/audioPlayer.duration)*100 + '%'; if(progressBarImmersive) progressBarImmersive.style.width = progressBar.style.width; syncLyricsDisplay(); }
         
-        function setupMediaSessionHandlers() { 
-            if('mediaSession' in navigator) {
-                navigator.mediaSession.setActionHandler('play', ()=>audioPlayer.play());
-                navigator.mediaSession.setActionHandler('pause', ()=>audioPlayer.pause());
-                navigator.mediaSession.setActionHandler('previoustrack', ()=>skipBackward());
-                navigator.mediaSession.setActionHandler('nexttrack', ()=>skipForward());
-            }
-        }
-        
         // --- Init Principale ---
         async function initializeAppContent() {
             if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service_worker.js').catch(e=>console.log(e));
@@ -710,8 +741,6 @@
             updateAmbientLight('#00BFFF', '0 191 255'); 
             showSection('music');
             updateLanguageUI();
-            
-            // Render finale per essere sicuri che le icone ci siano
             lucide.createIcons();
         }
         document.addEventListener('DOMContentLoaded', initializeAppContent);
