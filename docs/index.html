@@ -157,6 +157,11 @@
         </div>
     </div>
     
+    <div id="santa-modal" class="fixed inset-0 bg-black z-[200] hidden flex flex-col">
+        <button onclick="closeSantaTracker()" class="absolute top-4 right-4 z-[201] p-3 bg-red-600 rounded-full text-white hover:bg-red-700 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+        <iframe id="santa-frame" class="w-full h-full border-0" allow="autoplay; fullscreen"></iframe>
+    </div>
+    
     <div class="container-app">
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center space-x-8">
@@ -569,6 +574,23 @@
             return `<div class="mb-10"><h3 class="text-2xl font-bold mb-2">${title}</h3><p class="text-gray-400 mb-6">${subtitle}</p><div class="${isHoriz ? 'horizontal-scroll' : 'grid gap-4 ' + gridClasses}">${contentHtml}</div></div>`;
         }
 
+        // --- SANTA TRACKER LOGIC START ---
+        function openSantaTracker() {
+            const modal = document.getElementById('santa-modal');
+            const frame = document.getElementById('santa-frame');
+            // USA IL LINK GITHUB PAGES PER VISUALIZZARE L'HTML RENDERIZZATO
+            frame.src = "https://ryzn-eu.github.io/AuraEU/docs/esctrack.html"; 
+            modal.classList.remove('hidden');
+        }
+
+        function closeSantaTracker() {
+            const modal = document.getElementById('santa-modal');
+            const frame = document.getElementById('santa-frame');
+            modal.classList.add('hidden');
+            frame.src = "";
+        }
+        // --- SANTA TRACKER LOGIC END ---
+
         function renderHomePageWidgets() {
             const container = document.getElementById('home-widgets-container'); if (!container) return;
             const t = TRANSLATIONS[currentLang];
@@ -578,7 +600,11 @@
             // Promo Banner
             const best = AURA_MAP.filter(t=>t.categoryID==='Ryzn Best').slice(0,4);
             if(best.length) {
-                html += `<div class="promo-banner"><h3 class="promo-title">${t.promo_title}</h3><div class="grid grid-cols-2 gap-2 sm:gap-4 w-full">${best.map(tr=>`<div onclick="playTrack('${tr.id}')" class="bg-white/10 backdrop-blur p-2 rounded-xl flex items-center space-x-2 cursor-pointer"><img src="${tr.cover}" class="w-10 h-10 rounded-lg"><div class="min-w-0"><p class="font-bold text-sm truncate text-white">${tr.title}</p></div></div>`).join('')}</div><div id="promo-countdown-text" class="promo-countdown"></div></div>`;
+                html += `<div class="promo-banner"><h3 class="promo-title">${t.promo_title}</h3><div class="grid grid-cols-2 gap-2 sm:gap-4 w-full">${best.map(tr=>`<div onclick="playTrack('${tr.id}')" class="bg-white/10 backdrop-blur p-2 rounded-xl flex items-center space-x-2 cursor-pointer"><img src="${tr.cover}" class="w-10 h-10 rounded-lg"><div class="min-w-0"><p class="font-bold text-sm truncate text-white">${tr.title}</p></div></div>`).join('')}</div><div id="promo-countdown-text" class="promo-countdown"></div>
+                <button onclick="openSantaTracker()" class="mt-4 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full flex items-center gap-2 transition shadow-lg transform hover:scale-105 mx-auto">
+                    <i data-lucide="map" class="w-5 h-5"></i> Santa Tracker
+                </button>
+                </div>`;
             }
 
             // Categories
