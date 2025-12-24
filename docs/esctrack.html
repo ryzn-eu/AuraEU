@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santa Global Ops - Live Tracker</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        /* --- RESET & BASE --- */
+        * { box-sizing: border-box; }
+        body, html { 
+            margin: 0; padding: 0; height: 100%; width: 100%; 
+            overflow: hidden; 
+            font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif; 
+            background: #000; color: white; 
+            display: flex; flex-direction: column;
+        }
+
+        /* --- MAPPA --- */
+        #map-container { 
+            flex-grow: 1; position: relative; z-index: 1; 
+            border-bottom: 2px solid #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+        }
+        #map { width: 100%; height: 100%; background: #050505; }
+        .leaflet-tile-pane { filter: contrast(1.2) brightness(0.8) saturate(0.8); }
+        .leaflet-container { background: #050505; }
+
+        #watermark { 
+            position: absolute; bottom: 15px; left: 25px; z-index: 950; 
+            font-family: 'Courier New', monospace; font-weight: 300; font-size: 12px; 
+            letter-spacing: 4px; color: rgba(255, 255, 255, 0.3); 
+            pointer-events: none; user-select: none;
+        }
+
+        /* --- DASHBOARD --- */
+        .dashboard {
+            width: 100%; height: auto; min-height: 130px;
+            background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 15px 30px; 
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.9);
+            z-index: 1000; gap: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dash-left { 
+            flex: 1; display: flex; flex-direction: column; justify-content: center; 
+            border-left: 4px solid #fbbf24; padding-left: 20px; 
+            min-width: 240px;
+        }
+        h2 { 
+            margin: 0; font-size: 28px; font-weight: 700; color: #fbbf24; 
+            text-shadow: 0 0 15px rgba(251, 191, 36, 0.4); 
+            letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        h3 { 
+            margin: 4px 0 0 0; font-size: 13px; color: #94a3b8; 
+            font-weight: 600; text-transform: uppercase; letter-spacing: 2px; 
+        }
+
+        .dash-center { flex: 0 0 auto; display: flex; justify-content: center; }
+        
+        #status-badge { 
+            display: inline-block; padding: 8px 16px; border-radius: 4px; 
+            font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; 
+            background: #1e293b; color: #94a3b8; white-space: nowrap;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        #status-badge.live { background: #dc2626; color: white; animation: pulse 2s infinite; box-shadow: 0 0 20px rgba(220, 38, 38, 0.5); }
+        #status-badge.transit { background: #3b82f6; color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+        #status-badge.rest { background: #475569; color: #cbd5e1; }
+
+        .dash-monitors { flex: 1; display: flex; flex-direction: row; gap: 15px; align-items: center; justify-content: flex-end; }
+        
+        .stat-box { 
+            flex: 1; max-width: 150px; min-width: 100px; 
+            background: rgba(255,255,255,0.03); 
+            padding: 10px 5px; border-radius: 8px; text-align: center; 
+            border: 1px solid rgba(255,255,255,0.08); 
+            backdrop-filter: blur(5px);
+            transition: transform 0.2s;
+        }
+        .stat-label { display: block; font-size: 9px; color: #64748b; text-transform: uppercase; margin-bottom: 4px; font-weight: 700; letter-spacing: 1px; }
+        .stat-val { font-size: 18px; font-weight: 700; color: #f1f5f9; font-family: 'Courier New', monospace; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .stat-val.gold { color: #fbbf24; }
+
+        .ctrl-group { position: absolute; top: 20px; right: 20px; z-index: 2000; display: flex; gap: 10px; }
+        .btn-ctrl { 
+            background: #ef4444; color: white; border: 1px solid rgba(255,255,255,0.2); 
+            padding: 10px 20px; border-radius: 4px; 
+            font-weight: bold; font-family: 'Segoe UI', sans-serif; cursor: pointer; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: all 0.2s; 
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            backdrop-filter: blur(4px);
+        }
+        .btn-ctrl:hover { transform: translateY(-2px); background: #dc2626; }
+        #speed-btn { background: rgba(59, 130, 246, 0.9); border-color: #60a5fa; }
+        #speed-btn.active { background: #eab308; color: black; border-color: #fef08a; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        
+        #snow-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 900; }
+        .snowflake { position: absolute; top: -10px; background: white; border-radius: 50%; opacity: 0.8; animation: fall linear infinite; }
+
+        .santa-icon { font-size: 45px; filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8)); transition: transform 0.5s; }
+        .gift-marker { font-size: 16px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); }
+
+        @media (max-width: 900px) {
+            .dashboard { flex-direction: column; padding: 15px; height: auto; gap: 15px; }
+            .dash-left { border: none; padding: 0; width: 100%; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+            .dash-monitors { width: 100%; justify-content: space-between; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ctrl-group">
+        <button id="speed-btn" class="btn-ctrl" onclick="toggleSpeed()" style="display:none;">⚡ VELOCITÀ x1000</button>
+    </div>
+
+    <audio id="bgm" loop>
+        <source src="https://actions.google.com/sounds/v1/holidays/jingle_bells.ogg" type="audio/ogg">
+    </audio>
+
+    <div id="map-container">
+        <div id="snow-layer"></div>
+        <div id="watermark">E-S-C.IT GLOBAL OPS</div>
+        <div id="map"></div>
+    </div>
+
+    <div class="dashboard">
+        <div class="dash-left">
+            <h2 id="loc-name">--</h2>
+            <h3 id="loc-sub">--</h3>
+        </div>
+        <div class="dash-center">
+            <div id="status-badge">● SYSTEM READY</div>
+        </div>
+        <div class="dash-monitors">
+            <div class="stat-box">
+                <span class="stat-label">Attività</span>
+                <span class="stat-val" id="val-activity">--</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">UTC Time</span>
+                <span class="stat-val gold" id="val-utc">--:--</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Tua Ora</span>
+                <span class="stat-val" id="val-local">--:--</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DATABASE COMPLETO
+        // ==========================================
+        const citiesDB = [
+            // PARTENZA 
+            ["Rovaniemi", "Base Operativa", 66.54, 25.74, 2], 
+
+            // OCEANIA
+            ["Kiritimati", "Kiribati", 1.87, -157.36, 14],
+            ["Apia", "Samoa", -13.83, -171.75, 13],
+            ["Nuku'alofa", "Tonga", -21.13, -175.20, 13],
+            ["Wellington", "Nuova Zelanda", -41.28, 174.77, 13],
+            ["Suva", "Fiji", -18.14, 178.42, 12],
+            ["Funafuti", "Tuvalu", -8.52, 179.21, 12],
+            ["Majuro", "Isole Marshall", 7.10, 171.38, 12],
+            ["Yaren", "Nauru", -0.52, 166.93, 12],
+            ["Tarawa", "Kiribati", 1.45, 172.97, 12],
+            ["Honiara", "Isole Salomone", -9.43, 159.95, 11],
+            ["Port Vila", "Vanuatu", -17.73, 168.32, 11],
+            ["Noumea", "Nuova Caledonia", -22.27, 166.44, 11],
+            ["Canberra", "Australia (Est)", -35.28, 149.13, 11],
+            ["Palikir", "Micronesia", 6.92, 158.15, 11],
+            ["Port Moresby", "Papua Nuova Guinea", -9.44, 147.18, 10],
+            ["Hagatna", "Guam", 13.47, 144.75, 10],
+            ["Saipan", "Isole Marianne", 15.17, 145.75, 10],
+            ["Brisbane", "Australia", -27.47, 153.02, 10], 
+
+            // ASIA ORIENTALE
+            ["Tokyo", "Giappone", 35.67, 139.65, 9],
+            ["Seoul", "Corea del Sud", 37.56, 126.97, 9],
+            ["Pyongyang", "Corea del Nord", 39.03, 125.76, 9],
+            ["Dili", "Timor Est", -8.55, 125.56, 9],
+            ["Melekeok", "Palau", 7.49, 134.63, 9],
+            ["Pechino", "Cina", 39.90, 116.40, 8],
+            ["Taipei", "Taiwan", 25.03, 121.56, 8],
+            ["Manila", "Filippine", 14.59, 120.98, 8],
+            ["Bandar Seri Begawan", "Brunei", 4.94, 114.94, 8],
+            ["Kuala Lumpur", "Malesia", 3.13, 101.68, 8],
+            ["Singapore", "Singapore", 1.35, 103.81, 8],
+            ["Ulan Bator", "Mongolia", 47.91, 106.88, 8],
+            ["Perth", "Australia", -31.95, 115.86, 8],
+            ["Bangkok", "Thailandia", 13.75, 100.50, 7],
+            ["Hanoi", "Vietnam", 21.02, 105.83, 7],
+            ["Giacarta", "Indonesia", -6.20, 106.84, 7],
+            ["Phnom Penh", "Cambogia", 11.55, 104.92, 7],
+            ["Vientiane", "Laos", 17.97, 102.63, 7],
+            ["Krasnoyarsk", "Russia", 56.01, 92.86, 7],
+
+            // ASIA CENTRALE
+            ["Astana", "Kazakistan", 51.16, 71.47, 6],
+            ["Bishkek", "Kirghizistan", 42.87, 74.59, 6],
+            ["Dhaka", "Bangladesh", 23.81, 90.41, 6],
+            ["Thimphu", "Bhutan", 27.47, 89.63, 6],
+            ["Nuova Delhi", "India", 28.61, 77.20, 5.5],
+            ["Colombo", "Sri Lanka", 6.92, 79.86, 5.5],
+            ["Kathmandu", "Nepal", 27.71, 85.32, 5.75],
+            ["Islamabad", "Pakistan", 33.74, 73.04, 5],
+            ["Tashkent", "Uzbekistan", 41.29, 69.24, 5],
+            ["Ashgabat", "Turkmenistan", 37.96, 58.32, 5],
+            ["Dushanbe", "Tagikistan", 38.55, 68.77, 5],
+            ["Malé", "Maldive", 4.17, 73.50, 5],
+            ["Kabul", "Afghanistan", 34.55, 69.20, 4.5],
+
+            // MEDIO ORIENTE
+            ["Abu Dhabi", "Emirati Arabi", 24.45, 54.37, 4],
+            ["Mascate", "Oman", 23.58, 58.40, 4],
+            ["Baku", "Azerbaigian", 40.40, 49.86, 4],
+            ["Yerevan", "Armenia", 40.18, 44.51, 4],
+            ["Tbilisi", "Georgia", 41.71, 44.82, 4],
+            ["Port Louis", "Mauritius", -20.16, 57.50, 4],
+            ["Victoria", "Seychelles", -4.61, 55.45, 4],
+            ["Teheran", "Iran", 35.68, 51.38, 3.5],
+
+            // RUSSIA OVEST & ARABIA
+            ["Mosca", "Russia", 55.75, 37.61, 3],
+            ["Ankara", "Turchia", 39.93, 32.85, 3],
+            ["Riyadh", "Arabia Saudita", 24.71, 46.67, 3],
+            ["Baghdad", "Iraq", 33.31, 44.36, 3],
+            ["Doha", "Qatar", 25.28, 51.53, 3],
+            ["Kuwait City", "Kuwait", 29.37, 47.97, 3],
+            ["Manama", "Bahrain", 26.22, 50.58, 3],
+            ["Sana'a", "Yemen", 15.36, 44.19, 3],
+            ["Nairobi", "Kenya", -1.29, 36.82, 3],
+            ["Addis Abeba", "Etiopia", 9.00, 38.75, 3],
+            ["Mogadiscio", "Somalia", 2.04, 45.31, 3],
+            ["Antananarivo", "Madagascar", -18.87, 47.50, 3],
+            ["Kampala", "Uganda", 0.34, 32.58, 3],
+            ["Dodoma", "Tanzania", -6.16, 35.74, 3],
+            ["Minsk", "Bielorussia", 53.90, 27.56, 3],
+
+            // EUROPA EST
+            ["Helsinki", "Finlandia", 60.16, 24.93, 2],
+            ["Kiev", "Ucraina", 50.45, 30.52, 2],
+            ["Bucarest", "Romania", 44.42, 26.10, 2],
+            ["Sofia", "Bulgaria", 42.69, 23.32, 2],
+            ["Atene", "Grecia", 37.98, 23.72, 2],
+            ["Gerusalemme", "Israele", 31.76, 35.21, 2],
+            ["Beirut", "Libano", 33.89, 35.50, 2],
+            ["Amman", "Giordania", 31.94, 35.92, 2],
+            ["Il Cairo", "Egitto", 30.04, 31.23, 2],
+            ["Tripoli", "Libia", 32.88, 13.19, 2],
+            ["Khartoum", "Sudan", 15.50, 32.55, 2],
+            ["Harare", "Zimbabwe", -17.82, 31.05, 2],
+            ["Pretoria", "Sudafrica", -25.74, 28.22, 2],
+            ["Chisinau", "Moldavia", 47.01, 28.86, 2],
+            ["Vilnius", "Lituania", 54.68, 25.27, 2],
+            ["Riga", "Lettonia", 56.94, 24.10, 2],
+            ["Tallinn", "Estonia", 59.43, 24.75, 2],
+
+            // EUROPA CENTRALE
+            ["Roma", "Italia", 41.90, 12.49, 1],
+            ["Parigi", "Francia", 48.85, 2.35, 1],
+            ["Berlino", "Germania", 52.52, 13.40, 1],
+            ["Madrid", "Spagna", 40.41, -3.70, 1],
+            ["Amsterdam", "Paesi Bassi", 52.36, 4.90, 1],
+            ["Bruxelles", "Belgio", 50.85, 4.35, 1],
+            ["Vienna", "Austria", 48.20, 16.37, 1],
+            ["Berna", "Svizzera", 46.94, 7.44, 1],
+            ["Stoccolma", "Svezia", 59.32, 18.06, 1],
+            ["Oslo", "Norvegia", 59.91, 10.75, 1],
+            ["Copenaghen", "Danimarca", 55.67, 12.56, 1],
+            ["Varsavia", "Polonia", 52.22, 21.01, 1],
+            ["Praga", "Rep. Ceca", 50.07, 14.43, 1],
+            ["Budapest", "Ungheria", 47.49, 19.04, 1],
+            ["Belgrado", "Serbia", 44.78, 20.44, 1],
+            ["Zagabria", "Croazia", 45.81, 15.98, 1],
+            ["Tirana", "Albania", 41.32, 19.81, 1],
+            ["Tunisi", "Tunisia", 36.80, 10.18, 1],
+            ["Algeri", "Algeria", 36.75, 3.05, 1],
+            ["Lagos", "Nigeria", 6.52, 3.37, 1],
+            ["Kinshasa", "RDC", -4.44, 15.26, 1],
+            ["Luanda", "Angola", -8.83, 13.23, 1],
+
+            // UK & WEST AFRICA
+            ["Londra", "Regno Unito", 51.50, -0.12, 0],
+            ["Dublino", "Irlanda", 53.34, -6.26, 0],
+            ["Lisbona", "Portogallo", 38.72, -9.13, 0],
+            ["Reykjavik", "Islanda", 64.14, -21.82, 0],
+            ["Casablanca", "Marocco", 33.57, -7.58, 0],
+            ["Accra", "Ghana", 5.60, -0.18, 0],
+            ["Dakar", "Senegal", 14.71, -17.46, 0],
+            ["Abidjan", "Costa d'Avorio", 5.36, -4.00, 0],
+
+            // ATLANTICO
+            ["Praia", "Capo Verde", 14.93, -23.51, -1],
+            ["Grytviken", "Georgia del Sud", -54.28, -36.50, -2],
+
+            // SUD AMERICA & GROENLANDIA
+            ["Brasilia", "Brasile", -15.79, -47.88, -3],
+            ["Rio de Janeiro", "Brasile", -22.90, -43.17, -3],
+            ["Buenos Aires", "Argentina", -34.60, -58.38, -3],
+            ["Montevideo", "Uruguay", -34.90, -56.16, -3],
+            ["Santiago", "Cile", -33.44, -70.66, -3],
+            ["Paramaribo", "Suriname", 5.85, -55.20, -3],
+
+            // AMERICHE EST
+            ["Caracas", "Venezuela", 10.48, -66.90, -4],
+            ["La Paz", "Bolivia", -16.48, -68.11, -4],
+            ["Georgetown", "Guyana", 6.80, -58.15, -4],
+            ["Santo Domingo", "Rep. Dominicana", 18.48, -69.93, -4],
+            ["San Juan", "Porto Rico", 18.46, -66.10, -4],
+            ["Halifax", "Canada", 44.64, -63.57, -4],
+
+            // USA EST
+            ["New York", "USA", 40.71, -74.00, -5],
+            ["Washington D.C.", "USA", 38.90, -77.03, -5],
+            ["Ottawa", "Canada", 45.42, -75.69, -5],
+            ["L'Avana", "Cuba", 23.11, -82.36, -5],
+            ["Nassau", "Bahamas", 25.04, -77.33, -5],
+            ["Kingston", "Giamaica", 17.97, -76.79, -5],
+            ["Bogotà", "Colombia", 4.71, -74.07, -5],
+            ["Lima", "Perù", -12.04, -77.04, -5],
+            ["Quito", "Ecuador", -0.18, -78.46, -5],
+            ["Panama", "Panama", 8.98, -79.51, -5],
+
+            // USA CENTRAL
+            ["Chicago", "USA", 41.87, -87.62, -6],
+            ["Houston", "USA", 29.76, -95.36, -6],
+            ["Città del Messico", "Messico", 19.43, -99.13, -6],
+            ["Città del Guatemala", "Guatemala", 14.63, -90.50, -6],
+            ["San Jose", "Costa Rica", 9.92, -84.09, -6],
+            ["Managua", "Nicaragua", 12.11, -86.23, -6],
+
+            // USA MOUNTAIN
+            ["Denver", "USA", 39.73, -104.99, -7],
+            ["Edmonton", "Canada", 53.54, -113.49, -7],
+
+            // USA PACIFIC
+            ["Los Angeles", "USA", 34.05, -118.24, -8],
+            ["San Francisco", "USA", 37.77, -122.41, -8],
+            ["Vancouver", "Canada", 49.28, -123.12, -8],
+            ["Tijuana", "Messico", 32.51, -117.03, -8],
+
+            // ALASKA
+            ["Anchorage", "Alaska", 61.21, -149.90, -9],
+
+            // HAWAII
+            ["Honolulu", "Hawaii", 21.30, -157.85, -10],
+            ["Papeete", "Polinesia Fr.", -17.55, -149.56, -10],
+
+            // FINE
+            ["Pago Pago", "Samoa Americane", -14.27, -170.70, -11]
+        ];
+
+        // ==========================================
+        // 2. GENERAZIONE ROTTA TEMPORALE
+        // ==========================================
+        let schedule = [];
+        let zones = {};
+        citiesDB.forEach(city => {
+            let offset = city[4];
+            if (!zones[offset]) zones[offset] = [];
+            zones[offset].push(city);
+        });
+
+        const GLOBAL_START_UTC = 9.30; 
+        
+        let sortedOffsets = Object.keys(zones).map(Number).sort((a,b) => b - a);
+        let previousTime = GLOBAL_START_UTC; 
+
+        // Rovaniemi Start
+        schedule.push({ name: "Rovaniemi", sub: "Base Operativa", lat: 66.54, lng: 25.74, utc: 9.30 });
+
+        sortedOffsets.forEach(offset => {
+            let midnightInUTC = 24.0 - offset;
+            let citiesInZone = zones[offset];
+            citiesInZone.sort((a, b) => b[2] - a[2]);
+
+            let timeWindow = 0.95; 
+            let timePerCity = timeWindow / citiesInZone.length;
+
+            citiesInZone.forEach((city, idx) => {
+                let scheduledTime = midnightInUTC + (idx * timePerCity);
+                if (scheduledTime <= previousTime) scheduledTime = previousTime + 0.03; 
+
+                schedule.push({
+                    name: city[0],
+                    sub: city[1],
+                    lat: city[2],
+                    lng: city[3],
+                    utc: scheduledTime
+                });
+                previousTime = scheduledTime;
+            });
+        });
+
+        // Rientro
+        schedule.push({ name: "Rovaniemi", sub: "Missione Compiuta", lat: 66.54, lng: 25.74, utc: previousTime + 2 });
+
+        // ==========================================
+        // 3. MAPPA E GRAFICA
+        // ==========================================
+        const map = L.map('map', { zoomControl: false, attributionControl: false, dragging: true, minZoom: 2, worldCopyJump: true }).setView([66.54, 25.74], 3);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+        
+        map.createPane('giftPane'); map.getPane('giftPane').style.zIndex = 400; 
+        map.createPane('santaPane'); map.getPane('santaPane').style.zIndex = 650;
+
+        const santaIcon = L.divIcon({ className: 'custom-santa', html: '<div class="santa-icon">🎅</div>', iconSize: [50, 50], iconAnchor: [25, 25] });
+        const marker = L.marker([66.54, 25.74], { icon: santaIcon, pane: 'santaPane' }).addTo(map);
+        const giftIcon = L.divIcon({ className: 'custom-gift', html: '<div class="gift-marker">🎁</div>', iconSize: [20, 20], iconAnchor: [10, 10] });
+
+        function getBezierPoint(p0, p1, p2, t) {
+            const x = (1-t)*(1-t)*p0.lat + 2*(1-t)*t*p1.lat + t*t*p2.lat;
+            const y = (1-t)*(1-t)*p0.lng + 2*(1-t)*t*p1.lng + t*t*p2.lng;
+            return { lat: x, lng: y };
+        }
+
+        function getControlPoint(p0, p1) {
+            const dist = Math.sqrt(Math.pow(p1.lat-p0.lat,2) + Math.pow(p1.lng-p0.lng,2));
+            const offset = dist * 0.2; 
+            return { lat: (p0.lat + p1.lat)/2 + offset, lng: (p0.lng + p1.lng)/2 };
+        }
+
+        // ==========================================
+        // 4. LOGICA MOTORE
+        // ==========================================
+        let isTestMode = false;
+        let speedMult = 1;
+        let accumulatedTime = 0;
+        let lastFrame = 0;
+        let lastLegIndex = -1;
+
+        const START_TS = new Date(Date.UTC(new Date().getFullYear(), 11, 24, 9, 0, 0)).getTime(); 
+
+        function getSantaPos(currentUtcDec) {
+            let leg = -1;
+            for(let i=0; i<schedule.length-1; i++) {
+                if (currentUtcDec >= schedule[i].utc && currentUtcDec < schedule[i+1].utc) {
+                    leg = i; break;
+                }
+            }
+            if (leg === -1) {
+                if (currentUtcDec >= schedule[schedule.length-1].utc) return { finished: true, ...schedule[schedule.length-1] };
+                return null; 
+            }
+
+            const start = schedule[leg];
+            const end = schedule[leg+1];
+            const duration = end.utc - start.utc;
+            const t = (currentUtcDec - start.utc) / duration;
+            
+            // Movimento Curvo
+            let sLng = start.lng;
+            let eLng = end.lng;
+            if (eLng - sLng > 180) sLng += 360;
+            if (sLng - eLng > 180) eLng += 360;
+
+            const p0 = {lat: start.lat, lng: sLng};
+            const p2 = {lat: end.lat, lng: eLng};
+            const p1 = getControlPoint(p0, p2);
+
+            let pos = getBezierPoint(p0, p1, p2, t);
+            
+            while(pos.lng > 180) pos.lng -= 360;
+            while(pos.lng < -180) pos.lng += 360;
+
+            return { lat: pos.lat, lng: pos.lng, legIdx: leg, current: start, next: end, progress: t };
+        }
+
+        function startTestMode() {
+            isTestMode = true;
+            accumulatedTime = 0;
+            lastFrame = performance.now();
+            document.getElementById('speed-btn').style.display = 'block';
+            toggleSpeed(); 
+        }
+
+        function toggleSpeed() {
+            const btn = document.getElementById('speed-btn');
+            if (speedMult === 1) {
+                speedMult = 1000; 
+                btn.innerText = "⏩ NORMALE";
+                btn.classList.add('active');
+            } else {
+                speedMult = 1;
+                btn.innerText = "⚡ VELOCITÀ x1000";
+                btn.classList.remove('active');
+            }
+        }
+
+        function loop(now) {
+            let currentTs;
+
+            if (isTestMode) {
+                let dt = now - lastFrame;
+                lastFrame = now;
+                accumulatedTime += dt * speedMult;
+                currentTs = START_TS + accumulatedTime;
+            } else {
+                currentTs = Date.now();
+            }
+
+            let simDate = new Date(currentTs);
+            let diffMs = currentTs - new Date(Date.UTC(simDate.getUTCFullYear(), 11, 24, 0, 0, 0)).getTime();
+            let utcDecimal = diffMs / (1000 * 60 * 60);
+
+            document.getElementById('val-utc').innerText = simDate.getUTCHours().toString().padStart(2,'0') + ":" + simDate.getUTCMinutes().toString().padStart(2,'0');
+            document.getElementById('val-local').innerText = simDate.getHours().toString().padStart(2,'0') + ":" + simDate.getMinutes().toString().padStart(2,'0');
+
+            const data = getSantaPos(utcDecimal);
+
+            if (!data) {
+                // STANDBY
+                document.getElementById('status-badge').innerText = "● STANDBY";
+                document.getElementById('status-badge').className = "rest";
+                document.getElementById('loc-name').innerText = "ROVANIEMI";
+                document.getElementById('loc-sub').innerText = "PREPARATIVI";
+                document.getElementById('val-activity').innerText = "CARICO";
+                
+                let diff = START_TS - Date.now();
+                if (isTestMode) diff = 0;
+                
+                if (diff > 0) {
+                    let h = Math.floor(diff/3600000);
+                    let m = Math.floor((diff%3600000)/60000);
+                    let s = Math.floor((diff%60000)/1000);
+                    document.getElementById('val-activity').innerText = `-${h}h ${m}m ${s}s`;
+                }
+
+                marker.setLatLng([66.54, 25.74]);
+            } else if (data.finished) {
+                document.getElementById('status-badge').innerText = "● HOME";
+                document.getElementById('loc-name').innerText = "MISSIONE COMPIUTA";
+                document.getElementById('val-activity').innerText = "RIPOSO";
+                marker.setLatLng([66.54, 25.74]);
+            } else {
+                marker.setLatLng([data.lat, data.lng]);
+                map.panTo([data.lat, data.lng], { animate: false });
+
+                if (data.legIdx > lastLegIndex) {
+                    if (data.legIdx > 0) {
+                        let prev = schedule[data.legIdx];
+                        L.marker([prev.lat, prev.lng], { icon: giftIcon, pane: 'giftPane' }).addTo(map);
+                    }
+                    lastLegIndex = data.legIdx;
+                }
+
+                if (data.progress < 0.25) {
+                    document.getElementById('status-badge').innerText = "● DELIVERY";
+                    document.getElementById('status-badge').className = "live";
+                    document.getElementById('loc-name').innerText = data.current.name.toUpperCase();
+                    document.getElementById('loc-sub').innerText = data.current.sub.toUpperCase();
+                    document.getElementById('val-activity').innerText = "CONSEGNA";
+                } else {
+                    document.getElementById('status-badge').innerText = "● TRANSIT";
+                    document.getElementById('status-badge').className = "transit";
+                    document.getElementById('loc-name').innerText = "IN VOLO";
+                    document.getElementById('loc-sub').innerText = ">> " + data.next.name.toUpperCase();
+                    document.getElementById('val-activity').innerText = speedMult > 1 ? "IPERVELOCITÀ" : "VOLO";
+                }
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        requestAnimationFrame(loop);
+
+        function snow() {
+            const b = document.getElementById('snow-layer');
+            const s = document.createElement('div');
+            s.className = 'snowflake';
+            s.style.left = Math.random()*100+'%';
+            s.style.width = (Math.random()*3+2)+'px'; s.style.height = s.style.width;
+            s.style.opacity = Math.random()*0.5 + 0.5;
+            s.style.animationDuration = (Math.random()*2+3)+'s';
+            b.appendChild(s);
+            setTimeout(()=>s.remove(), 5000);
+        }
+        setInterval(snow, 100);
+    </script>
+</body>
+</html>
