@@ -27,6 +27,9 @@
         @keyframes shimmer { 0%, 100% { transform: translateX(-150%) skewX(-20deg); } 50% { transform: translateX(150%) skewX(-20deg); } }
         .floating-icon { animation: floatIcon 3s ease-in-out infinite; } @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         .fixed-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-image: url('https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User/Foto.png'); background-size: cover; background-position: center; pointer-events: none; }
+        /* FIREWORKS CANVAS */
+        #fireworks-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        
         body { background-color: transparent; color: white; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 96px; overflow-x: hidden; position: relative; }
         body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: -1; pointer-events: none; }
         .container-app { flex-grow: 1; padding: 1rem; max-width: 1400px; margin: 0 auto; width: 100%; z-index: 1; }
@@ -40,38 +43,94 @@
         .title-wrapper { overflow: hidden; white-space: nowrap; } .marquee { display: inline-block; animation: marquee 10s linear infinite; padding-left: 100%; animation-play-state: paused; } .title-wrapper.is-long .marquee { animation-play-state: running; } @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
         .horizontal-scroll { display: flex; overflow-x: auto; padding-bottom: 1rem; gap: 1rem; scrollbar-width: thin; } .horizontal-widget-item { flex: 0 0 160px; width: 160px; }
         
-        /* --- PROMO BANNER STYLES --- */
+        /* --- PROMO BANNER STYLES (FESTIVAL EDITION) --- */
         .promo-banner {
-            background: rgba(0, 191, 255, 0.15); /* Blu semitrasparente */
-            backdrop-filter: blur(15px); /* Effetto vetro */
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(0, 191, 255, 0.3); /* Bordo sottile blu */
+            background: linear-gradient(160deg, rgba(0, 30, 60, 0.8), rgba(0, 0, 0, 0.9)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop'); 
+            background-blend-mode: overlay;
+            background-size: cover;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 191, 255, 0.3);
             border-radius: 24px;
             padding: 30px 24px;
             margin-bottom: 40px;
-            box-shadow: 0 10px 40px -10px rgba(0, 191, 255, 0.2);
-            text-align: center; /* Centra tutto il contenuto */
+            box-shadow: 0 10px 40px -10px rgba(0, 191, 255, 0.3);
+            text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
+            overflow: hidden;
         }
+        .promo-banner::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, transparent, #00BFFF, transparent);
+            animation: scanline 4s infinite linear;
+        }
+        @keyframes scanline { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
         .promo-title {
-            font-size: 2.5rem; /* Font grande */
-            font-weight: 900; /* Molto grassetto */
+            font-size: 2.5rem;
+            font-weight: 900;
             text-align: center;
             color: white;
-            margin-bottom: 25px;
+            margin-bottom: 5px;
             text-transform: uppercase;
-            letter-spacing: 4px; /* Spaziatura caratteri */
-            text-shadow: 0 0 20px rgba(0, 191, 255, 0.6); /* Effetto glow */
-            width: 100%;
+            letter-spacing: 2px;
+            text-shadow: 0 0 30px rgba(0, 191, 255, 0.8);
+            line-height: 1.1;
         }
-        .promo-countdown {
-            text-align: center; margin-top: 20px; color: rgba(255, 255, 255, 0.8);
-            font-weight: 600; font-size: 1.1rem; font-family: monospace;
-            padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);
-            width: 100%;
+        .promo-subtitle {
+            font-size: 1rem; color: #00BFFF; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 25px;
         }
+
+        /* FAKE PLAYER STYLES */
+        .festival-player-container {
+            width: 100%; max-width: 500px; aspect-ratio: 16/9;
+            background: #000; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
+        .festival-poster {
+            position: absolute; inset: 0; 
+            background-image: url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop');
+            background-size: cover; background-position: center; opacity: 0.6;
+        }
+        .festival-overlay {
+            z-index: 10; background: rgba(0,0,0,0.4); padding: 10px 20px; border-radius: 50px;
+            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; items-center;
+        }
+        .live-badge {
+            position: absolute; top: 10px; left: 10px;
+            background: #333; color: #888; padding: 4px 8px; border-radius: 4px;
+            font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
+            display: flex; items-center; gap: 5px; z-index: 20;
+        }
+        .live-badge.active { background: #ff0000; color: white; animation: pulseRed 2s infinite; }
+        .play-btn-fake {
+            width: 60px; height: 60px; background: rgba(255,255,255,0.1);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            border: 2px solid rgba(255,255,255,0.5); color: rgba(255,255,255,0.5);
+            margin-bottom: 10px; transition: all 0.3s;
+        }
+        .festival-status-text { font-family: monospace; font-size: 0.9rem; color: #ddd; text-shadow: 0 2px 4px black; }
+
+        /* COUNTDOWN STYLES */
+        .countdown-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+            width: 100%; max-width: 400px; margin-top: 10px;
+        }
+        .countdown-item {
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; padding: 10px 5px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .cd-number { font-size: 1.5rem; font-weight: 900; color: white; font-family: monospace; line-height: 1; }
+        .cd-label { font-size: 0.6rem; color: #00BFFF; text-transform: uppercase; margin-top: 5px; }
         
         /* TESTI (LYRICS) STYLES */
         .lyrics-container-spotify { width: 100%; height: 180px; overflow-y: auto; padding: 10px 0; text-align: center; margin-top: 20px; mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); scrollbar-width: none; }
@@ -94,6 +153,7 @@
 <body class="ryzn-bg">
 
     <div class="fixed-background"></div>
+    <canvas id="fireworks-canvas"></canvas>
     
     <div id="install-blocker" class="hidden">
         <div class="max-w-md w-full bg-white/10 border border-white/20 p-8 rounded-3xl shadow-2xl relative">
@@ -124,8 +184,7 @@
         <div class="w-full max-w-2xl mx-auto depth-glass bg-ryzn-bg p-6 rounded-2xl shadow-2xl relative">
             <div class="flex items-center mb-4"><input type="text" id="search-input" oninput="performSearch()" placeholder="Cerca..." class="flex-grow p-3 rounded-l-lg bg-white/10 border border-white/20 text-white focus:outline-none"><button onclick="performSearch()" class="p-3 accent-bg rounded-r-lg"><i data-lucide="search" class="w-6 h-6"></i></button></div>
             <div id="search-results" class="max-h-96 overflow-y-auto space-y-3 p-2"><p class="text-center text-gray-500">Inizia a digitare...</p></div>
-            <button onclick="closeSearchModal()" class="absolute top-3 right-3 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button>
-        </div>
+            <button onclick="closeSearchModal()" class="absolute top-3 right-3 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div>
     </div>
 
     <div id="artist-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[160] hidden flex items-center justify-center p-4 modal"><div class="depth-glass bg-ryzn-bg/90 p-0 rounded-3xl w-full max-w-lg shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]"><div class="relative h-48 sm:h-64 w-full"><img id="artist-modal-image" src="" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-ryzn-bg via-transparent"></div><button onclick="closeArtistModal()" class="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-white"><i data-lucide="x" class="w-6 h-6"></i></button><div class="absolute bottom-4 left-6 right-6"><h2 id="artist-modal-name" class="text-4xl font-extrabold text-white"></h2><p id="artist-modal-genre" class="text-gray-300 text-sm font-medium mt-1 badge inline-block px-2 py-1 rounded-md bg-white/10 border border-white/10"></p></div></div><div class="p-6 overflow-y-auto custom-scrollbar"><div class="mb-6"><h4 class="text-accent-text font-bold mb-2 text-sm uppercase">Biografia</h4><p id="artist-modal-bio" class="text-gray-300 text-sm"></p></div><div id="artist-modal-socials" class="flex space-x-4 mt-4 pt-4 border-t border-white/10"></div></div></div></div>
@@ -191,8 +250,8 @@
                     <div class="pt-4 border-t border-white/10">
                         <label class="block text-gray-400 text-sm mb-2" id="txt-language-label">Lingua</label>
                         <select id="language-selector" onchange="changeLanguage(this.value)" class="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white">
-                            <option value="it">Italiano 🇮🇹</option>
                             <option value="en">English 🇬🇧</option>
+                            <option value="it">Italiano 🇮🇹</option>
                             <option value="ro">Română 🇷🇴</option>
                             <option value="de">Deutsch 🇩🇪</option>
                             <option value="es">Español 🇪🇸</option>
@@ -247,14 +306,43 @@
         
         let isTransitioning = false; 
 
+        // UPDATED TRANSLATIONS FOR FESTIVAL
         const TRANSLATIONS={
-            it:{greeting_m:"Buongiorno.",greeting_a:"Buon Pomeriggio.",greeting_e:"Buonasera.",vibe_ready:"La tua Vibe è pronta.",discover:"Scopri",sessions:"Le Tue Sessioni",saved_tracks:"I Tuoi Brani Salvati",profile:"Profilo Utente",login_btn:"Accedi con questo dispositivo",logout_btn:"Disconnetti",search_ph:"Cerca...",create_session:"Crea Sessione",create_session_modal:"Crea Nuova Sessione",add_session:"Aggiungi a Sessione",cancel:"Annulla",create:"Crea",history:"Cronologia Ascolti",language:"Lingua",premium_desc:"Accesso esclusivo attivo.",countdown_lbl:"Scadenza Offerta (1 Aprile)",status_guest:"Stato: Disconnesso",status_user:"Utente ID:",now_playing:"In Riproduzione",quick_access:"🎧 Accesso Rapido",quick_access_sub:"Riclicca per un nuovo brano.",mood_select:"✨ Mood Select",mood_select_sub:"Scegli la vibe perfetta.",trending_title:"🔥 I Più Ascoltati",trending_sub:"Selezione casuale.",results:"Risultati:",results_sub:"Brani filtrati.",back_home:"Torna alla Home",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Hit atmosfera.",cat_cr2_title:"🕯️ CR2 - Ballate e Relax",cat_cr2_sub:"Melodie lente.",cat_cr3_title:"🔔 CR3 - I Classici",cat_cr3_sub:"Tracce tradizionali.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Musica strumentale.",promo_title:"Ryzn Top 4",promo_sub:"RYZN Music Group"},
-            en:{greeting_m:"Good Morning.",greeting_a:"Good Afternoon.",greeting_e:"Good Evening.",vibe_ready:"Your Vibe is ready.",discover:"Discover",sessions:"Your Sessions",saved_tracks:"Saved Tracks",profile:"User Profile",login_btn:"Login with this device",logout_btn:"Logout",search_ph:"Search...",create_session:"Create Session",create_session_modal:"New Session",add_session:"Add to Session",cancel:"Cancel",create:"Create",history:"Listening History",language:"Language",premium_desc:"Exclusive access active.",countdown_lbl:"Offer Expires (April 1st)",status_guest:"Status: Guest",status_user:"User ID:",now_playing:"Now Playing",quick_access:"🎧 Quick Access",quick_access_sub:"Click again.",mood_select:"✨ Mood Select",mood_select_sub:"Choose vibe.",trending_title:"🔥 Trending Now",trending_sub:"Random selection.",results:"Results:",results_sub:"Filtered tracks.",back_home:"Back to Home",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Pop songs.",cat_cr2_title:"🕯️ CR2 - Ballads & Relax",cat_cr2_sub:"Slow melodies.",cat_cr3_title:"🔔 CR3 - Classics",cat_cr3_sub:"Traditional tracks.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumental music.",promo_title:"Ryzn Top 4",promo_sub:"RYZN Music Group"},
-            ro:{greeting_m:"Bună dimineața.",greeting_a:"Bună ziua.",greeting_e:"Bună seara.",vibe_ready:"Vibe-ul tău este gata.",discover:"Descoperă",sessions:"Sesiunile Tale",saved_tracks:"Melodii Salvate",profile:"Profil Utilizator",login_btn:"Autentificare cu acest dispozitiv",logout_btn:"Deconectare",search_ph:"Căutare...",create_session:"Creează Sesiune",create_session_modal:"Sesiune Nouă",add_session:"Adaugă la Sesiune",cancel:"Anulare",create:"Creează",history:"Istoric Ascultare",language:"Limbă",premium_desc:"Acces exclusiv activ.",countdown_lbl:"Oferta Expiră (1 Aprilie)",status_guest:"Stare: Oaspete",status_user:"Utilizator ID:",now_playing:"Acum Redă",quick_access:"🎧 Acces Rapid",quick_access_sub:"Click din nou pentru o melodie nouă.",mood_select:"✨ Selectare Mood",mood_select_sub:"Alege vibrația perfectă pentru momentul tău.",trending_title:"🔥 Cele mai ascultate",trending_sub:"O selecție aleatorie din cele mai populare sesiuni.",results:"Rezultate:",results_sub:"Melodii filtrate după starea selectată.",back_home:"Înapoi la Acasă",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Melodii pop și hituri pentru a încălzi atmosfera.",cat_cr2_title:"🕯️ CR2 - Balade și Relaxare",cat_cr2_sub:"Melodii lente și dulci pentru seri liniștite și romantice.",cat_cr3_title:"🔔 CR3 - Clasice",cat_cr3_sub:"Piese tradiționale care sunt mereu actuale.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Muzică instrumentală pentru a crea starea perfectă.",promo_title:"Ryzn Top 4",promo_sub:"Grupul Muzical RYZN"},
-            de:{greeting_m:"Guten Morgen.",greeting_a:"Guten Tag.",greeting_e:"Guten Abend.",vibe_ready:"Dein Vibe ist bereit.",discover:"Entdecken",sessions:"Deine Sessions",saved_tracks:"Gespeicherte Titel",profile:"Benutzerprofil",login_btn:"Mit diesem Gerät anmelden",logout_btn:"Abmelden",search_ph:"Suchen...",create_session:"Session erstellen",create_session_modal:"Neue Session",add_session:"Zur Session hinzufügen",cancel:"Abbrechen",create:"Erstellen",history:"Hörverlauf",language:"Sprache",premium_desc:"Exklusiver Zugang aktiv.",countdown_lbl:"Angebot endet (1. April)",status_guest:"Status: Gast",status_user:"Benutzer ID:",now_playing:"Jetzt läuft",quick_access:"🎧 Schnellzugriff",quick_access_sub:"Klicken Sie erneut für einen neuen Titel.",mood_select:"✨ Stimmungswahl",mood_select_sub:"Wähle den perfekten Vibe für deinen Moment.",trending_title:"🔥 Beliebt",trending_sub:"Eine zufällige Auswahl aus unseren beliebtesten Sessions.",results:"Ergebnisse:",results_sub:"Titel gefiltert nach ausgewählter Stimmung.",back_home:"Zurück zur Startseite",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Popsongs und Hits, um die Atmosphäre aufzuwärmen.",cat_cr2_title:"🕯️ CR2 - Balladen & Entspannung",cat_cr2_sub:"Langsame, süße Melodien für ruhige romantische Abende.",cat_cr3_title:"🔔 CR3 - Klassiker",cat_cr3_sub:"Traditionelle Titel, die immer aktuell sind.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumentalmusik für die perfekte Stimmung.",promo_title:"Ryzn Top 4",promo_sub:"RYZN Music Group"},
-            es:{greeting_m:"Buenos días.",greeting_a:"Buenas tardes.",greeting_e:"Buenas noches.",vibe_ready:"Tu Vibe está lista.",discover:"Descubrir",sessions:"Tus Sesiones",saved_tracks:"Canciones Guardadas",profile:"Perfil de Usuario",login_btn:"Acceder con este dispositivo",logout_btn:"Cerrar sesión",search_ph:"Buscar...",create_session:"Crear Sesión",create_session_modal:"Nueva Sesión",add_session:"Añadir a Sesión",cancel:"Cancelar",create:"Crear",history:"Historial de escucha",language:"Idioma",premium_desc:"Acceso exclusivo activo.",countdown_lbl:"Oferta expira (1 de Abril)",status_guest:"Estado: Invitado",status_user:"Usuario ID:",now_playing:"Reproduciendo",quick_access:"🎧 Acceso Rápido",quick_access_sub:"Haz clic de nuevo para una nueva canción.",mood_select:"✨ Selección de Mood",mood_select_sub:"Elige la vibra perfecta para tu momento.",trending_title:"🔥 Tendencias",trending_sub:"Una selección aleatoria de nuestras sesiones más populares.",results:"Resultados:",results_sub:"Canciones filtradas por el estado de ánimo seleccionado.",back_home:"Volver al Inicio",cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Canciones pop y éxitos para calentar el ambiente.",cat_cr2_title:"🕯️ CR2 - Baladas y Relax",cat_cr2_sub:"Melodías lentas y dulces para noches románticas y tranquilas.",cat_cr3_title:"🔔 CR3 - Clásicos",cat_cr3_sub:"Temas tradicionales que siempre son actuales.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Música instrumental para crear el ambiente perfecto.",promo_title:"Ryzn Top 4",promo_sub:"RYZN Music Group"},
-            ru:{greeting_m:"Доброе утро.",greeting_a:"Добрый день.",greeting_e:"Добрый вечер.",vibe_ready:"Твой вайб готов.",discover:"Обзор",sessions:"Твои сессии",saved_tracks:"Сохраненные треки",profile:"Профиль",login_btn:"Войти с этого устройства",logout_btn:"Выйти",search_ph:"Поиск...",create_session:"Создать сессию",create_session_modal:"Новая сессия",add_session:"Добавить в сессию",cancel:"Отмена",create:"Создать",history:"История",language:"Язык",premium_desc:"Эксклюзивный доступ активен.",countdown_lbl:"Предложение истекает (1 апреля)",status_guest:"Статус: Гость",status_user:"ID польз.:",now_playing:"Сейчас играет",quick_access:"🎧 Быстрый доступ",quick_access_sub:"Нажмите снова для нового трека.",mood_select:"✨ Выбор настроения",mood_select_sub:"Выберите идеальный вайб для вашего момента.",trending_title:"🔥 Популярное",trending_sub:"Случайная подборка из наших самых популярных сессий.",results:"Результаты:",results_sub:"Треки, отфильтрованные по выбранному настроению.",back_home:"Назад на главную",cat_cr1_title:"🎄 CR1 - Топ Хиты",cat_cr1_sub:"Поп-песни и хиты, чтобы согреть атмосферу.",cat_cr2_title:"🕯️ CR2 - Баллады и Релакс",cat_cr2_sub:"Медленные, сладкие мелодии для тихих романтических вечеров.",cat_cr3_title:"🔔 CR3 - Классика",cat_cr3_sub:"Традиционные треки, которые всегда актуальны.",cat_cr4_title:"❄️ CR4 - Эмбиент Вайб",cat_cr4_sub:"Инструментальная музыка для создания идеального настроения.",promo_title:"Ryzn Топ 4",promo_sub:"Музыкальная группа RYZN"},
-            ar:{greeting_m:"صباح الخير.",greeting_a:"مساء الخير.",greeting_e:"مساء الخير.",vibe_ready:"أجواؤك جاهزة.",discover:"اكتشف",sessions:"جلساتك",saved_tracks:"الأغاني المحفوظة",profile:"الملف الشخصي",login_btn:"تسجيل الدخول بهذا الجهاز",logout_btn:"تسجيل الخروج",search_ph:"بحث...",create_session:"إنشاء جلسة",create_session_modal:"جلسة جديدة",add_session:"إضافة إلى الجلسة",cancel:"إلغاء",create:"إنشاء",history:"سجل الاستماع",language:"لغة",premium_desc:"وصول حصري نشط.",countdown_lbl:"ينتهي العرض (1 أبريل)",status_guest:"الحالة: ضيف",status_user:"معرف المستخدم:",now_playing:"يتم التشغيل الآن",quick_access:"🎧 الوصول السريع",quick_access_sub:"انقر مرة أخرى للحصول على مقطع جديد.",mood_select:"✨ اختيار المزاج",mood_select_sub:"اختر الأجواء المثالية للحظتك.",trending_title:"🔥 الأكثر رواجاً",trending_sub:"مجموعة مختارة عشوائياً من جلساتنا الأكثر شعبية.",results:"النتائج:",results_sub:"المقاطع التي تمت تصفيتها حسب المزاج المختار.",back_home:"العودة إلى الصفحة الرئيسية",cat_cr1_title:"🎄 CR1 - أفضل الأغاني",cat_cr1_sub:"أغاني البوب والنجاحات لتدفئة الجو.",cat_cr2_title:"🕯️ CR2 - أغاني وقصائد",cat_cr2_sub:"ألحان بطيئة وحلوة لأمسيات رومانسية هادئة.",cat_cr3_title:"🔔 CR3 - كلاسيكيات",cat_cr3_sub:"المقاطع التقليدية التي تكون دائماً حديثة.",cat_cr4_title:"❄️ CR4 - أجواء محيطة",cat_cr4_sub:"موسيقى آلية لخلق المزاج المثالي.",promo_title:"أفضل 4 Ryzn",promo_sub:"مجموعة RYZN الموسيقية"}
+            it:{
+                greeting_m:"Buongiorno.",greeting_a:"Buon Pomeriggio.",greeting_e:"Buonasera.",vibe_ready:"La tua Vibe è pronta.",discover:"Scopri",sessions:"Le Tue Sessioni",saved_tracks:"I Tuoi Brani Salvati",profile:"Profilo Utente",login_btn:"Accedi con questo dispositivo",logout_btn:"Disconnetti",search_ph:"Cerca...",create_session:"Crea Sessione",create_session_modal:"Crea Nuova Sessione",add_session:"Aggiungi a Sessione",cancel:"Annulla",create:"Crea",history:"Cronologia Ascolti",language:"Lingua",premium_desc:"Accesso esclusivo attivo.",countdown_lbl:"Scadenza Offerta (1 Aprile)",status_guest:"Stato: Disconnesso",status_user:"Utente ID:",now_playing:"In Riproduzione",quick_access:"🎧 Accesso Rapido",quick_access_sub:"Riclicca per un nuovo brano.",mood_select:"✨ Mood Select",mood_select_sub:"Scegli la vibe perfetta.",trending_title:"🔥 I Più Ascoltati",trending_sub:"Selezione casuale.",results:"Risultati:",results_sub:"Brani filtrati.",back_home:"Torna alla Home",
+                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Hit atmosfera.",cat_cr2_title:"🕯️ CR2 - Ballate e Relax",cat_cr2_sub:"Melodie lente.",cat_cr3_title:"🔔 CR3 - I Classici",cat_cr3_sub:"Tracce tradizionali.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Musica strumentale.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Diretta da Bucarest", live_offline:"OFFLINE - INIZIA PRESTO", live_soon:"IL LIVE INIZIA A CAPODANNO"
+            },
+            en:{
+                greeting_m:"Good Morning.",greeting_a:"Good Afternoon.",greeting_e:"Good Evening.",vibe_ready:"Your Vibe is ready.",discover:"Discover",sessions:"Your Sessions",saved_tracks:"Saved Tracks",profile:"User Profile",login_btn:"Login with this device",logout_btn:"Logout",search_ph:"Search...",create_session:"Create Session",create_session_modal:"New Session",add_session:"Add to Session",cancel:"Cancel",create:"Create",history:"Listening History",language:"Language",premium_desc:"Exclusive access active.",countdown_lbl:"Offer Expires (April 1st)",status_guest:"Status: Guest",status_user:"User ID:",now_playing:"Now Playing",quick_access:"🎧 Quick Access",quick_access_sub:"Click again.",mood_select:"✨ Mood Select",mood_select_sub:"Choose vibe.",trending_title:"🔥 Trending Now",trending_sub:"Random selection.",results:"Results:",results_sub:"Filtered tracks.",back_home:"Back to Home",
+                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Pop songs.",cat_cr2_title:"🕯️ CR2 - Ballads & Relax",cat_cr2_sub:"Slow melodies.",cat_cr3_title:"🔔 CR3 - Classics",cat_cr3_sub:"Traditional tracks.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumental music.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live from Bucharest", live_offline:"OFFLINE - STARTING SOON", live_soon:"LIVE STARTS ON NYE"
+            },
+            ro:{
+                greeting_m:"Bună dimineața.",greeting_a:"Bună ziua.",greeting_e:"Bună seara.",vibe_ready:"Vibe-ul tău este gata.",discover:"Descoperă",sessions:"Sesiunile Tale",saved_tracks:"Melodii Salvate",profile:"Profil Utilizator",login_btn:"Autentificare cu acest dispozitiv",logout_btn:"Deconectare",search_ph:"Căutare...",create_session:"Creează Sesiune",create_session_modal:"Sesiune Nouă",add_session:"Adaugă la Sesiune",cancel:"Anulare",create:"Creează",history:"Istoric Ascultare",language:"Limbă",premium_desc:"Acces exclusiv activ.",countdown_lbl:"Oferta Expiră (1 Aprilie)",status_guest:"Stare: Oaspete",status_user:"Utilizator ID:",now_playing:"Acum Redă",quick_access:"🎧 Acces Rapid",quick_access_sub:"Click din nou pentru o melodie nouă.",mood_select:"✨ Selectare Mood",mood_select_sub:"Alege vibrația perfectă pentru momentul tău.",trending_title:"🔥 Cele mai ascultate",trending_sub:"O selecție aleatorie din cele mai populare sesiuni.",results:"Rezultate:",results_sub:"Melodii filtrate după starea selectată.",back_home:"Înapoi la Acasă",
+                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Melodii pop.",cat_cr2_title:"🕯️ CR2 - Balade și Relaxare",cat_cr2_sub:"Melodii lente.",cat_cr3_title:"🔔 CR3 - Clasice",cat_cr3_sub:"Piese tradiționale.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Muzică instrumentală.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live din București", live_offline:"OFFLINE - ÎNCEPE CURÂND", live_soon:"LIVE DE REVELION"
+            },
+            de:{
+                greeting_m:"Guten Morgen.",greeting_a:"Guten Tag.",greeting_e:"Guten Abend.",vibe_ready:"Dein Vibe ist bereit.",discover:"Entdecken",sessions:"Deine Sessions",saved_tracks:"Gespeicherte Titel",profile:"Benutzerprofil",login_btn:"Mit diesem Gerät anmelden",logout_btn:"Abmelden",search_ph:"Suchen...",create_session:"Session erstellen",create_session_modal:"Neue Session",add_session:"Zur Session hinzufügen",cancel:"Abbrechen",create:"Erstellen",history:"Hörverlauf",language:"Sprache",premium_desc:"Exklusiver Zugang aktiv.",countdown_lbl:"Angebot endet (1. April)",status_guest:"Status: Gast",status_user:"Benutzer ID:",now_playing:"Jetzt läuft",quick_access:"🎧 Schnellzugriff",quick_access_sub:"Klicken Sie erneut für einen neuen Titel.",mood_select:"✨ Stimmungswahl",mood_select_sub:"Wähle den perfekten Vibe für deinen Moment.",trending_title:"🔥 Beliebt",trending_sub:"Eine zufällige Auswahl aus unseren beliebtesten Sessions.",results:"Ergebnisse:",results_sub:"Titel gefiltert nach ausgewählter Stimmung.",back_home:"Zurück zur Startseite",
+                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Popsongs.",cat_cr2_title:"🕯️ CR2 - Balladen & Entspannung",cat_cr2_sub:"Langsame Melodien.",cat_cr3_title:"🔔 CR3 - Klassiker",cat_cr3_sub:"Traditionelle Titel.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumentalmusik.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live aus Bukarest", live_offline:"OFFLINE - STARTET BALD", live_soon:"LIVE ZU SILVESTER"
+            },
+            es:{
+                greeting_m:"Buenos días.",greeting_a:"Buenas tardes.",greeting_e:"Buenas noches.",vibe_ready:"Tu Vibe está lista.",discover:"Descubrir",sessions:"Tus Sesiones",saved_tracks:"Canciones Guardadas",profile:"Perfil de Usuario",login_btn:"Acceder con este dispositivo",logout_btn:"Cerrar sesión",search_ph:"Buscar...",create_session:"Crear Sesión",create_session_modal:"Nueva Sesión",add_session:"Añadir a Sesión",cancel:"Cancelar",create:"Crear",history:"Historial de escucha",language:"Idioma",premium_desc:"Acceso exclusivo activo.",countdown_lbl:"Oferta expira (1 de Abril)",status_guest:"Estado: Invitado",status_user:"Usuario ID:",now_playing:"Reproduciendo",quick_access:"🎧 Acceso Rápido",quick_access_sub:"Haz clic de nuevo para una nueva canción.",mood_select:"✨ Selección de Mood",mood_select_sub:"Elige la vibra perfecta para tu momento.",trending_title:"🔥 Tendencias",trending_sub:"Una selección aleatoria de nuestras sesiones más populares.",results:"Resultados:",results_sub:"Canciones filtradas por el estado de ánimo seleccionado.",back_home:"Volver al Inicio",
+                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Canciones pop.",cat_cr2_title:"🕯️ CR2 - Baladas y Relax",cat_cr2_sub:"Melodías lentas.",cat_cr3_title:"🔔 CR3 - Clásicos",cat_cr3_sub:"Temas tradicionales.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Música instrumental.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"En vivo desde Bucarest", live_offline:"OFFLINE - EMPIEZA PRONTO", live_soon:"EN VIVO EN AÑO NUEVO"
+            },
+            ru:{
+                greeting_m:"Доброе утро.",greeting_a:"Добрый день.",greeting_e:"Добрый вечер.",vibe_ready:"Твой вайб готов.",discover:"Обзор",sessions:"Твои сессии",saved_tracks:"Сохраненные треки",profile:"Профиль",login_btn:"Войти с этого устройства",logout_btn:"Выйти",search_ph:"Поиск...",create_session:"Создать сессию",create_session_modal:"Новая сессия",add_session:"Добавить в сессию",cancel:"Отмена",create:"Создать",history:"История",language:"Язык",premium_desc:"Эксклюзивный доступ активен.",countdown_lbl:"Предложение истекает (1 апреля)",status_guest:"Статус: Гость",status_user:"ID польз.:",now_playing:"Сейчас играет",quick_access:"🎧 Быстрый доступ",quick_access_sub:"Нажмите снова для нового трека.",mood_select:"✨ Выбор настроения",mood_select_sub:"Выберите идеальный вайб для вашего момента.",trending_title:"🔥 Популярное",trending_sub:"Случайная подборка из наших самых популярных сессий.",results:"Результаты:",results_sub:"Треки, отфильтрованные по выбранному настроению.",back_home:"Назад на главную",
+                cat_cr1_title:"🎄 CR1 - Топ Хиты",cat_cr1_sub:"Поп-песни.",cat_cr2_title:"🕯️ CR2 - Баллады и Релакс",cat_cr2_sub:"Медленные мелодии.",cat_cr3_title:"🔔 CR3 - Классика",cat_cr3_sub:"Традиционные треки.",cat_cr4_title:"❄️ CR4 - Эмбиент Вайб",cat_cr4_sub:"Инструментальная музыка.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Прямой эфир из Бухареста", live_offline:"ОФФЛАЙН - СКОРО", live_soon:"ПРЯМОЙ ЭФИР В НОВЫЙ ГОД"
+            },
+            ar:{
+                greeting_m:"صباح الخير.",greeting_a:"مساء الخير.",greeting_e:"مساء الخير.",vibe_ready:"أجواؤك جاهزة.",discover:"اكتشف",sessions:"جلساتك",saved_tracks:"الأغاني المحفوظة",profile:"الملف الشخصي",login_btn:"تسجيل الدخول بهذا الجهاز",logout_btn:"تسجيل الخروج",search_ph:"بحث...",create_session:"إنشاء جلسة",create_session_modal:"جلسة جديدة",add_session:"إضافة إلى الجلسة",cancel:"إلغاء",create:"إنشاء",history:"سجل الاستماع",language:"لغة",premium_desc:"وصول حصري نشط.",countdown_lbl:"ينتهي العرض (1 أبريل)",status_guest:"الحالة: ضيف",status_user:"معرف المستخدم:",now_playing:"يتم التشغيل الآن",quick_access:"🎧 الوصول السريع",quick_access_sub:"انقر مرة أخرى للحصول على مقطع جديد.",mood_select:"✨ اختيار المزاج",mood_select_sub:"اختر الأجواء المثالية للحظتك.",trending_title:"🔥 الأكثر رواجاً",trending_sub:"مجموعة مختارة عشوائياً من جلساتنا الأكثر شعبية.",results:"النتائج:",results_sub:"المقاطع التي تمت تصفيتها حسب المزاج المختار.",back_home:"العودة إلى الصفحة الرئيسية",
+                cat_cr1_title:"🎄 CR1 - أفضل الأغاني",cat_cr1_sub:"أغاني البوب.",cat_cr2_title:"🕯️ CR2 - أغاني وقصائد",cat_cr2_sub:"ألحان بطيئة.",cat_cr3_title:"🔔 CR3 - كلاسيكيات",cat_cr3_sub:"المقاطع التقليدية.",cat_cr4_title:"❄️ CR4 - أجواء محيطة",cat_cr4_sub:"موسيقى آلية.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"مباشر من بوخارست", live_offline:"غير متصل - يبدأ قريباً", live_soon:"المباشر يبدأ في رأس السنة"
+            }
         };
         const CATEGORY_KEYS_MAP = { 'CR1': { titleKey: 'cat_cr1_title', subKey: 'cat_cr1_sub' }, 'CR2': { titleKey: 'cat_cr2_title', subKey: 'cat_cr2_sub' }, 'CR3': { titleKey: 'cat_cr3_title', subKey: 'cat_cr3_sub' }, 'CR4': { titleKey: 'cat_cr4_title', subKey: 'cat_cr4_sub' } };
         const MOOD_STYLES = { "Invernale": "bg-blue-900/40 border-blue-600 text-blue-300", "Party": "bg-red-900/40 border-red-600 text-red-300", "Ambient": "bg-gray-800/40 border-gray-600 text-gray-300", "Chill": "bg-cyan-900/40 border-cyan-600 text-cyan-300" };
@@ -269,19 +357,86 @@
             if (isStandalone || isIOS) {
                 blocker.classList.add('hidden'); document.body.style.overflow = 'auto';
             } else {
-                // Rimosso il commento per attivare il blocco, come richiesto
                 blocker.classList.remove('hidden'); document.body.style.overflow = 'hidden';
             }
         }
         
-        // FIX GATEKEEPER: Se l'utente clicca ma è nel browser, ricarica e il blocco torna.
         function forceRecheckPWA() { 
             window.location.reload();
         }
         
         window.addEventListener('load', checkPWAStatus);
-        // Aggiunta per compatibilità iOS cache
         window.addEventListener('pageshow', checkPWAStatus);
+
+        // --- FIREWORKS ANIMATION (Background) ---
+        const fwCanvas = document.getElementById('fireworks-canvas');
+        const fwCtx = fwCanvas.getContext('2d');
+        let fwParticles = [];
+        
+        function resizeFireworks() { fwCanvas.width = window.innerWidth; fwCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeFireworks);
+        resizeFireworks();
+
+        function createFirework() {
+            const x = Math.random() * fwCanvas.width;
+            const y = fwCanvas.height;
+            const targetY = Math.random() * (fwCanvas.height * 0.5);
+            const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            
+            // Launch particle
+            fwParticles.push({ x, y, vx: 0, vy: - (Math.random() * 4 + 8), targetY, color, type: 'launch', alpha: 1 });
+        }
+
+        function createExplosion(x, y, color) {
+            for (let i = 0; i < 50; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 4;
+                fwParticles.push({
+                    x, y, 
+                    vx: Math.cos(angle) * speed, 
+                    vy: Math.sin(angle) * speed, 
+                    color, alpha: 1, type: 'explode', decay: Math.random() * 0.02 + 0.01
+                });
+            }
+        }
+
+        function animateFireworks() {
+            fwCtx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
+            // Leggero trail
+            // fwCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; fwCtx.fillRect(0, 0, fwCanvas.width, fwCanvas.height);
+
+            if (Math.random() < 0.02) createFirework(); // Spawn rate
+
+            for (let i = fwParticles.length - 1; i >= 0; i--) {
+                let p = fwParticles[i];
+                
+                if (p.type === 'launch') {
+                    p.x += p.vx; p.y += p.vy;
+                    p.vy += 0.05; // Gravity
+                    if (p.vy >= 0 || p.y <= p.targetY) {
+                        createExplosion(p.x, p.y, p.color);
+                        fwParticles.splice(i, 1);
+                    } else {
+                        fwCtx.beginPath(); fwCtx.arc(p.x, p.y, 2, 0, Math.PI*2); fwCtx.fillStyle = p.color; fwCtx.fill();
+                    }
+                } else {
+                    p.x += p.vx; p.y += p.vy;
+                    p.vy += 0.05; // Gravity
+                    p.alpha -= p.decay;
+                    if (p.alpha <= 0) {
+                        fwParticles.splice(i, 1);
+                    } else {
+                        fwCtx.save();
+                        fwCtx.globalAlpha = p.alpha;
+                        fwCtx.beginPath(); fwCtx.arc(p.x, p.y, 1.5, 0, Math.PI*2); fwCtx.fillStyle = p.color; fwCtx.fill();
+                        fwCtx.restore();
+                    }
+                }
+            }
+            requestAnimationFrame(animateFireworks);
+        }
+        animateFireworks();
+
 
         // --- CORE FUNCTIONS ---
         
@@ -295,10 +450,8 @@
             updateListeningHistory(trackId);
             if (immersiveVideoPlayer) immersiveVideoPlayer.src = '';
             
-            // Audio Start
             audioPlayer.src = track.audioUrl;
             
-            // AGGIORNAMENTO MEDIA SESSION
             updateMediaSession();
             
             audioPlayer.play().then(() => {
@@ -315,7 +468,6 @@
             updateUI(track);
         }
 
-        // UPDATE PROGRESS CON PRE-END SKIP
         function updateProgress() { 
             if(audioPlayer && progressBar) {
                 const duration = audioPlayer.duration;
@@ -324,7 +476,6 @@
                 progressBar.style.width = (currentTime/duration)*100 + '%'; 
                 if(progressBarImmersive) progressBarImmersive.style.width = progressBar.style.width; 
                 
-                // FIX IOS BACKGROUND
                 if (duration > 0 && (duration - currentTime) < 0.5 && !audioPlayer.paused && !isTransitioning) {
                     isTransitioning = true;
                     if (isLooping) { audioPlayer.currentTime = 0; audioPlayer.play(); isTransitioning = false; }
@@ -368,11 +519,9 @@
 
         function setupMediaSessionHandlers() { 
             if('mediaSession' in navigator) {
-                // DISABILITA ESPLICITAMENTE PLAY/PAUSE NEL CENTRO DI CONTROLLO
                 navigator.mediaSession.setActionHandler('play', null);
                 navigator.mediaSession.setActionHandler('pause', null);
                 
-                // MANTIENE ATTIVI SOLO SKIP E SEEK
                 navigator.mediaSession.setActionHandler('previoustrack', ()=>skipBackward());
                 navigator.mediaSession.setActionHandler('nexttrack', ()=>skipForward());
                 navigator.mediaSession.setActionHandler('seekto', (d) => {
@@ -381,12 +530,9 @@
             }
         }
 
-        // ... (Altre funzioni standard) ...
-        
         function parseLRC(t){const l=t.split('\n'),r=[],g=/\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\]/;l.forEach(x=>{const m=g.exec(x);if(m){r.push({time:parseInt(m[1])*60+parseInt(m[2])+(m[3]?parseInt(m[3])/1000:0),text:x.replace(g,'').trim()})}});return r}
         async function loadLyrics(u){if(!u){currentLyrics=[];updateLyricsUI();return}try{const r=await fetch(u);if(r.ok)currentLyrics=parseLRC(await r.text());else currentLyrics=[]}catch(e){currentLyrics=[]}updateLyricsUI()}
         
-        // FIX LYRICS UI: Mostra il contenitore se ci sono testi
         function updateLyricsUI(){
             if(!lyricsContainer) return;
             if(currentLyrics.length > 0) {
@@ -450,7 +596,6 @@
             if (confirm("Logout?")) { loggedInUser = null; saveLocalData(); updateAuthUI(null); showSection('music'); }
         }
         
-        // FIX ICONA PROFILO: Aggiunto lucide.createIcons() alla fine
         function updateAuthUI(u) {
             if(u) {
                  const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en'];
@@ -464,7 +609,7 @@
                  const statusGuest = t.status_guest || "Status: Guest";
                  document.getElementById('profile-info').textContent = statusGuest;
             }
-            lucide.createIcons(); // FIX: Ridisegna l'icona
+            lucide.createIcons();
         }
 
         function updateLanguageUI() {
@@ -480,7 +625,12 @@
             updateAuthUI(loggedInUser);
         }
 
-        function changeLanguage(lang) { currentLang = lang; localStorage.setItem('aura_lang', lang); updateLanguageUI(); if(document.getElementById('music-section').classList.contains('active')) renderHomePageWidgets(); }
+        function changeLanguage(lang) { 
+            currentLang = lang; 
+            localStorage.setItem('aura_lang', lang); 
+            updateLanguageUI(); 
+            if(document.getElementById('music-section').classList.contains('active')) renderHomePageWidgets(); 
+        }
 
         // Modal Openers
         function openArtistProfile(aid) {
@@ -575,11 +725,28 @@
             if (AURA_MAP.length === 0) { if(container.innerHTML.indexOf('Err')===-1) container.innerHTML = '<p>Loading...</p>'; return; }
             
             let html = '';
-            // Promo Banner
-            const best = AURA_MAP.filter(t=>t.categoryID==='Ryzn Best').slice(0,4);
-            if(best.length) {
-                html += `<div class="promo-banner"><h3 class="promo-title">${t.promo_title}</h3><div class="grid grid-cols-2 gap-2 sm:gap-4 w-full">${best.map(tr=>`<div onclick="playTrack('${tr.id}')" class="bg-white/10 backdrop-blur p-2 rounded-xl flex items-center space-x-2 cursor-pointer"><img src="${tr.cover}" class="w-10 h-10 rounded-lg"><div class="min-w-0"><p class="font-bold text-sm truncate text-white">${tr.title}</p></div></div>`).join('')}</div><div id="promo-countdown-text" class="promo-countdown"></div></div>`;
-            }
+            
+            // --- NEW FESTIVAL BANNER ---
+            html += `<div class="promo-banner">
+                <h3 class="promo-title">${t.promo_fest_title}</h3>
+                <p class="promo-subtitle">${t.promo_fest_sub}</p>
+                
+                <div class="festival-player-container">
+                    <div class="festival-poster"></div>
+                    <div class="festival-overlay">
+                        <div class="live-badge"><div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div> ${t.live_offline.split('-')[0]}</div>
+                        <div class="play-btn-fake"><i data-lucide="play" class="w-8 h-8 fill-current"></i></div>
+                        <p class="festival-status-text">${t.live_soon}</p>
+                    </div>
+                </div>
+
+                <div class="countdown-grid" id="festival-countdown">
+                    <div class="countdown-item"><span class="cd-number" id="cd-days">00</span><span class="cd-label">Days</span></div>
+                    <div class="countdown-item"><span class="cd-number" id="cd-hours">00</span><span class="cd-label">Hours</span></div>
+                    <div class="countdown-item"><span class="cd-number" id="cd-mins">00</span><span class="cd-label">Mins</span></div>
+                    <div class="countdown-item"><span class="cd-number" id="cd-secs">00</span><span class="cd-label">Secs</span></div>
+                </div>
+            </div>`;
 
             // Categories
             CATEGORY_KEYS.forEach(catID => {
@@ -596,11 +763,37 @@
         }
 
         function startCountdownTicker() {
-             const el = document.getElementById('promo-countdown-text'); const elP = document.getElementById('premium-countdown-timer');
+             const daysEl = document.getElementById('cd-days');
+             const hoursEl = document.getElementById('cd-hours');
+             const minsEl = document.getElementById('cd-mins');
+             const secsEl = document.getElementById('cd-secs');
+             const premiumEl = document.getElementById('premium-countdown-timer');
+
+             // TARGET: BUCHAREST NEW YEAR (GMT+2) => Dec 31 2024, 24:00:00 GMT+2
+             // This is equivalent to Jan 1 2025 00:00:00 GMT+2
+             // const targetDate = new Date("2025-01-01T00:00:00+02:00");
+             // For safety in older browsers/simplicity:
+             // Note: Dec 31 22:00 UTC is Bucharest Midnight.
+             const targetDate = Date.UTC(2024, 11, 31, 22, 0, 0); 
+
              function update() {
-                 const now = new Date();
-                 if(el) { el.textContent = "Christmas Soon!"; }
-                 if(elP) { const diff = new Date(now.getFullYear(), 3, 1) - now; elP.textContent = Math.floor(diff/86400000) + "g"; }
+                 const now = new Date().getTime();
+                 const diff = targetDate - now;
+
+                 if (diff > 0) {
+                     if(daysEl) daysEl.innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+                     if(hoursEl) hoursEl.innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+                     if(minsEl) minsEl.innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+                     if(secsEl) secsEl.innerText = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
+                 } else {
+                     if(daysEl) document.querySelector('.festival-status-text').textContent = "LIVE NOW";
+                 }
+                 
+                 // Premium ticker
+                 if(premiumEl) { 
+                     const diffP = new Date(new Date().getFullYear(), 3, 1) - new Date(); 
+                     premiumEl.textContent = Math.max(0, Math.floor(diffP/86400000)) + "g"; 
+                 }
              }
              update(); setInterval(update, 1000);
         }
@@ -667,7 +860,7 @@
             else if(sid==='playlists') renderPlaylists();
             else if(sid==='profile') renderHistory();
             updateLanguageUI();
-            lucide.createIcons(); // FIX: Ridisegna le icone al cambio sezione
+            lucide.createIcons(); 
         }
 
         // --- FUNZIONI SHARE (CONDIVISIONE) ---
@@ -774,6 +967,11 @@
             
             loadLocalData(); 
             getDOMElements(); 
+            
+            // FIX: Ensure Language Selector Matches Internal State
+            const langSel = document.getElementById('language-selector');
+            if(langSel) langSel.value = currentLang;
+
             await fetchTracks(); 
             updateAmbientLight('#00BFFF', '0 191 255'); 
             showSection('music');
