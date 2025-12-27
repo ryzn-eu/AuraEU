@@ -43,18 +43,17 @@
         .title-wrapper { overflow: hidden; white-space: nowrap; } .marquee { display: inline-block; animation: marquee 10s linear infinite; padding-left: 100%; animation-play-state: paused; } .title-wrapper.is-long .marquee { animation-play-state: running; } @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
         .horizontal-scroll { display: flex; overflow-x: auto; padding-bottom: 1rem; gap: 1rem; scrollbar-width: thin; } .horizontal-widget-item { flex: 0 0 160px; width: 160px; }
         
-        /* --- PROMO BANNER STYLES (FESTIVAL EDITION) --- */
+        /* --- PROMO BANNER STYLES (CORRETTO PER LEGGIBILITA) --- */
         .promo-banner {
-            background: linear-gradient(160deg, rgba(0, 30, 60, 0.8), rgba(0, 0, 0, 0.9)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop'); 
-            background-blend-mode: overlay;
+            /* Sfondo scuro con gradiente pesante per leggibilità testo */
+            background: linear-gradient(to bottom, rgba(13, 13, 13, 0.9), rgba(0, 20, 40, 0.85)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop'); 
             background-size: cover;
             background-position: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 191, 255, 0.3);
+            border: 1px solid rgba(0, 191, 255, 0.15);
             border-radius: 24px;
-            padding: 30px 24px;
+            padding: 30px 20px;
             margin-bottom: 40px;
-            box-shadow: 0 10px 40px -10px rgba(0, 191, 255, 0.3);
+            box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.7);
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -62,75 +61,99 @@
             position: relative;
             overflow: hidden;
         }
-        .promo-banner::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-            background: linear-gradient(90deg, transparent, #00BFFF, transparent);
-            animation: scanline 4s infinite linear;
-        }
-        @keyframes scanline { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
         .promo-title {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 900;
             text-align: center;
             color: white;
             margin-bottom: 5px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 30px rgba(0, 191, 255, 0.8);
+            letter-spacing: 1px;
+            /* Ombra testo per contrasto massimo */
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
             line-height: 1.1;
         }
         .promo-subtitle {
-            font-size: 1rem; color: #00BFFF; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 25px;
+            font-size: 0.95rem; 
+            color: #40CFFF; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            margin-bottom: 25px;
+            text-shadow: 0 2px 5px rgba(0,0,0,1);
         }
 
-        /* FAKE PLAYER STYLES */
+        /* FAKE PLAYER STYLES (RIDISEGNATO) */
         .festival-player-container {
-            width: 100%; max-width: 500px; aspect-ratio: 16/9;
-            background: #000; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.2);
+            width: 100%; max-width: 450px; aspect-ratio: 16/9;
+            background: #000; border-radius: 20px;
             position: relative; overflow: hidden;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .festival-poster {
             position: absolute; inset: 0; 
             background-image: url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop');
-            background-size: cover; background-position: center; opacity: 0.6;
+            background-size: cover; background-position: center; opacity: 0.5;
+            transition: opacity 0.5s;
         }
-        .festival-overlay {
-            z-index: 10; background: rgba(0,0,0,0.4); padding: 10px 20px; border-radius: 50px;
-            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1);
-            display: flex; flex-direction: column; items-center;
+        .festival-player-container:hover .festival-poster { opacity: 0.7; }
+        
+        .glass-overlay-player {
+            position: absolute; inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(2px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
+
         .live-badge {
-            position: absolute; top: 10px; left: 10px;
-            background: #333; color: #888; padding: 4px 8px; border-radius: 4px;
-            font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
-            display: flex; items-center; gap: 5px; z-index: 20;
+            position: absolute; top: 15px; left: 15px;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            color: #aaa; padding: 6px 12px; border-radius: 8px;
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+            display: flex; items-center; gap: 6px; border: 1px solid rgba(255,255,255,0.1);
         }
-        .live-badge.active { background: #ff0000; color: white; animation: pulseRed 2s infinite; }
+        
         .play-btn-fake {
-            width: 60px; height: 60px; background: rgba(255,255,255,0.1);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            border: 2px solid rgba(255,255,255,0.5); color: rgba(255,255,255,0.5);
-            margin-bottom: 10px; transition: all 0.3s;
+            width: 70px; height: 70px; 
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(255,255,255,0.3); 
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-        .festival-status-text { font-family: monospace; font-size: 0.9rem; color: #ddd; text-shadow: 0 2px 4px black; }
+        .festival-player-container:hover .play-btn-fake {
+            transform: scale(1.1);
+            background: rgba(0, 191, 255, 0.8);
+            border-color: transparent;
+            box-shadow: 0 0 30px rgba(0, 191, 255, 0.5);
+        }
+
+        .festival-status-text { 
+            margin-top: 15px;
+            font-size: 0.8rem; font-weight: 600; letter-spacing: 1px;
+            color: rgba(255,255,255,0.7); text-transform: uppercase;
+        }
 
         /* COUNTDOWN STYLES */
         .countdown-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
-            width: 100%; max-width: 400px; margin-top: 10px;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+            width: 100%; max-width: 380px; 
         }
         .countdown-item {
-            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px; padding: 10px 5px;
+            background: rgba(0,0,0,0.4); 
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px; padding: 12px 0;
             display: flex; flex-direction: column; align-items: center;
         }
-        .cd-number { font-size: 1.5rem; font-weight: 900; color: white; font-family: monospace; line-height: 1; }
-        .cd-label { font-size: 0.6rem; color: #00BFFF; text-transform: uppercase; margin-top: 5px; }
+        .cd-number { font-size: 1.4rem; font-weight: 800; color: white; font-family: monospace; line-height: 1; text-shadow: 0 2px 4px black; }
+        .cd-label { font-size: 0.6rem; color: #888; text-transform: uppercase; margin-top: 4px; font-weight: 600; }
         
         /* TESTI (LYRICS) STYLES */
         .lyrics-container-spotify { width: 100%; height: 180px; overflow-y: auto; padding: 10px 0; text-align: center; margin-top: 20px; mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); scrollbar-width: none; }
@@ -311,37 +334,37 @@
             it:{
                 greeting_m:"Buongiorno.",greeting_a:"Buon Pomeriggio.",greeting_e:"Buonasera.",vibe_ready:"La tua Vibe è pronta.",discover:"Scopri",sessions:"Le Tue Sessioni",saved_tracks:"I Tuoi Brani Salvati",profile:"Profilo Utente",login_btn:"Accedi con questo dispositivo",logout_btn:"Disconnetti",search_ph:"Cerca...",create_session:"Crea Sessione",create_session_modal:"Crea Nuova Sessione",add_session:"Aggiungi a Sessione",cancel:"Annulla",create:"Crea",history:"Cronologia Ascolti",language:"Lingua",premium_desc:"Accesso esclusivo attivo.",countdown_lbl:"Scadenza Offerta (1 Aprile)",status_guest:"Stato: Disconnesso",status_user:"Utente ID:",now_playing:"In Riproduzione",quick_access:"🎧 Accesso Rapido",quick_access_sub:"Riclicca per un nuovo brano.",mood_select:"✨ Mood Select",mood_select_sub:"Scegli la vibe perfetta.",trending_title:"🔥 I Più Ascoltati",trending_sub:"Selezione casuale.",results:"Risultati:",results_sub:"Brani filtrati.",back_home:"Torna alla Home",
                 cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Hit atmosfera.",cat_cr2_title:"🕯️ CR2 - Ballate e Relax",cat_cr2_sub:"Melodie lente.",cat_cr3_title:"🔔 CR3 - I Classici",cat_cr3_sub:"Tracce tradizionali.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Musica strumentale.",
-                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Diretta da Bucarest", live_offline:"OFFLINE - INIZIA PRESTO", live_soon:"IL LIVE INIZIA A CAPODANNO"
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Diretta da Bucarest", live_offline:"OFFLINE", live_soon:"IL LIVE INIZIA ALLE 23:00"
             },
             en:{
                 greeting_m:"Good Morning.",greeting_a:"Good Afternoon.",greeting_e:"Good Evening.",vibe_ready:"Your Vibe is ready.",discover:"Discover",sessions:"Your Sessions",saved_tracks:"Saved Tracks",profile:"User Profile",login_btn:"Login with this device",logout_btn:"Logout",search_ph:"Search...",create_session:"Create Session",create_session_modal:"New Session",add_session:"Add to Session",cancel:"Cancel",create:"Create",history:"Listening History",language:"Language",premium_desc:"Exclusive access active.",countdown_lbl:"Offer Expires (April 1st)",status_guest:"Status: Guest",status_user:"User ID:",now_playing:"Now Playing",quick_access:"🎧 Quick Access",quick_access_sub:"Click again.",mood_select:"✨ Mood Select",mood_select_sub:"Choose vibe.",trending_title:"🔥 Trending Now",trending_sub:"Random selection.",results:"Results:",results_sub:"Filtered tracks.",back_home:"Back to Home",
                 cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Pop songs.",cat_cr2_title:"🕯️ CR2 - Ballads & Relax",cat_cr2_sub:"Slow melodies.",cat_cr3_title:"🔔 CR3 - Classics",cat_cr3_sub:"Traditional tracks.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumental music.",
-                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live from Bucharest", live_offline:"OFFLINE - STARTING SOON", live_soon:"LIVE STARTS ON NYE"
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live from Bucharest", live_offline:"OFFLINE", live_soon:"LIVE STARTS AT 23:00"
             },
             ro:{
                 greeting_m:"Bună dimineața.",greeting_a:"Bună ziua.",greeting_e:"Bună seara.",vibe_ready:"Vibe-ul tău este gata.",discover:"Descoperă",sessions:"Sesiunile Tale",saved_tracks:"Melodii Salvate",profile:"Profil Utilizator",login_btn:"Autentificare cu acest dispozitiv",logout_btn:"Deconectare",search_ph:"Căutare...",create_session:"Creează Sesiune",create_session_modal:"Sesiune Nouă",add_session:"Adaugă la Sesiune",cancel:"Anulare",create:"Creează",history:"Istoric Ascultare",language:"Limbă",premium_desc:"Acces exclusiv activ.",countdown_lbl:"Oferta Expiră (1 Aprilie)",status_guest:"Stare: Oaspete",status_user:"Utilizator ID:",now_playing:"Acum Redă",quick_access:"🎧 Acces Rapid",quick_access_sub:"Click din nou pentru o melodie nouă.",mood_select:"✨ Selectare Mood",mood_select_sub:"Alege vibrația perfectă pentru momentul tău.",trending_title:"🔥 Cele mai ascultate",trending_sub:"O selecție aleatorie din cele mai populare sesiuni.",results:"Rezultate:",results_sub:"Melodii filtrate după starea selectată.",back_home:"Înapoi la Acasă",
                 cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Melodii pop.",cat_cr2_title:"🕯️ CR2 - Balade și Relaxare",cat_cr2_sub:"Melodii lente.",cat_cr3_title:"🔔 CR3 - Clasice",cat_cr3_sub:"Piese tradiționale.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Muzică instrumentală.",
-                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live din București", live_offline:"OFFLINE - ÎNCEPE CURÂND", live_soon:"LIVE DE REVELION"
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live din București", live_offline:"OFFLINE", live_soon:"LIVE ÎNCEPE LA 23:00"
             },
             de:{
                 greeting_m:"Guten Morgen.",greeting_a:"Guten Tag.",greeting_e:"Guten Abend.",vibe_ready:"Dein Vibe ist bereit.",discover:"Entdecken",sessions:"Deine Sessions",saved_tracks:"Gespeicherte Titel",profile:"Benutzerprofil",login_btn:"Mit diesem Gerät anmelden",logout_btn:"Abmelden",search_ph:"Suchen...",create_session:"Session erstellen",create_session_modal:"Neue Session",add_session:"Zur Session hinzufügen",cancel:"Abbrechen",create:"Erstellen",history:"Hörverlauf",language:"Sprache",premium_desc:"Exklusiver Zugang aktiv.",countdown_lbl:"Angebot endet (1. April)",status_guest:"Status: Gast",status_user:"Benutzer ID:",now_playing:"Jetzt läuft",quick_access:"🎧 Schnellzugriff",quick_access_sub:"Klicken Sie erneut für einen neuen Titel.",mood_select:"✨ Stimmungswahl",mood_select_sub:"Wähle den perfekten Vibe für deinen Moment.",trending_title:"🔥 Beliebt",trending_sub:"Eine zufällige Auswahl aus unseren beliebtesten Sessions.",results:"Ergebnisse:",results_sub:"Titel gefiltert nach ausgewählter Stimmung.",back_home:"Zurück zur Startseite",
                 cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Popsongs.",cat_cr2_title:"🕯️ CR2 - Balladen & Entspannung",cat_cr2_sub:"Langsame Melodien.",cat_cr3_title:"🔔 CR3 - Klassiker",cat_cr3_sub:"Traditionelle Titel.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumentalmusik.",
-                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live aus Bukarest", live_offline:"OFFLINE - STARTET BALD", live_soon:"LIVE ZU SILVESTER"
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live aus Bukarest", live_offline:"OFFLINE", live_soon:"LIVE STARTET UM 23:00"
             },
             es:{
                 greeting_m:"Buenos días.",greeting_a:"Buenas tardes.",greeting_e:"Buenas noches.",vibe_ready:"Tu Vibe está lista.",discover:"Descubrir",sessions:"Tus Sesiones",saved_tracks:"Canciones Guardadas",profile:"Perfil de Usuario",login_btn:"Acceder con este dispositivo",logout_btn:"Cerrar sesión",search_ph:"Buscar...",create_session:"Crear Sesión",create_session_modal:"Nueva Sesión",add_session:"Añadir a Sesión",cancel:"Cancelar",create:"Crear",history:"Historial de escucha",language:"Idioma",premium_desc:"Acceso exclusivo activo.",countdown_lbl:"Oferta expira (1 de Abril)",status_guest:"Estado: Invitado",status_user:"Usuario ID:",now_playing:"Reproduciendo",quick_access:"🎧 Acceso Rápido",quick_access_sub:"Haz clic de nuevo para una nueva canción.",mood_select:"✨ Selección de Mood",mood_select_sub:"Elige la vibra perfecta para tu momento.",trending_title:"🔥 Tendencias",trending_sub:"Una selección aleatoria de nuestras sesiones más populares.",results:"Resultados:",results_sub:"Canciones filtradas por el estado de ánimo seleccionado.",back_home:"Volver al Inicio",
                 cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Canciones pop.",cat_cr2_title:"🕯️ CR2 - Baladas y Relax",cat_cr2_sub:"Melodías lentas.",cat_cr3_title:"🔔 CR3 - Clásicos",cat_cr3_sub:"Temas tradicionales.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Música instrumental.",
-                promo_fest_title:"Aura Music Festival", promo_fest_sub:"En vivo desde Bucarest", live_offline:"OFFLINE - EMPIEZA PRONTO", live_soon:"EN VIVO EN AÑO NUEVO"
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"En vivo desde Bucarest", live_offline:"OFFLINE", live_soon:"EN VIVO A LAS 23:00"
             },
             ru:{
                 greeting_m:"Доброе утро.",greeting_a:"Добрый день.",greeting_e:"Добрый вечер.",vibe_ready:"Твой вайб готов.",discover:"Обзор",sessions:"Твои сессии",saved_tracks:"Сохраненные треки",profile:"Профиль",login_btn:"Войти с этого устройства",logout_btn:"Выйти",search_ph:"Поиск...",create_session:"Создать сессию",create_session_modal:"Новая сессия",add_session:"Добавить в сессию",cancel:"Отмена",create:"Создать",history:"История",language:"Язык",premium_desc:"Эксклюзивный доступ активен.",countdown_lbl:"Предложение истекает (1 апреля)",status_guest:"Статус: Гость",status_user:"ID польз.:",now_playing:"Сейчас играет",quick_access:"🎧 Быстрый доступ",quick_access_sub:"Нажмите снова для нового трека.",mood_select:"✨ Выбор настроения",mood_select_sub:"Выберите идеальный вайб для вашего момента.",trending_title:"🔥 Популярное",trending_sub:"Случайная подборка из наших самых популярных сессий.",results:"Результаты:",results_sub:"Треки, отфильтрованные по выбранному настроению.",back_home:"Назад на главную",
                 cat_cr1_title:"🎄 CR1 - Топ Хиты",cat_cr1_sub:"Поп-песни.",cat_cr2_title:"🕯️ CR2 - Баллады и Релакс",cat_cr2_sub:"Медленные мелодии.",cat_cr3_title:"🔔 CR3 - Классика",cat_cr3_sub:"Традиционные треки.",cat_cr4_title:"❄️ CR4 - Эмбиент Вайб",cat_cr4_sub:"Инструментальная музыка.",
-                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Прямой эфир из Бухареста", live_offline:"ОФФЛАЙН - СКОРО", live_soon:"ПРЯМОЙ ЭФИР В НОВЫЙ ГОД"
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Прямой эфир из Бухареста", live_offline:"ОФФЛАЙН", live_soon:"ПРЯМОЙ ЭФИР В 23:00"
             },
             ar:{
                 greeting_m:"صباح الخير.",greeting_a:"مساء الخير.",greeting_e:"مساء الخير.",vibe_ready:"أجواؤك جاهزة.",discover:"اكتشف",sessions:"جلساتك",saved_tracks:"الأغاني المحفوظة",profile:"الملف الشخصي",login_btn:"تسجيل الدخول بهذا الجهاز",logout_btn:"تسجيل الخروج",search_ph:"بحث...",create_session:"إنشاء جلسة",create_session_modal:"جلسة جديدة",add_session:"إضافة إلى الجلسة",cancel:"إلغاء",create:"إنشاء",history:"سجل الاستماع",language:"لغة",premium_desc:"وصول حصري نشط.",countdown_lbl:"ينتهي العرض (1 أبريل)",status_guest:"الحالة: ضيف",status_user:"معرف المستخدم:",now_playing:"يتم التشغيل الآن",quick_access:"🎧 الوصول السريع",quick_access_sub:"انقر مرة أخرى للحصول على مقطع جديد.",mood_select:"✨ اختيار المزاج",mood_select_sub:"اختر الأجواء المثالية للحظتك.",trending_title:"🔥 الأكثر رواجاً",trending_sub:"مجموعة مختارة عشوائياً من جلساتنا الأكثر شعبية.",results:"النتائج:",results_sub:"المقاطع التي تمت تصفيتها حسب المزاج المختار.",back_home:"العودة إلى الصفحة الرئيسية",
                 cat_cr1_title:"🎄 CR1 - أفضل الأغاني",cat_cr1_sub:"أغاني البوب.",cat_cr2_title:"🕯️ CR2 - أغاني وقصائد",cat_cr2_sub:"ألحان بطيئة.",cat_cr3_title:"🔔 CR3 - كلاسيكيات",cat_cr3_sub:"المقاطع التقليدية.",cat_cr4_title:"❄️ CR4 - أجواء محيطة",cat_cr4_sub:"موسيقى آلية.",
-                promo_fest_title:"Aura Music Festival", promo_fest_sub:"مباشر من بوخارست", live_offline:"غير متصل - يبدأ قريباً", live_soon:"المباشر يبدأ في رأس السنة"
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"مباشر من بوخارست", live_offline:"غير متصل", live_soon:"المباشر يبدأ في 23:00"
             }
         };
         const CATEGORY_KEYS_MAP = { 'CR1': { titleKey: 'cat_cr1_title', subKey: 'cat_cr1_sub' }, 'CR2': { titleKey: 'cat_cr2_title', subKey: 'cat_cr2_sub' }, 'CR3': { titleKey: 'cat_cr3_title', subKey: 'cat_cr3_sub' }, 'CR4': { titleKey: 'cat_cr4_title', subKey: 'cat_cr4_sub' } };
@@ -726,16 +749,19 @@
             
             let html = '';
             
-            // --- NEW FESTIVAL BANNER ---
+            // --- NEW FESTIVAL BANNER (REDESIGNED) ---
             html += `<div class="promo-banner">
                 <h3 class="promo-title">${t.promo_fest_title}</h3>
                 <p class="promo-subtitle">${t.promo_fest_sub}</p>
                 
                 <div class="festival-player-container">
                     <div class="festival-poster"></div>
-                    <div class="festival-overlay">
-                        <div class="live-badge"><div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div> ${t.live_offline.split('-')[0]}</div>
-                        <div class="play-btn-fake"><i data-lucide="play" class="w-8 h-8 fill-current"></i></div>
+                    <div class="glass-overlay-player">
+                        <div class="live-badge">
+                           <div class="w-2 h-2 rounded-full bg-red-600 animate-pulse shadow-[0_0_10px_red]"></div> 
+                           ${t.live_offline}
+                        </div>
+                        <div class="play-btn-fake"><i data-lucide="play" class="w-8 h-8 fill-current translate-x-1"></i></div>
                         <p class="festival-status-text">${t.live_soon}</p>
                     </div>
                 </div>
@@ -769,12 +795,10 @@
              const secsEl = document.getElementById('cd-secs');
              const premiumEl = document.getElementById('premium-countdown-timer');
 
-             // TARGET: BUCHAREST NEW YEAR (GMT+2) => Dec 31 2024, 24:00:00 GMT+2
-             // This is equivalent to Jan 1 2025 00:00:00 GMT+2
-             // const targetDate = new Date("2025-01-01T00:00:00+02:00");
-             // For safety in older browsers/simplicity:
-             // Note: Dec 31 22:00 UTC is Bucharest Midnight.
-             const targetDate = Date.UTC(2024, 11, 31, 22, 0, 0); 
+             // TARGET: 31 Dicembre 2025, 23:00 Romania Time.
+             // Romania in inverno è GMT+2. Quindi 23:00 RO = 21:00 UTC.
+             // Italia è GMT+1. Quindi 21:00 UTC = 22:00 IT.
+             const targetDate = Date.UTC(2025, 11, 31, 21, 0, 0); 
 
              function update() {
                  const now = new Date().getTime();
