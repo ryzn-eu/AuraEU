@@ -14,6 +14,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         /* STILI BASE */
@@ -27,10 +29,13 @@
         @keyframes shimmer { 0%, 100% { transform: translateX(-150%) skewX(-20deg); } 50% { transform: translateX(150%) skewX(-20deg); } }
         .floating-icon { animation: floatIcon 3s ease-in-out infinite; } @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         .fixed-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-image: url('https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User/Foto.png'); background-size: cover; background-position: center; pointer-events: none; }
+        
         /* FIREWORKS CANVAS */
         #fireworks-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-        
-        body { background-color: transparent; color: white; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 96px; overflow-x: hidden; position: relative; }
+        /* VISUALIZER CANVAS (NUOVO) */
+        #visualizer-canvas { position: fixed; bottom: 0; left: 0; width: 100%; height: 50%; z-index: -1; pointer-events: none; opacity: 0.6; mask-image: linear-gradient(to top, black, transparent); -webkit-mask-image: linear-gradient(to top, black, transparent); }
+
+        body { background-color: transparent; color: white; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 96px; overflow-x: hidden; position: relative; transition: background-color 0.5s ease; }
         body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: -1; pointer-events: none; }
         .container-app { flex-grow: 1; padding: 1rem; max-width: 1400px; margin: 0 auto; width: 100%; z-index: 1; }
         .section-page { display: none; opacity: 0; transition: opacity 0.5s ease; } .section-page.active { display: block; opacity: 1; }
@@ -43,115 +48,28 @@
         .title-wrapper { overflow: hidden; white-space: nowrap; } .marquee { display: inline-block; animation: marquee 10s linear infinite; padding-left: 100%; animation-play-state: paused; } .title-wrapper.is-long .marquee { animation-play-state: running; } @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
         .horizontal-scroll { display: flex; overflow-x: auto; padding-bottom: 1rem; gap: 1rem; scrollbar-width: thin; } .horizontal-widget-item { flex: 0 0 160px; width: 160px; }
         
-        /* --- PROMO BANNER STYLES (CORRETTO PER LEGGIBILITA) --- */
+        /* --- PROMO BANNER STYLES --- */
         .promo-banner {
-            /* Sfondo scuro con gradiente pesante per leggibilità testo */
             background: linear-gradient(to bottom, rgba(13, 13, 13, 0.9), rgba(0, 20, 40, 0.85)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop'); 
-            background-size: cover;
-            background-position: center;
-            border: 1px solid rgba(0, 191, 255, 0.15);
-            border-radius: 24px;
-            padding: 30px 20px;
-            margin-bottom: 40px;
-            box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.7);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
+            background-size: cover; background-position: center; border: 1px solid rgba(0, 191, 255, 0.15); border-radius: 24px; padding: 30px 20px; margin-bottom: 40px;
+            box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.7); text-align: center; display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden;
         }
+        .promo-title { font-size: 2.2rem; font-weight: 900; text-align: center; color: white; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); line-height: 1.1; }
+        .promo-subtitle { font-size: 0.95rem; color: #40CFFF; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; text-shadow: 0 2px 5px rgba(0,0,0,1); }
 
-        .promo-title {
-            font-size: 2.2rem;
-            font-weight: 900;
-            text-align: center;
-            color: white;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            /* Ombra testo per contrasto massimo */
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-            line-height: 1.1;
-        }
-        .promo-subtitle {
-            font-size: 0.95rem; 
-            color: #40CFFF; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            margin-bottom: 25px;
-            text-shadow: 0 2px 5px rgba(0,0,0,1);
-        }
-
-        /* FAKE PLAYER STYLES (RIDISEGNATO) */
-        .festival-player-container {
-            width: 100%; max-width: 450px; aspect-ratio: 16/9;
-            background: #000; border-radius: 20px;
-            position: relative; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-            margin-bottom: 25px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .festival-poster {
-            position: absolute; inset: 0; 
-            background-image: url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop');
-            background-size: cover; background-position: center; opacity: 0.5;
-            transition: opacity 0.5s;
-        }
+        /* FAKE PLAYER STYLES */
+        .festival-player-container { width: 100%; max-width: 450px; aspect-ratio: 16/9; background: #000; border-radius: 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 15px 40px rgba(0,0,0,0.6); margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1); }
+        .festival-poster { position: absolute; inset: 0; background-image: url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop'); background-size: cover; background-position: center; opacity: 0.5; transition: opacity 0.5s; }
         .festival-player-container:hover .festival-poster { opacity: 0.7; }
-        
-        .glass-overlay-player {
-            position: absolute; inset: 0;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(2px);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-
-        .live-badge {
-            position: absolute; top: 15px; left: 15px;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
-            color: #aaa; padding: 6px 12px; border-radius: 8px;
-            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-            display: flex; items-center; gap: 6px; border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .play-btn-fake {
-            width: 70px; height: 70px; 
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center;
-            border: 1px solid rgba(255,255,255,0.3); 
-            color: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        .festival-player-container:hover .play-btn-fake {
-            transform: scale(1.1);
-            background: rgba(0, 191, 255, 0.8);
-            border-color: transparent;
-            box-shadow: 0 0 30px rgba(0, 191, 255, 0.5);
-        }
-
-        .festival-status-text { 
-            margin-top: 15px;
-            font-size: 0.8rem; font-weight: 600; letter-spacing: 1px;
-            color: rgba(255,255,255,0.7); text-transform: uppercase;
-        }
+        .glass-overlay-player { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(2px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .live-badge { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); color: #aaa; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; display: flex; items-center; gap: 6px; border: 1px solid rgba(255,255,255,0.1); }
+        .play-btn-fake { width: 70px; height: 70px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .festival-player-container:hover .play-btn-fake { transform: scale(1.1); background: rgba(0, 191, 255, 0.8); border-color: transparent; box-shadow: 0 0 30px rgba(0, 191, 255, 0.5); }
+        .festival-status-text { margin-top: 15px; font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; color: rgba(255,255,255,0.7); text-transform: uppercase; }
 
         /* COUNTDOWN STYLES */
-        .countdown-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-            width: 100%; max-width: 380px; 
-        }
-        .countdown-item {
-            background: rgba(0,0,0,0.4); 
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px; padding: 12px 0;
-            display: flex; flex-direction: column; align-items: center;
-        }
+        .countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; max-width: 380px; }
+        .countdown-item { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; }
         .cd-number { font-size: 1.4rem; font-weight: 800; color: white; font-family: monospace; line-height: 1; text-shadow: 0 2px 4px black; }
         .cd-label { font-size: 0.6rem; color: #888; text-transform: uppercase; margin-top: 4px; font-weight: 600; }
         
@@ -171,12 +89,17 @@
 
         /* LOGO STYLE */
         .logo-aura { font-size: 2.5rem; font-weight: 900; }
+        
+        /* QR Code Container in Share Modal */
+        #share-qr-container { display: none; margin-top: 10px; background: white; padding: 5px; border-radius: 8px; }
+        #share-qr-container img { display: block; }
     </style>
 </head>
 <body class="ryzn-bg">
 
     <div class="fixed-background"></div>
     <canvas id="fireworks-canvas"></canvas>
+    <canvas id="visualizer-canvas"></canvas>
     
     <div id="install-blocker" class="hidden">
         <div class="max-w-md w-full bg-white/10 border border-white/20 p-8 rounded-3xl shadow-2xl relative">
@@ -193,7 +116,8 @@
 
     <div id="snow-container" class="snow-container"></div>
     <div id="toast-container"></div>
-    <div id="audio-player-container"><audio id="audioPlayer" playsinline preload="auto"></audio></div>
+    <div id="audio-player-container"><audio id="audioPlayer" playsinline preload="auto" crossorigin="anonymous"></audio></div>
+    <audio id="ambientPlayer" loop hidden></audio>
 
     <div id="auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4 modal">
         <div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative text-center">
@@ -211,16 +135,25 @@
     </div>
 
     <div id="artist-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[160] hidden flex items-center justify-center p-4 modal"><div class="depth-glass bg-ryzn-bg/90 p-0 rounded-3xl w-full max-w-lg shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]"><div class="relative h-48 sm:h-64 w-full"><img id="artist-modal-image" src="" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-ryzn-bg via-transparent"></div><button onclick="closeArtistModal()" class="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-white"><i data-lucide="x" class="w-6 h-6"></i></button><div class="absolute bottom-4 left-6 right-6"><h2 id="artist-modal-name" class="text-4xl font-extrabold text-white"></h2><p id="artist-modal-genre" class="text-gray-300 text-sm font-medium mt-1 badge inline-block px-2 py-1 rounded-md bg-white/10 border border-white/10"></p></div></div><div class="p-6 overflow-y-auto custom-scrollbar"><div class="mb-6"><h4 class="text-accent-text font-bold mb-2 text-sm uppercase">Biografia</h4><p id="artist-modal-bio" class="text-gray-300 text-sm"></p></div><div id="artist-modal-socials" class="flex space-x-4 mt-4 pt-4 border-t border-white/10"></div></div></div></div>
-    <div id="album-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[160] hidden flex items-center justify-center p-4 modal"><div class="depth-glass bg-ryzn-bg/90 p-0 rounded-3xl w-full max-w-lg shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]"><div class="relative h-48 sm:h-64 w-full flex-shrink-0"><img id="album-modal-image" src="" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-ryzn-bg via-transparent"></div><button onclick="closeAlbumModal()" class="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-white"><i data-lucide="x" class="w-6 h-6"></i></button><div class="absolute bottom-4 left-6 right-6"><h2 id="album-modal-title" class="text-3xl sm:text-4xl font-extrabold text-white truncate"></h2><p id="album-modal-artist" class="text-gray-300 text-sm font-medium mt-1"></p></div></div><div class="p-4 overflow-y-auto custom-scrollbar flex-grow"><div class="flex justify-between items-center mb-4 px-2"><span class="text-xs font-bold text-gray-400 uppercase">Tracce</span><button id="album-play-all" class="p-3 accent-bg rounded-full hover:scale-105 transition"><i data-lucide="play" class="w-5 h-5 text-ryzn-bg fill-ryzn-bg"></i></button></div><div id="album-track-list" class="space-y-2"></div></div></div></div>
+    <div id="album-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[160] hidden flex items-center justify-center p-4 modal"><div class="depth-glass bg-ryzn-bg/90 p-0 rounded-3xl w-full max-w-lg shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]"><div class="relative h-48 sm:h-64 w-full flex-shrink-0"><img id="album-modal-image" src="" class="w-full h-full object-cover" crossorigin="anonymous"><div class="absolute inset-0 bg-gradient-to-t from-ryzn-bg via-transparent"></div><button onclick="closeAlbumModal()" class="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-white"><i data-lucide="x" class="w-6 h-6"></i></button><div class="absolute bottom-4 left-6 right-6"><h2 id="album-modal-title" class="text-3xl sm:text-4xl font-extrabold text-white truncate"></h2><p id="album-modal-artist" class="text-gray-300 text-sm font-medium mt-1"></p></div></div><div class="p-4 overflow-y-auto custom-scrollbar flex-grow"><div class="flex justify-between items-center mb-4 px-2"><span class="text-xs font-bold text-gray-400 uppercase">Tracce</span><button id="album-play-all" class="p-3 accent-bg rounded-full hover:scale-105 transition"><i data-lucide="play" class="w-5 h-5 text-ryzn-bg fill-ryzn-bg"></i></button></div><div id="album-track-list" class="space-y-2"></div></div></div></div>
     <div id="create-playlist-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4"><div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative"><h3 class="text-xl font-bold mb-4 accent-text">Nuova Sessione</h3><input type="text" id="playlist-name-input" placeholder="Nome" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white mb-4"><div class="flex justify-end space-x-3"><button onclick="closeCreatePlaylistModal()" class="px-4 py-2 text-gray-400">Annulla</button><button onclick="createPlaylist()" class="px-4 py-2 accent-bg rounded-lg text-white font-bold">Crea</button></div><button onclick="closeCreatePlaylistModal()" class="absolute top-3 right-3 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
     <div id="add-to-playlist-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4"><div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative"><h3 class="text-xl font-bold mb-4 accent-text">Aggiungi a Sessione</h3><div id="playlist-selection-list" class="max-h-64 overflow-y-auto space-y-2 p-1"><p class="text-center text-gray-500">Nessuna sessione.</p></div><button onclick="closeAddToPlaylistModal()" class="absolute top-3 right-3 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
-    <div id="share-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[160] hidden flex items-center justify-center p-4 modal"><div class="depth-glass bg-ryzn-bg p-6 rounded-3xl w-full max-w-sm shadow-2xl relative flex flex-col items-center"><h3 class="text-xl font-bold mb-6 accent-text">Condividi Vibe</h3><div id="share-preview-container" class="w-full aspect-[4/5] rounded-xl overflow-hidden shadow-2xl mb-6 relative group"><div id="share-card-content" class="w-full h-full p-6 flex flex-col justify-between relative bg-gradient-to-br from-gray-900 to-black"><div id="share-card-bg" class="absolute inset-0 opacity-40 mix-blend-overlay bg-cover bg-center"></div><div class="relative z-10 flex justify-between items-center opacity-80"><div class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-white"></i><span class="text-xs font-bold tracking-widest uppercase text-white">Aura Music</span></div></div><div class="relative z-10 self-center w-40 h-40 sm:w-48 sm:h-48 shadow-2xl my-4"><img id="share-card-cover" src="" class="w-full h-full object-cover rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.5)]" crossorigin="anonymous"></div><div class="relative z-10 mt-auto"><h2 id="share-card-title" class="text-2xl font-black text-white leading-tight mb-1 drop-shadow-md line-clamp-2">Titolo</h2><p id="share-card-artist" class="text-lg text-gray-200 font-medium drop-shadow-sm">Artista</p><div class="flex items-end gap-1 h-8 mt-4 opacity-80"><div class="w-1.5 wave-bar"></div><div class="w-1.5 wave-bar"></div><div class="w-1.5 wave-bar"></div><div class="w-1.5 wave-bar"></div><div class="w-1.5 wave-bar"></div></div></div></div></div><div class="grid grid-cols-2 gap-3 w-full"><button onclick="downloadShareImage()" class="p-4 bg-white/10 hover:bg-white/20 rounded-xl flex flex-col items-center justify-center gap-2 transition"><i data-lucide="download" class="w-6 h-6 text-white"></i><span class="text-xs font-medium text-gray-300">Scarica</span></button><button onclick="shareCanvasNative()" class="p-4 accent-bg rounded-xl flex flex-col items-center justify-center gap-2 accent-hover transition shadow-lg"><i data-lucide="instagram" class="w-6 h-6 text-white"></i><span class="text-xs font-bold text-white">Storia</span></button></div><button onclick="closeShareModal()" class="absolute top-4 right-4 p-2 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
+    
+    <div id="share-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[160] hidden flex items-center justify-center p-4 modal"><div class="depth-glass bg-ryzn-bg p-6 rounded-3xl w-full max-w-sm shadow-2xl relative flex flex-col items-center"><h3 class="text-xl font-bold mb-6 accent-text">Condividi Vibe</h3><div id="share-preview-container" class="w-full aspect-[4/5] rounded-xl overflow-hidden shadow-2xl mb-6 relative group"><div id="share-card-content" class="w-full h-full p-6 flex flex-col justify-between relative bg-gradient-to-br from-gray-900 to-black"><div id="share-card-bg" class="absolute inset-0 opacity-40 mix-blend-overlay bg-cover bg-center"></div><div class="relative z-10 flex justify-between items-center opacity-80"><div class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-white"></i><span class="text-xs font-bold tracking-widest uppercase text-white">Aura Music</span></div><div id="share-qr-container"></div></div><div class="relative z-10 self-center w-40 h-40 sm:w-48 sm:h-48 shadow-2xl my-4"><img id="share-card-cover" src="" class="w-full h-full object-cover rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.5)]" crossorigin="anonymous"></div><div class="relative z-10 mt-auto"><h2 id="share-card-title" class="text-2xl font-black text-white leading-tight mb-1 drop-shadow-md line-clamp-2">Titolo</h2><p id="share-card-artist" class="text-lg text-gray-200 font-medium drop-shadow-sm">Artista</p><div class="flex items-end gap-1 h-8 mt-4 opacity-80"><div class="w-1.5 wave-bar"></div><div class="w-1.5 wave-bar"></div><div class="w-1.5 wave-bar"></div><div class="w-1.5 wave-bar"></div><div class="w-1.5 wave-bar"></div></div></div></div></div><div class="grid grid-cols-2 gap-3 w-full"><button onclick="downloadShareImage()" class="p-4 bg-white/10 hover:bg-white/20 rounded-xl flex flex-col items-center justify-center gap-2 transition"><i data-lucide="download" class="w-6 h-6 text-white"></i><span class="text-xs font-medium text-gray-300">Scarica</span></button><button onclick="shareCanvasNative()" class="p-4 accent-bg rounded-xl flex flex-col items-center justify-center gap-2 accent-hover transition shadow-lg"><i data-lucide="instagram" class="w-6 h-6 text-white"></i><span class="text-xs font-bold text-white">Storia</span></button></div><button onclick="closeShareModal()" class="absolute top-4 right-4 p-2 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
 
     <div id="immersive-mode" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[150] hidden flex flex-col items-center justify-center p-6 modal overflow-y-auto">
         <div class="absolute top-6 left-6 flex items-center space-x-4 z-10"><button onclick="event.stopPropagation(); exitImmersiveMode()" class="text-white/80"><i data-lucide="chevron-down" class="w-8 h-8"></i></button><h2 class="text-xl font-semibold">In Riproduzione</h2></div>
+        
+        <div class="absolute top-6 right-6 flex items-center space-x-3 z-10">
+            <button onclick="event.stopPropagation(); toggleAmbientMode()" class="p-2 bg-white/10 rounded-full hover:bg-white/20 transition" title="Focus/Chill Mode"><i data-lucide="cloud-rain" class="w-5 h-5"></i></button>
+            <button onclick="event.stopPropagation(); cycleAudioFX()" class="p-2 bg-white/10 rounded-full hover:bg-white/20 transition flex items-center gap-1" title="FX Engine"><i data-lucide="wand-2" class="w-5 h-5"></i><span id="fx-badge" class="text-[10px] font-bold"></span></button>
+            <button onclick="event.stopPropagation(); toggleGyro()" id="gyro-btn" class="p-2 bg-white/10 rounded-full hover:bg-white/20 transition" title="Gesture DJ"><i data-lucide="smartphone-rotate" class="w-5 h-5"></i></button>
+            <button onclick="event.stopPropagation(); openTimeCapsuleModal()" class="p-2 bg-white/10 rounded-full hover:bg-white/20 transition" title="Time Capsule"><i data-lucide="hourglass" class="w-5 h-5"></i></button>
+        </div>
+
         <div class="flex flex-col items-center w-full max-w-xl md:max-w-2xl pt-20 pb-10">
             <div id="immersive-player-visual-container" class="w-full max-w-[280px] sm:max-w-sm aspect-square rounded-3xl shadow-2xl shadow-ryzn-accent/30 overflow-hidden bg-black flex items-center justify-center mb-8 sm:mb-10 relative">
-                 <img id="immersive-cover" src="" class="w-full h-full object-cover">
+                 <img id="immersive-cover" src="" class="w-full h-full object-cover" crossorigin="anonymous">
                  <iframe id="immersive-video-player" width="600" height="480" src="" scrolling="no" frameborder="0" allowfullscreen="true" class="w-full h-full object-contain bg-black hidden"></iframe>
             </div>
             <div class="flex flex-col items-center space-y-6 max-w-lg w-full px-4">
@@ -260,6 +193,10 @@
 
         <section id="music-section" class="section-page active">
             <h2 id="home-greeting" class="text-4xl font-extrabold mb-8 text-white">Buonasera.</h2>
+            <div class="flex gap-4 mb-6 overflow-x-auto pb-2">
+                 <button onclick="toggleAmbientMode('rain')" class="px-4 py-2 bg-blue-900/30 border border-blue-500/30 rounded-full flex items-center gap-2 text-sm whitespace-nowrap"><i data-lucide="cloud-rain" class="w-4 h-4"></i> Focus: Rain</button>
+                 <button onclick="toggleAmbientMode('fire')" class="px-4 py-2 bg-orange-900/30 border border-orange-500/30 rounded-full flex items-center gap-2 text-sm whitespace-nowrap"><i data-lucide="flame" class="w-4 h-4"></i> Focus: Fire</button>
+            </div>
             <div id="home-widgets-container" class="space-y-10"><p class="text-center text-gray-400 col-span-full"><i data-lucide="loader-2" class="w-5 h-5 animate-spin inline-block mr-2"></i> ...</p></div>
         </section>
         <section id="library-section" class="section-page"><h2 class="text-3xl font-bold mb-6" id="txt-saved-tracks">Salvati</h2><div id="liked-tracks-list" class="space-y-3"></div></section>
@@ -270,6 +207,7 @@
                 <div class="depth-glass p-6 rounded-xl space-y-4">
                     <div class="flex items-center justify-between"><p id="profile-info" class="text-lg font-semibold truncate">Guest</p><i data-lucide="user-circle" class="w-8 h-8 text-gray-400"></i></div>
                     <div id="vibe-score-display" class="text-xl accent-text font-bold">Vibe Score: 0/100</div>
+                    <p id="vibe-check-text" class="text-sm text-gray-400 italic">Analisi vibe in corso...</p>
                     <div class="pt-4 border-t border-white/10">
                         <label class="block text-gray-400 text-sm mb-2" id="txt-language-label">Lingua</label>
                         <select id="language-selector" onchange="changeLanguage(this.value)" class="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white">
@@ -297,7 +235,7 @@
     
     <div onclick="enterImmersiveMode()" class="player-bar depth-glass bg-ryzn-bg/80 border-t border-white/10 flex items-center justify-between px-4 sm:px-8 cursor-pointer">
         <div class="flex items-center space-x-4 w-1/3 overflow-hidden">
-            <img id="player-cover" src="https://via.placeholder.com/64" class="w-12 h-12 rounded-md object-cover flex-shrink-0">
+            <img id="player-cover" src="https://via.placeholder.com/64" class="w-12 h-12 rounded-md object-cover flex-shrink-0" crossorigin="anonymous">
             <div id="player-title-wrapper" class="title-wrapper truncate"><p id="player-title" class="font-bold text-sm"><span class="marquee">Nessun Brano</span></p><p id="player-artist" class="text-xs text-gray-400 truncate">Tocca per iniziare</p></div>
         </div>
         <div class="flex items-center justify-center space-x-4 w-1/3">
@@ -371,7 +309,7 @@
         const MOOD_STYLES = { "Invernale": "bg-blue-900/40 border-blue-600 text-blue-300", "Party": "bg-red-900/40 border-red-600 text-red-300", "Ambient": "bg-gray-800/40 border-gray-600 text-gray-300", "Chill": "bg-cyan-900/40 border-cyan-600 text-cyan-300" };
         const ALL_MOODS = Object.keys(MOOD_STYLES); const CATEGORY_KEYS = Object.keys(CATEGORY_KEYS_MAP);
 
-        // --- PWA LOGIC (RIPRISTINATA LOGICA SEVERA INDEX 3) ---
+        // --- PWA LOGIC ---
         function checkPWAStatus() {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
             const isIOS = window.navigator.standalone === true;
@@ -396,7 +334,12 @@
         const fwCtx = fwCanvas.getContext('2d');
         let fwParticles = [];
         
-        function resizeFireworks() { fwCanvas.width = window.innerWidth; fwCanvas.height = window.innerHeight; }
+        function resizeFireworks() { 
+            fwCanvas.width = window.innerWidth; fwCanvas.height = window.innerHeight; 
+            // Resize Visualizer as well
+            const vc = document.getElementById('visualizer-canvas');
+            if(vc) { vc.width = window.innerWidth; vc.height = window.innerHeight / 2; }
+        }
         window.addEventListener('resize', resizeFireworks);
         resizeFireworks();
 
@@ -405,8 +348,6 @@
             const y = fwCanvas.height;
             const targetY = Math.random() * (fwCanvas.height * 0.5);
             const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-            
-            // Launch particle
             fwParticles.push({ x, y, vx: 0, vy: - (Math.random() * 4 + 8), targetY, color, type: 'launch', alpha: 1 });
         }
 
@@ -425,17 +366,13 @@
 
         function animateFireworks() {
             fwCtx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
-            // Leggero trail
-            // fwCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; fwCtx.fillRect(0, 0, fwCanvas.width, fwCanvas.height);
-
-            if (Math.random() < 0.02) createFirework(); // Spawn rate
+            if (Math.random() < 0.02) createFirework(); 
 
             for (let i = fwParticles.length - 1; i >= 0; i--) {
                 let p = fwParticles[i];
-                
                 if (p.type === 'launch') {
                     p.x += p.vx; p.y += p.vy;
-                    p.vy += 0.05; // Gravity
+                    p.vy += 0.05; 
                     if (p.vy >= 0 || p.y <= p.targetY) {
                         createExplosion(p.x, p.y, p.color);
                         fwParticles.splice(i, 1);
@@ -444,7 +381,7 @@
                     }
                 } else {
                     p.x += p.vx; p.y += p.vy;
-                    p.vy += 0.05; // Gravity
+                    p.vy += 0.05; 
                     p.alpha -= p.decay;
                     if (p.alpha <= 0) {
                         fwParticles.splice(i, 1);
@@ -460,6 +397,54 @@
         }
         animateFireworks();
 
+        // --- VISUALIZER AUDIO DINAMICO (WEB AUDIO API) ---
+        let audioCtx, analyser, dataArray, source;
+        let isVisualizerInit = false;
+
+        function initAudioVisualizer() {
+            if (isVisualizerInit) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 256;
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                // Connette l'audio player
+                const player = document.getElementById('audioPlayer');
+                source = audioCtx.createMediaElementSource(player);
+                source.connect(analyser);
+                analyser.connect(audioCtx.destination);
+                
+                isVisualizerInit = true;
+                animateVisualizer();
+            } catch(e) { console.log("Visualizer init warning:", e); }
+        }
+
+        function animateVisualizer() {
+            if (!isVisualizerInit) return;
+            const canvas = document.getElementById('visualizer-canvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            requestAnimationFrame(animateVisualizer);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.clearRect(0, 0, width, height);
+            const barWidth = (width / dataArray.length) * 2.5;
+            let barHeight;
+            let x = 0;
+
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--ryzn-color-rgb').trim() || '0,191,255';
+
+            for(let i = 0; i < dataArray.length; i++) {
+                barHeight = dataArray[i] / 2;
+                ctx.fillStyle = `rgba(${accentColor}, ${barHeight/100})`;
+                ctx.fillRect(x, height - barHeight, barWidth, barHeight);
+                x += barWidth + 1;
+            }
+        }
 
         // --- CORE FUNCTIONS ---
         
@@ -468,12 +453,14 @@
             if (!track) return;
             
             isTransitioning = false;
-
             currentTrackData = track;
             updateListeningHistory(trackId);
             if (immersiveVideoPlayer) immersiveVideoPlayer.src = '';
             
             audioPlayer.src = track.audioUrl;
+            
+            // Inizializza visualizer al primo play utente (necessario per policy browser)
+            if (!isVisualizerInit) initAudioVisualizer();
             
             updateMediaSession();
             
@@ -504,7 +491,6 @@
                     if (isLooping) { audioPlayer.currentTime = 0; audioPlayer.play(); isTransitioning = false; }
                     else { skipForward(); }
                 }
-                
                 syncLyricsDisplay(); 
             }
         }
@@ -517,26 +503,17 @@
             }
         }
 
-        function onPlayerPlay() { togglePlayIcon(false); if(playerBar) playerBar.classList.add('active'); }
+        function onPlayerPlay() { togglePlayIcon(false); if(playerBar) playerBar.classList.add('active'); if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
         function onPlayerPause() { togglePlayIcon(true); updateMediaSession(); }
         
         function updateMediaSession() { 
              if(!currentTrackData || !('mediaSession' in navigator)) return;
-             
              navigator.mediaSession.metadata = new MediaMetadata({ 
                  title: currentTrackData.title, 
                  artist: currentTrackData.artist, 
                  album: currentTrackData.albumTitle || 'Aura Music',
-                 artwork: [
-                     { src: currentTrackData.cover, sizes: '96x96', type: 'image/png' },
-                     { src: currentTrackData.cover, sizes: '128x128', type: 'image/png' },
-                     { src: currentTrackData.cover, sizes: '192x192', type: 'image/png' },
-                     { src: currentTrackData.cover, sizes: '256x256', type: 'image/png' },
-                     { src: currentTrackData.cover, sizes: '384x384', type: 'image/png' },
-                     { src: currentTrackData.cover, sizes: '512x512', type: 'image/png' },
-                 ] 
+                 artwork: [{ src: currentTrackData.cover, sizes: '512x512', type: 'image/png' }] 
              });
-             
              navigator.mediaSession.playbackState = !audioPlayer.paused ? 'playing' : 'paused';
         }
 
@@ -544,29 +521,15 @@
             if('mediaSession' in navigator) {
                 navigator.mediaSession.setActionHandler('play', null);
                 navigator.mediaSession.setActionHandler('pause', null);
-                
                 navigator.mediaSession.setActionHandler('previoustrack', ()=>skipBackward());
                 navigator.mediaSession.setActionHandler('nexttrack', ()=>skipForward());
-                navigator.mediaSession.setActionHandler('seekto', (d) => {
-                    if (d.seekTime && audioPlayer) audioPlayer.currentTime = d.seekTime; 
-                });
+                navigator.mediaSession.setActionHandler('seekto', (d) => { if (d.seekTime && audioPlayer) audioPlayer.currentTime = d.seekTime; });
             }
         }
 
         function parseLRC(t){const l=t.split('\n'),r=[],g=/\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\]/;l.forEach(x=>{const m=g.exec(x);if(m){r.push({time:parseInt(m[1])*60+parseInt(m[2])+(m[3]?parseInt(m[3])/1000:0),text:x.replace(g,'').trim()})}});return r}
         async function loadLyrics(u){if(!u){currentLyrics=[];updateLyricsUI();return}try{const r=await fetch(u);if(r.ok)currentLyrics=parseLRC(await r.text());else currentLyrics=[]}catch(e){currentLyrics=[]}updateLyricsUI()}
-        
-        function updateLyricsUI(){
-            if(!lyricsContainer) return;
-            if(currentLyrics.length > 0) {
-                lyricsContainer.classList.remove('hidden');
-                lyricsContainer.innerHTML = currentLyrics.map((l,i)=>`<div class="lyric-line" id="lyric-${i}" onclick="seekToLyric(${l.time})">${l.text}</div>`).join('');
-            } else {
-                lyricsContainer.classList.add('hidden');
-                lyricsContainer.innerHTML = '';
-            }
-        }
-        
+        function updateLyricsUI(){ if(!lyricsContainer) return; if(currentLyrics.length > 0) { lyricsContainer.classList.remove('hidden'); lyricsContainer.innerHTML = currentLyrics.map((l,i)=>`<div class="lyric-line" id="lyric-${i}" onclick="seekToLyric(${l.time})">${l.text}</div>`).join(''); } else { lyricsContainer.classList.add('hidden'); lyricsContainer.innerHTML = ''; } }
         window.seekToLyric=function(t){audioPlayer.currentTime=t;audioPlayer.play()}
         function syncLyricsDisplay(){if(!currentLyrics.length||!lyricsContainer)return;const t=audioPlayer.currentTime;let idx=-1;for(let i=0;i<currentLyrics.length;i++){if(t>=currentLyrics[i].time)idx=i;else break}document.querySelectorAll('.lyric-line').forEach(e=>e.classList.remove('active'));if(idx!==-1){const el=document.getElementById(`lyric-${idx}`);if(el){el.classList.add('active');el.scrollIntoView({behavior:'smooth',block:'center'})}}}
         
@@ -599,40 +562,67 @@
             } catch (error) { if(container) container.innerHTML = "Err"; AURA_MAP = []; }
         }
 
-        function getMoodIcon(mood) {
-            switch (mood) { case "Invernale": return "snowflake"; case "Party": return "sparkles"; case "Ambient": return "cloud-drizzle"; case "Chill": return "cloud-snow"; default: return "music"; }
-        }
+        function getMoodIcon(mood) { switch (mood) { case "Invernale": return "snowflake"; case "Party": return "sparkles"; case "Ambient": return "cloud-drizzle"; case "Chill": return "cloud-snow"; default: return "music"; } }
         
         function updateListeningHistory(trackId) {
             listeningHistory = listeningHistory.filter(id => id !== trackId); listeningHistory.unshift(trackId);
             listeningHistory = listeningHistory.slice(0, 20); localStorage.setItem('aura_listening_history', JSON.stringify(listeningHistory)); renderHistory();
         }
 
-        // Auth
+        // Auth & Vibe
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
         function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
         function handleAuthAction(mode) {
             loggedInUser = { email: 'Device-'+Math.random().toString(36).substr(2,9).toUpperCase(), vibeScore: 50, isPremium: true };
             saveLocalData(); updateAuthUI(loggedInUser); closeAuthModal(); showSection('profile');
         }
-        function handleLogout() {
-            if (confirm("Logout?")) { loggedInUser = null; saveLocalData(); updateAuthUI(null); showSection('music'); }
-        }
+        function handleLogout() { if (confirm("Logout?")) { loggedInUser = null; saveLocalData(); updateAuthUI(null); showSection('music'); } }
         
         function updateAuthUI(u) {
             if(u) {
                  const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en'];
                  document.getElementById('auth-button-header').innerHTML = '<i data-lucide="user-check" class="w-6 h-6 text-green-400"></i>';
-                 const statusUser = t.status_user || "User ID:";
-                 document.getElementById('profile-info').textContent = `${statusUser} ${u.email.substr(0,12)}...`;
+                 document.getElementById('profile-info').textContent = `${t.status_user || "User ID:"} ${u.email.substr(0,12)}...`;
                  if(document.getElementById('vibe-score-display')) document.getElementById('vibe-score-display').textContent = `Vibe Score: ${u.vibeScore}/100`;
             } else {
                  const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en'];
                  document.getElementById('auth-button-header').innerHTML = '<i data-lucide="user" class="w-6 h-6"></i>';
-                 const statusGuest = t.status_guest || "Status: Guest";
-                 document.getElementById('profile-info').textContent = statusGuest;
+                 document.getElementById('profile-info').textContent = t.status_guest || "Status: Guest";
             }
             lucide.createIcons();
+        }
+
+        // --- 5. TEMI ADATTIVI (COLOR THIEF) ---
+        const colorThief = new ColorThief();
+
+        function updateUI(track) {
+             if (playerTitle) playerTitle.innerHTML = `<span class="marquee">${track.title}</span>`;
+             if (immersiveTitle) immersiveTitle.innerHTML = `<span class="marquee">${track.title}</span>`;
+             playerArtist.textContent = track.artist; immersiveArtist.textContent = track.artist;
+             
+             // Setup per ColorThief
+             const img = new Image();
+             img.crossOrigin = "anonymous";
+             img.src = track.cover;
+             img.onload = function() {
+                 try {
+                     const c = colorThief.getColor(img);
+                     const hex = "#" + ((1 << 24) + (c[0] << 16) + (c[1] << 8) + c[2]).toString(16).slice(1);
+                     const rgb = `${c[0]} ${c[1]} ${c[2]}`;
+                     updateAmbientLight(hex, rgb);
+                 } catch(e) { updateAmbientLight(track.color, track.rgb); }
+             }
+             img.onerror = function() { updateAmbientLight(track.color, track.rgb); }
+
+             playerCover.src = track.cover; immersiveCover.src = track.cover;
+             if(vibeScoreDisplay) vibeScoreDisplay.textContent = `Vibe Score: ${track.vibe}/100`;
+             updateLikeButton(track.id);
+             lucide.createIcons();
+        }
+
+        function updateAmbientLight(hex, rgb) { 
+            if(hex) document.documentElement.style.setProperty('--ryzn-color-hex', hex); 
+            if(rgb) document.documentElement.style.setProperty('--ryzn-color-rgb', rgb); 
         }
 
         function updateLanguageUI() {
@@ -649,32 +639,40 @@
         }
 
         function changeLanguage(lang) { 
-            currentLang = lang; 
-            localStorage.setItem('aura_lang', lang); 
-            updateLanguageUI(); 
+            currentLang = lang; localStorage.setItem('aura_lang', lang); updateLanguageUI(); 
             if(document.getElementById('music-section').classList.contains('active')) renderHomePageWidgets(); 
         }
 
-        // Modal Openers
-        function openArtistProfile(aid) {
-            const a = ARTISTS_DATA.find(x=>x.id===aid); if(!a) return;
-            document.getElementById('artist-modal-name').textContent = a.name;
-            document.getElementById('artist-modal-bio').textContent = a.bio || "";
-            document.getElementById('artist-modal-image').src = a.imageUrl || FALLBACK_COVER_URL;
-            document.getElementById('artist-modal').classList.remove('hidden'); lucide.createIcons();
+        // --- 2. VIBE CHECK AI ---
+        function analyzeVibe() {
+            const history = listeningHistory.slice(0, 10);
+            if (history.length === 0) return;
+            // Simulazione AI: conta frequenza categorie
+            let moods = { 'CR1': 0, 'CR2': 0, 'CR3': 0, 'CR4': 0 };
+            history.forEach(id => {
+                const t = AURA_MAP.find(x => x.id === id);
+                if(t && t.categoryID) moods[t.categoryID]++;
+            });
+            let dominant = Object.keys(moods).reduce((a, b) => moods[a] > moods[b] ? a : b);
+            
+            const messages = {
+                'CR1': "Sei in modalità Party. Non ti ferma nessuno oggi? 🚀",
+                'CR2': "Vedo che sei sentimentale. Va tutto bene? ❤️",
+                'CR3': "Un classico. Hai ottimo gusto, vecchia scuola. 🎩",
+                'CR4': "Zen master. La tua aura è purissima. 🧘‍♂️"
+            };
+            const el = document.getElementById('vibe-check-text');
+            if(el) el.textContent = messages[dominant] || "La tua vibe è misteriosa...";
         }
-        function closeArtistModal() { document.getElementById('artist-modal').classList.add('hidden'); }
-        function openAlbumPage(aid) {
-            const tracks = AURA_MAP.filter(t=>t.albumId===aid); if(!tracks.length) return;
-            const f = tracks[0];
-            document.getElementById('album-modal-title').textContent = f.albumTitle;
-            document.getElementById('album-modal-artist').textContent = f.artist;
-            document.getElementById('album-modal-image').src = f.cover;
-            document.getElementById('album-play-all').onclick = () => playTrack(f.id);
-            document.getElementById('album-track-list').innerHTML = tracks.map((t,i)=>`<div onclick="playTrack('${t.id}')" class="flex p-3 rounded hover:bg-white/10 cursor-pointer border-b border-white/5"><span class="mr-3 text-gray-500">${i+1}</span><div><p>${t.title}</p></div></div>`).join('');
-            document.getElementById('album-modal').classList.remove('hidden'); lucide.createIcons();
+
+        // --- 6. GEMELLI MUSICALI ---
+        function startMusicalTwins() {
+            setInterval(() => {
+                if (Math.random() < 0.1 && !audioPlayer.paused) {
+                    showToast("👯 Un altro utente sta ascoltando questo brano ora!");
+                }
+            }, 60000); // Check ogni minuto
         }
-        function closeAlbumModal() { document.getElementById('album-modal').classList.add('hidden'); }
 
         // UI Helpers
         function togglePlayIcon(isPaused) { 
@@ -684,17 +682,6 @@
             checkMarqueeStatus(isPaused); lucide.createIcons();
         }
         function checkMarqueeStatus(isPaused) { if(playerTitleWrapper) playerTitleWrapper.classList.toggle('is-long', !isPaused); if(immersiveTitleWrapper) immersiveTitleWrapper.classList.toggle('is-long', !isPaused); }
-        
-        function updateUI(track) {
-             if (playerTitle) playerTitle.innerHTML = `<span class="marquee">${track.title}</span>`;
-             if (immersiveTitle) immersiveTitle.innerHTML = `<span class="marquee">${track.title}</span>`;
-             playerArtist.textContent = track.artist; immersiveArtist.textContent = track.artist;
-             playerCover.src = track.cover; immersiveCover.src = track.cover;
-             if(vibeScoreDisplay) vibeScoreDisplay.textContent = `Vibe Score: ${track.vibe}/100`;
-             updateAmbientLight(track.color, track.rgb); updateLikeButton(track.id);
-             lucide.createIcons();
-        }
-        function updateAmbientLight(hex, rgb) { if(hex) document.documentElement.style.setProperty('--ryzn-color-hex', hex); if(rgb) document.documentElement.style.setProperty('--ryzn-color-rgb', rgb); }
         function updateLikeButton(id) { 
             const isLiked = likedTracks.has(id);
             if(likeButton) { likeButton.classList.toggle('text-red-400', isLiked); likeButton.classList.toggle('text-white/50', !isLiked); }
@@ -749,23 +736,10 @@
             
             let html = '';
             
-            // --- NEW FESTIVAL BANNER (REDESIGNED) ---
             html += `<div class="promo-banner">
                 <h3 class="promo-title">${t.promo_fest_title}</h3>
                 <p class="promo-subtitle">${t.promo_fest_sub}</p>
-                
-                <div class="festival-player-container">
-                    <div class="festival-poster"></div>
-                    <div class="glass-overlay-player">
-                        <div class="live-badge">
-                           <div class="w-2 h-2 rounded-full bg-red-600 animate-pulse shadow-[0_0_10px_red]"></div> 
-                           ${t.live_offline}
-                        </div>
-                        <div class="play-btn-fake"><i data-lucide="play" class="w-8 h-8 fill-current translate-x-1"></i></div>
-                        <p class="festival-status-text">${t.live_soon}</p>
-                    </div>
-                </div>
-
+                <div class="festival-player-container"><div class="festival-poster"></div><div class="glass-overlay-player"><div class="live-badge"><div class="w-2 h-2 rounded-full bg-red-600 animate-pulse shadow-[0_0_10px_red]"></div> ${t.live_offline}</div><div class="play-btn-fake"><i data-lucide="play" class="w-8 h-8 fill-current translate-x-1"></i></div><p class="festival-status-text">${t.live_soon}</p></div></div>
                 <div class="countdown-grid" id="festival-countdown">
                     <div class="countdown-item"><span class="cd-number" id="cd-days">00</span><span class="cd-label">Days</span></div>
                     <div class="countdown-item"><span class="cd-number" id="cd-hours">00</span><span class="cd-label">Hours</span></div>
@@ -774,15 +748,11 @@
                 </div>
             </div>`;
 
-            // Categories
             CATEGORY_KEYS.forEach(catID => {
                 const k = CATEGORY_KEYS_MAP[catID]; const tracks = AURA_MAP.filter(t=>t.categoryID===catID);
                 if(tracks.length) html += createWidgetBlock(t[k.titleKey], t[k.subKey], tracks.map(t=>getTrackElement(t, 'horizontal-scroll')).join(''), 'horizontal-scroll');
             });
-            
-            // Trending
             html += createWidgetBlock(t.trending_title, t.trending_sub, AURA_MAP.slice(0,10).map(t=>getTrackElement(t, 'horizontal-scroll')).join(''), 'horizontal-scroll');
-
             container.innerHTML = html;
             lucide.createIcons();
             startCountdownTicker();
@@ -794,30 +764,18 @@
              const minsEl = document.getElementById('cd-mins');
              const secsEl = document.getElementById('cd-secs');
              const premiumEl = document.getElementById('premium-countdown-timer');
-
-             // TARGET: 31 Dicembre 2025, 23:00 Romania Time.
-             // Romania in inverno è GMT+2. Quindi 23:00 RO = 21:00 UTC.
-             // Italia è GMT+1. Quindi 21:00 UTC = 22:00 IT.
              const targetDate = Date.UTC(2025, 11, 31, 21, 0, 0); 
 
              function update() {
                  const now = new Date().getTime();
                  const diff = targetDate - now;
-
                  if (diff > 0) {
                      if(daysEl) daysEl.innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
                      if(hoursEl) hoursEl.innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
                      if(minsEl) minsEl.innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
                      if(secsEl) secsEl.innerText = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
-                 } else {
-                     if(daysEl) document.querySelector('.festival-status-text').textContent = "LIVE NOW";
                  }
-                 
-                 // Premium ticker
-                 if(premiumEl) { 
-                     const diffP = new Date(new Date().getFullYear(), 3, 1) - new Date(); 
-                     premiumEl.textContent = Math.max(0, Math.floor(diffP/86400000)) + "g"; 
-                 }
+                 if(premiumEl) { const diffP = new Date(new Date().getFullYear(), 3, 1) - new Date(); premiumEl.textContent = Math.max(0, Math.floor(diffP/86400000)) + "g"; }
              }
              update(); setInterval(update, 1000);
         }
@@ -828,14 +786,13 @@
             list.innerHTML = tracks.length ? tracks.map(t=>getTrackElement(t, 'grid')).join('') : '<p>Empty</p>';
             lucide.createIcons();
         }
-        
         function renderHistory() {
             const list = document.getElementById('history-list'); if(!list) return;
             const h = listeningHistory.map(id=>AURA_MAP.find(t=>t.id===id)).filter(t=>t);
             list.innerHTML = h.length ? h.map(t=>`<div onclick="playTrack('${t.id}')" class="flex p-2 hover:bg-white/10 rounded cursor-pointer"><span>${t.title}</span></div>`).join('') : '<p>Empty</p>';
         }
 
-        // Playlists
+        // Playlists & Search
         function createPlaylist() {
             const n = document.getElementById('playlist-name-input').value.trim();
             if(n.length<3) { showToast("Name too short"); return; }
@@ -859,22 +816,30 @@
             const l = document.getElementById('playlists-list'); if(!l) return;
             l.innerHTML = userPlaylists.length ? userPlaylists.map(p=>`<div onclick="playPlaylist('${p.id}')" class="p-4 bg-white/5 rounded cursor-pointer"><h3>${p.name}</h3><p>${p.tracks.length} tracks</p></div>`).join('') : '<p>No playlists</p>';
         }
-        function playPlaylist(pid) {
-            const p = userPlaylists.find(x=>x.id===pid); if(p && p.tracks.length) playTrack(p.tracks[0]);
-        }
-
-        // Search
+        function playPlaylist(pid) { const p = userPlaylists.find(x=>x.id===pid); if(p && p.tracks.length) playTrack(p.tracks[0]); }
         function openSearchModal() { document.getElementById('search-modal').classList.remove('hidden'); }
         function closeSearchModal() { document.getElementById('search-modal').classList.add('hidden'); }
+        
+        // --- 4. TERMINAL MODE (MODIFICATO) ---
         function performSearch() {
-            const q = document.getElementById('search-input').value.toLowerCase().trim();
+            const q = document.getElementById('search-input').value.trim();
+            
+            // EASTER EGGS
+            if (q === '/matrix') {
+                document.body.style.fontFamily = 'monospace';
+                document.documentElement.style.setProperty('--ryzn-color-hex', '#00ff00');
+                document.documentElement.style.setProperty('--ryzn-bg-color', '#000000');
+                showToast("Matrix Mode Activated"); return;
+            }
+            if (q === '/reset-aura') { localStorage.clear(); location.reload(); return; }
+            if (q === '/party') { setInterval(() => createFirework(), 200); showToast("Party Mode: ON"); return; }
+
             const res = document.getElementById('search-results');
             if(q.length<2) { res.innerHTML = ''; return; }
-            const trs = AURA_MAP.filter(t=>t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q));
+            const trs = AURA_MAP.filter(t=>t.title.toLowerCase().includes(q.toLowerCase()) || t.artist.toLowerCase().includes(q.toLowerCase()));
             res.innerHTML = trs.map(t=>`<div onclick="playTrack('${t.id}');closeSearchModal()" class="p-2 border-b border-white/10 cursor-pointer">${t.title} - ${t.artist}</div>`).join('');
         }
 
-        // Section Nav con FIX icone
         function showSection(sid, filter='Trending') {
             document.querySelectorAll('.section-page').forEach(s=>s.classList.remove('active'));
             document.getElementById(sid+'-section').classList.add('active');
@@ -882,47 +847,41 @@
             if(sid==='music') renderHomePageWidgets();
             else if(sid==='library') renderLikedTracks();
             else if(sid==='playlists') renderPlaylists();
-            else if(sid==='profile') renderHistory();
+            else if(sid==='profile') { renderHistory(); analyzeVibe(); } // Trigger Vibe Check
             updateLanguageUI();
             lucide.createIcons(); 
         }
 
-        // --- FUNZIONI SHARE (CONDIVISIONE) ---
+        // --- 4. SMART SHARE AURA CARD (QR CODE) ---
         function openShareModal() {
             if (!currentTrackData) return;
-
             document.getElementById('share-card-title').innerText = currentTrackData.title;
             document.getElementById('share-card-artist').innerText = currentTrackData.artist;
-            
             const coverImg = document.getElementById('share-card-cover');
             coverImg.crossOrigin = "anonymous";
             coverImg.src = currentTrackData.cover;
-
             const cardContent = document.getElementById('share-card-content');
             const color = currentTrackData.color || '#555';
             cardContent.style.background = `linear-gradient(135deg, ${color} 0%, #000000 100%)`;
             
+            // GENERAZIONE QR CODE
+            const qrContainer = document.getElementById('share-qr-container');
+            qrContainer.innerHTML = "";
+            qrContainer.style.display = "block";
+            // Simuliamo un link diretto (in un'app reale useresti deep linking)
+            const shareUrl = `https://aura-music.com/share?track=${encodeURIComponent(currentTrackData.id)}`;
+            new QRCode(qrContainer, { text: shareUrl, width: 48, height: 48, colorDark : "#000000", colorLight : "#ffffff" });
+
             document.getElementById('share-modal').classList.remove('hidden');
             lucide.createIcons();
         }
-
-        function closeShareModal() {
-            document.getElementById('share-modal').classList.add('hidden');
-        }
-
+        function closeShareModal() { document.getElementById('share-modal').classList.add('hidden'); }
         function downloadShareImage() {
             const element = document.getElementById('share-card-content');
             html2canvas(element, { useCORS: true, scale: 2, backgroundColor: null }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Aura_Share_${currentTrackData.title.replace(/\s+/g, '_')}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            }).catch(err => {
-                console.error("Errore generazione immagine:", err);
-                showToast("Errore creazione immagine");
+                const link = document.createElement('a'); link.download = `Aura_Share_${currentTrackData.title.replace(/\s+/g, '_')}.png`; link.href = canvas.toDataURL('image/png'); link.click();
             });
         }
-        
         function shareCanvasNative() {
             const element = document.getElementById('share-card-content');
             html2canvas(element, { useCORS: true, scale: 2, backgroundColor: null }).then(canvas => {
@@ -930,19 +889,85 @@
                     if (!blob) return;
                     const file = new File([blob], "aura_story.png", { type: "image/png" });
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        try {
-                            await navigator.share({
-                                files: [file],
-                                title: 'Aura Music Vibe',
-                                text: `Ascolta ${currentTrackData.title} su Aura Music.`
-                            });
-                        } catch (err) { console.log("Condivisione annullata o fallita", err); }
-                    } else {
-                        showToast("Condivisione diretta non supportata. Scarico immagine...");
-                        downloadShareImage();
-                    }
+                        try { await navigator.share({ files: [file], title: 'Aura Music Vibe', text: `Ascolta ${currentTrackData.title} su Aura Music.` }); } catch (err) {}
+                    } else { downloadShareImage(); }
                 }, 'image/png');
             });
+        }
+
+        // --- 1. GESTURE DJ (GIROSCOPIO) ---
+        let gyroEnabled = false;
+        function toggleGyro() {
+            gyroEnabled = !gyroEnabled;
+            const btn = document.getElementById('gyro-btn');
+            if(btn) btn.classList.toggle('bg-green-500/50', gyroEnabled);
+            showToast(gyroEnabled ? "Gesture DJ Attivo: Ruota per Volume" : "Gesture DJ Spento");
+            if (gyroEnabled && window.DeviceOrientationEvent) { window.addEventListener('deviceorientation', handleOrientation); } 
+            else { window.removeEventListener('deviceorientation', handleOrientation); }
+        }
+        function handleOrientation(event) {
+            if (!gyroEnabled) return;
+            let tilt = event.gamma; 
+            let newVol = Math.max(0, Math.min(1, (tilt + 45) / 90));
+            if(audioPlayer) audioPlayer.volume = newVol;
+        }
+
+        // --- 2. AURA FX ENGINE ---
+        const FX_MODES = [ { name: "Normal", rate: 1.0 }, { name: "Nightcore ⚡", rate: 1.25 }, { name: "Slowed 🐢", rate: 0.85 } ];
+        let currentFxIndex = 0;
+        function cycleAudioFX() {
+            currentFxIndex = (currentFxIndex + 1) % FX_MODES.length;
+            const mode = FX_MODES[currentFxIndex];
+            audioPlayer.playbackRate = mode.rate;
+            showToast(`Modo FX: ${mode.name}`);
+            const badge = document.getElementById('fx-badge');
+            if(badge) badge.textContent = mode.name;
+        }
+
+        // --- 3. FOCUS & CHILL (AMBIENT) ---
+        const AMBIENT_SOUNDS = {
+            'rain': 'https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/audio/rain_loop.mp3', // Placeholder URL
+            'fire': 'https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/audio/fire_loop.mp3'  // Placeholder URL
+        };
+        let isAmbientPlaying = false;
+        function toggleAmbientMode(type = 'rain') {
+            const player = document.getElementById('ambientPlayer');
+            if(isAmbientPlaying && player.src.includes(type)) {
+                player.pause(); isAmbientPlaying = false; showToast("Ambient Off");
+            } else {
+                // In un caso reale servono URL validi, qui simulo l'azione
+                // player.src = AMBIENT_SOUNDS[type]; 
+                // player.play();
+                isAmbientPlaying = true;
+                showToast(`Focus Mode: ${type} (Simulato)`);
+            }
+        }
+
+        // --- 3. TIME CAPSULE ---
+        function openTimeCapsuleModal() {
+            if(!currentTrackData) return;
+            const date = prompt("Inserisci data sblocco (YYYY-MM-DD):", "2025-12-31");
+            if(date) createTimeCapsule(currentTrackData.id, date);
+        }
+        function createTimeCapsule(trackId, unlockDateStr) {
+            let capsules = JSON.parse(localStorage.getItem('aura_capsules') || '[]');
+            capsules.push({ trackId: trackId, unlockDate: new Date(unlockDateStr).getTime(), locked: true });
+            localStorage.setItem('aura_capsules', JSON.stringify(capsules));
+            showToast("Brano sigillato nella Capsula Temporale");
+        }
+        function checkCapsules() {
+            let capsules = JSON.parse(localStorage.getItem('aura_capsules') || '[]');
+            const now = Date.now();
+            let opened = false;
+            capsules.forEach(c => {
+                if (c.locked && now >= c.unlockDate) {
+                    c.locked = false; opened = true;
+                }
+            });
+            if(opened) {
+                showToast("Una Capsula Temporale si è aperta!");
+                localStorage.setItem('aura_capsules', JSON.stringify(capsules));
+            }
         }
 
         // Utils
@@ -983,23 +1008,18 @@
             setupMediaSessionHandlers();
         }
         function handleSeek(e) { if(audioPlayer) { const r = e.currentTarget.getBoundingClientRect(); audioPlayer.currentTime = ((e.clientX - r.left)/r.width) * audioPlayer.duration; } }
-        function updateProgress() { if(audioPlayer && progressBar) progressBar.style.width = (audioPlayer.currentTime/audioPlayer.duration)*100 + '%'; if(progressBarImmersive) progressBarImmersive.style.width = progressBar.style.width; syncLyricsDisplay(); }
         
-        // --- Init Principale ---
         async function initializeAppContent() {
             if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service_worker.js').catch(e=>console.log(e));
-            
             loadLocalData(); 
             getDOMElements(); 
-            
-            // FIX: Ensure Language Selector Matches Internal State
-            const langSel = document.getElementById('language-selector');
-            if(langSel) langSel.value = currentLang;
-
+            const langSel = document.getElementById('language-selector'); if(langSel) langSel.value = currentLang;
             await fetchTracks(); 
             updateAmbientLight('#00BFFF', '0 191 255'); 
             showSection('music');
             updateLanguageUI();
+            checkCapsules(); // Check time capsules
+            startMusicalTwins(); // Start twin checker
             lucide.createIcons();
         }
         document.addEventListener('DOMContentLoaded', initializeAppContent);
