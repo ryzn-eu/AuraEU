@@ -96,9 +96,9 @@
     
     <div id="install-blocker" class="hidden">
         <div class="max-w-md w-full bg-white/10 border border-white/20 p-8 rounded-3xl shadow-2xl relative">
-            <h2 class="text-3xl font-extrabold text-white mb-4">Installa Aura</h2>
-            <p class="text-gray-300 mb-8">Per background audio continuo, installa l'app.</p>
-            <p class="text-xs text-gray-500 cursor-pointer" onclick="forceRecheckPWA()">Tocca qui se hai già installato.</p>
+            <h2 class="text-3xl font-extrabold text-white mb-4">Install Aura</h2>
+            <p class="text-gray-300 mb-8">For continuous background audio, install the app.</p>
+            <p class="text-xs text-gray-500 cursor-pointer" onclick="forceRecheckPWA()">Tap here if already installed.</p>
         </div>
     </div>
 
@@ -110,8 +110,8 @@
 
     <div id="auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4 modal">
         <div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative text-center">
-            <h3 class="text-2xl font-bold mb-4 accent-text">Benvenuto</h3>
-            <button onclick="handleAuthAction('device')" class="w-full py-4 accent-bg rounded-xl text-white font-bold flex items-center justify-center gap-2"><i data-lucide="smartphone" class="w-5 h-5"></i> Accedi</button>
+            <h3 id="txt-auth-welcome" class="text-2xl font-bold mb-4 accent-text">Welcome</h3>
+            <button onclick="handleAuthAction('device')" class="w-full py-4 accent-bg rounded-xl text-white font-bold flex items-center justify-center gap-2"><i data-lucide="smartphone" class="w-5 h-5"></i> <span id="txt-auth-btn">Login with this device</span></button>
             <button onclick="closeAuthModal()" class="absolute top-3 right-3 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
     </div>
@@ -121,25 +121,25 @@
             <div class="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/50">
                 <i data-lucide="hourglass" class="w-8 h-8 text-amber-500"></i>
             </div>
-            <h3 class="text-2xl font-bold mb-2 text-white">Capsula Temporale</h3>
-            <p class="text-gray-400 text-sm mb-6">Sigilla questo brano fino a una data futura.</p>
+            <h3 id="txt-capsule-title" class="text-2xl font-bold mb-2 text-white">Time Capsule</h3>
+            <p id="txt-capsule-desc" class="text-gray-400 text-sm mb-6">Seal this track until a future date.</p>
             <input type="date" id="capsule-date" class="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white mb-4 focus:outline-none focus:border-amber-500">
-            <button onclick="confirmTimeCapsule()" class="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl text-white font-bold transition">Sigilla</button>
-            <button onclick="closeCapsuleModal()" class="mt-4 text-gray-500 text-sm">Annulla</button>
+            <button id="btn-capsule-seal" onclick="confirmTimeCapsule()" class="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl text-white font-bold transition">Seal</button>
+            <button id="btn-capsule-cancel" onclick="closeCapsuleModal()" class="mt-4 text-gray-500 text-sm">Cancel</button>
         </div>
     </div>
     
     <div id="search-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex flex-col p-4 modal">
         <div class="w-full max-w-2xl mx-auto depth-glass bg-ryzn-bg p-6 rounded-2xl shadow-2xl relative">
-            <div class="flex items-center mb-4"><input type="text" id="search-input" oninput="performSearch()" placeholder="Cerca..." class="flex-grow p-3 rounded-l-lg bg-white/10 border border-white/20 text-white focus:outline-none"><button onclick="performSearch()" class="p-3 accent-bg rounded-r-lg"><i data-lucide="search" class="w-6 h-6"></i></button></div>
-            <div id="search-results" class="max-h-96 overflow-y-auto space-y-3 p-2"><p class="text-center text-gray-500">Inizia a digitare...</p></div>
+            <div class="flex items-center mb-4"><input type="text" id="search-input" oninput="performSearch()" placeholder="Search..." class="flex-grow p-3 rounded-l-lg bg-white/10 border border-white/20 text-white focus:outline-none"><button onclick="performSearch()" class="p-3 accent-bg rounded-r-lg"><i data-lucide="search" class="w-6 h-6"></i></button></div>
+            <div id="search-results" class="max-h-96 overflow-y-auto space-y-3 p-2"><p class="text-center text-gray-500">Start typing...</p></div>
             <button onclick="closeSearchModal()" class="absolute top-3 right-3 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div>
     </div>
 
-    <div id="create-playlist-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4"><div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative"><h3 class="text-xl font-bold mb-4 accent-text">Nuova Sessione</h3><input type="text" id="playlist-name-input" placeholder="Nome" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white mb-4"><div class="flex justify-end space-x-3"><button onclick="closeCreatePlaylistModal()" class="px-4 py-2 text-gray-400">Annulla</button><button onclick="createPlaylist()" class="px-4 py-2 accent-bg rounded-lg text-white font-bold">Crea</button></div></div></div>
-    <div id="add-to-playlist-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4"><div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative"><h3 class="text-xl font-bold mb-4 accent-text">Aggiungi a Sessione</h3><div id="playlist-selection-list" class="max-h-64 overflow-y-auto space-y-2 p-1"><p class="text-center text-gray-500">Nessuna sessione.</p></div><button onclick="closeAddToPlaylistModal()" class="absolute top-3 right-3 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
+    <div id="create-playlist-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4"><div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative"><h3 id="txt-new-session" class="text-xl font-bold mb-4 accent-text">New Session</h3><input type="text" id="playlist-name-input" placeholder="Name" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white mb-4"><div class="flex justify-end space-x-3"><button id="btn-session-cancel" onclick="closeCreatePlaylistModal()" class="px-4 py-2 text-gray-400">Cancel</button><button id="btn-session-create" onclick="createPlaylist()" class="px-4 py-2 accent-bg rounded-lg text-white font-bold">Create</button></div></div></div>
+    <div id="add-to-playlist-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4"><div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative"><h3 id="txt-add-session" class="text-xl font-bold mb-4 accent-text">Add to Session</h3><div id="playlist-selection-list" class="max-h-64 overflow-y-auto space-y-2 p-1"><p class="text-center text-gray-500">No sessions.</p></div><button onclick="closeAddToPlaylistModal()" class="absolute top-3 right-3 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
     
-    <div id="share-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[160] hidden flex items-center justify-center p-4 modal"><div class="depth-glass bg-ryzn-bg p-6 rounded-3xl w-full max-w-sm shadow-2xl relative flex flex-col items-center"><h3 class="text-xl font-bold mb-6 accent-text">Condividi Vibe</h3><div id="share-preview-container" class="w-full aspect-[4/5] rounded-xl overflow-hidden shadow-2xl mb-6 relative group"><div id="share-card-content" class="w-full h-full p-6 flex flex-col justify-between relative bg-gradient-to-br from-gray-900 to-black"><div id="share-card-bg" class="absolute inset-0 opacity-40 mix-blend-overlay bg-cover bg-center"></div><div class="relative z-10 flex justify-between items-center opacity-80"><div class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-white"></i><span class="text-xs font-bold tracking-widest uppercase text-white">Aura Music</span></div><div id="share-qr-container"></div></div><div class="relative z-10 self-center w-40 h-40 sm:w-48 sm:h-48 shadow-2xl my-4"><img id="share-card-cover" src="" class="w-full h-full object-cover rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.5)]" crossorigin="anonymous"></div><div class="relative z-10 mt-auto"><h2 id="share-card-title" class="text-2xl font-black text-white leading-tight mb-1 drop-shadow-md line-clamp-2">Titolo</h2><p id="share-card-artist" class="text-lg text-gray-200 font-medium drop-shadow-sm">Artista</p></div></div></div><div class="grid grid-cols-2 gap-3 w-full"><button onclick="downloadShareImage()" class="p-4 bg-white/10 hover:bg-white/20 rounded-xl flex flex-col items-center justify-center gap-2 transition"><i data-lucide="download" class="w-6 h-6 text-white"></i><span class="text-xs font-medium text-gray-300">Scarica</span></button><button onclick="shareCanvasNative()" class="p-4 accent-bg rounded-xl flex flex-col items-center justify-center gap-2 accent-hover transition shadow-lg"><i data-lucide="instagram" class="w-6 h-6 text-white"></i><span class="text-xs font-bold text-white">Storia</span></button></div><button onclick="closeShareModal()" class="absolute top-4 right-4 p-2 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
+    <div id="share-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[160] hidden flex items-center justify-center p-4 modal"><div class="depth-glass bg-ryzn-bg p-6 rounded-3xl w-full max-w-sm shadow-2xl relative flex flex-col items-center"><h3 id="txt-share-vibe" class="text-xl font-bold mb-6 accent-text">Share Vibe</h3><div id="share-preview-container" class="w-full aspect-[4/5] rounded-xl overflow-hidden shadow-2xl mb-6 relative group"><div id="share-card-content" class="w-full h-full p-6 flex flex-col justify-between relative bg-gradient-to-br from-gray-900 to-black"><div id="share-card-bg" class="absolute inset-0 opacity-40 mix-blend-overlay bg-cover bg-center"></div><div class="relative z-10 flex justify-between items-center opacity-80"><div class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-white"></i><span class="text-xs font-bold tracking-widest uppercase text-white">Aura Music</span></div><div id="share-qr-container"></div></div><div class="relative z-10 self-center w-40 h-40 sm:w-48 sm:h-48 shadow-2xl my-4"><img id="share-card-cover" src="" class="w-full h-full object-cover rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.5)]" crossorigin="anonymous"></div><div class="relative z-10 mt-auto"><h2 id="share-card-title" class="text-2xl font-black text-white leading-tight mb-1 drop-shadow-md line-clamp-2">Title</h2><p id="share-card-artist" class="text-lg text-gray-200 font-medium drop-shadow-sm">Artist</p></div></div></div><div class="grid grid-cols-2 gap-3 w-full"><button onclick="downloadShareImage()" class="p-4 bg-white/10 hover:bg-white/20 rounded-xl flex flex-col items-center justify-center gap-2 transition"><i data-lucide="download" class="w-6 h-6 text-white"></i><span id="txt-btn-download" class="text-xs font-medium text-gray-300">Download</span></button><button onclick="shareCanvasNative()" class="p-4 accent-bg rounded-xl flex flex-col items-center justify-center gap-2 accent-hover transition shadow-lg"><i data-lucide="instagram" class="w-6 h-6 text-white"></i><span id="txt-btn-story" class="text-xs font-bold text-white">Story</span></button></div><button onclick="closeShareModal()" class="absolute top-4 right-4 p-2 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
 
     <div id="immersive-mode" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[150] hidden flex flex-col items-center justify-center p-6 modal overflow-y-auto">
         <div class="absolute top-6 left-6 flex items-center space-x-4 z-10">
@@ -186,7 +186,7 @@
                         <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="h-10 w-auto object-contain" alt="Aura">
                     </h1>
                 </a>
-                <nav class="hidden sm:flex space-x-6 text-gray-400 text-lg font-medium"><button id="nav-music" onclick="showSection('music')" class="nav-item hover:accent-text transition pb-1">Scopri</button></nav>
+                <nav class="hidden sm:flex space-x-6 text-gray-400 text-lg font-medium"><button id="nav-music" onclick="showSection('music')" class="nav-item hover:accent-text transition pb-1">Discover</button></nav>
             </div>
             <div class="flex items-center space-x-3">
                  <button onclick="showSection('playlists')" class="p-2 depth-glass rounded-full text-white hover:bg-white/10 transition"><i data-lucide="list-music" class="w-6 h-6"></i></button>
@@ -198,20 +198,20 @@
         <hr class="border-white/10 my-6 md:my-10">
 
         <section id="music-section" class="section-page active">
-            <h2 id="home-greeting" class="text-4xl font-extrabold mb-8 text-white">Buonasera.</h2>
+            <h2 id="home-greeting" class="text-4xl font-extrabold mb-8 text-white">Good Evening.</h2>
             <div id="home-widgets-container" class="space-y-10"><p class="text-center text-gray-400 col-span-full"><i data-lucide="loader-2" class="w-5 h-5 animate-spin inline-block mr-2"></i> ...</p></div>
         </section>
-        <section id="library-section" class="section-page"><h2 class="text-3xl font-bold mb-6" id="txt-saved-tracks">Salvati</h2><div id="liked-tracks-list" class="space-y-3"></div></section>
-        <section id="playlists-section" class="section-page"><div class="flex justify-between items-center mb-6"><h2 class="text-3xl font-bold" id="txt-sessions">Sessioni</h2><button onclick="openCreatePlaylistModal()" class="flex items-center px-4 py-2 accent-bg rounded-full text-sm font-semibold"><i data-lucide="plus" class="w-4 h-4 mr-1"></i> <span id="txt-create-btn">Crea</span></button></div><div id="playlists-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></section>
+        <section id="library-section" class="section-page"><h2 class="text-3xl font-bold mb-6" id="txt-saved-tracks">Saved Tracks</h2><div id="liked-tracks-list" class="space-y-3"></div></section>
+        <section id="playlists-section" class="section-page"><div class="flex justify-between items-center mb-6"><h2 class="text-3xl font-bold" id="txt-sessions">Your Sessions</h2><button onclick="openCreatePlaylistModal()" class="flex items-center px-4 py-2 accent-bg rounded-full text-sm font-semibold"><i data-lucide="plus" class="w-4 h-4 mr-1"></i> <span id="txt-create-btn">Create</span></button></div><div id="playlists-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></section>
         <section id="profile-section" class="section-page">
-            <h2 class="text-3xl font-bold mb-6" id="txt-profile-title">Profilo</h2>
+            <h2 class="text-3xl font-bold mb-6" id="txt-profile-title">Profile</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
                 <div class="depth-glass p-6 rounded-xl space-y-4">
                     <div class="flex items-center justify-between"><p id="profile-info" class="text-lg font-semibold truncate">Guest</p><i data-lucide="user-circle" class="w-8 h-8 text-gray-400"></i></div>
                     <div id="vibe-score-display" class="text-xl accent-text font-bold">Vibe Score: 0/100</div>
-                    <p id="vibe-check-text" class="text-sm text-gray-400 italic">Analisi vibe in corso...</p>
+                    <p id="vibe-check-text" class="text-sm text-gray-400 italic">Vibe analysis in progress...</p>
                     <div class="pt-4 border-t border-white/10">
-                        <label class="block text-gray-400 text-sm mb-2" id="txt-language-label">Lingua</label>
+                        <label class="block text-gray-400 text-sm mb-2" id="txt-language-label">Language</label>
                         <select id="language-selector" onchange="changeLanguage(this.value)" class="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white">
                             <option value="en">English 🇬🇧</option>
                             <option value="it">Italiano 🇮🇹</option>
@@ -222,23 +222,23 @@
                             <option value="ar">العربية 🇸🇦</option>
                         </select>
                     </div>
-                    <button id="btn-logout" onclick="handleLogout()" class="w-full px-4 py-3 bg-red-600/80 hover:bg-red-600 border border-red-500/30 rounded-lg text-white font-bold transition flex items-center justify-center gap-2 mt-4"><i data-lucide="log-out" class="w-5 h-5"></i><span id="txt-logout-btn">Esci</span></button>
+                    <button id="btn-logout" onclick="handleLogout()" class="w-full px-4 py-3 bg-red-600/80 hover:bg-red-600 border border-red-500/30 rounded-lg text-white font-bold transition flex items-center justify-center gap-2 mt-4"><i data-lucide="log-out" class="w-5 h-5"></i><span id="txt-logout-btn">Logout</span></button>
                 </div>
                 <div class="premium-gold p-6 rounded-xl flex flex-col justify-between relative overflow-hidden text-black group">
                      <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/30 rounded-full blur-3xl animate-pulse"></div>
                      <div class="premium-shine"></div>
-                     <div class="relative z-10"><h3 class="text-2xl font-black uppercase tracking-wider mb-2 flex items-center gap-2"><i data-lucide="crown" class="w-8 h-8 floating-icon fill-black/20"></i> Premium</h3><p class="font-medium text-black/80" id="txt-premium-desc">Attivo.</p></div>
-                     <div class="relative z-10 mt-6 text-center border-t border-black/10 pt-4"><p class="text-xs font-bold uppercase tracking-widest opacity-70 mb-1" id="txt-countdown-label">Scadenza</p><div id="premium-countdown-timer" class="text-2xl font-mono font-bold">--</div></div>
+                     <div class="relative z-10"><h3 class="text-2xl font-black uppercase tracking-wider mb-2 flex items-center gap-2"><i data-lucide="crown" class="w-8 h-8 floating-icon fill-black/20"></i> Premium</h3><p class="font-medium text-black/80" id="txt-premium-desc">Exclusive access active.</p></div>
+                     <div class="relative z-10 mt-6 text-center border-t border-black/10 pt-4"><p class="text-xs font-bold uppercase tracking-widest opacity-70 mb-1" id="txt-countdown-label">Expires in</p><div id="premium-countdown-timer" class="text-2xl font-mono font-bold">--</div></div>
                 </div>
             </div>
-            <div class="mt-8"><h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i data-lucide="history" class="w-5 h-5 accent-text"></i><span id="txt-history-title">Cronologia</span></h3><div id="history-list" class="space-y-2 max-w-4xl"></div></div>
+            <div class="mt-8"><h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i data-lucide="history" class="w-5 h-5 accent-text"></i><span id="txt-history-title">Listening History</span></h3><div id="history-list" class="space-y-2 max-w-4xl"></div></div>
         </section>
     </div> 
     
     <div onclick="enterImmersiveMode()" class="player-bar depth-glass bg-ryzn-bg/80 border-t border-white/10 flex items-center justify-between px-4 sm:px-8 cursor-pointer">
         <div class="flex items-center space-x-4 w-1/3 overflow-hidden">
             <img id="player-cover" src="https://via.placeholder.com/64" class="w-12 h-12 rounded-md object-cover flex-shrink-0" crossorigin="anonymous">
-            <div id="player-title-wrapper" class="title-wrapper truncate"><p id="player-title" class="font-bold text-sm"><span class="marquee">Nessun Brano</span></p><p id="player-artist" class="text-xs text-gray-400 truncate">Tocca per iniziare</p></div>
+            <div id="player-title-wrapper" class="title-wrapper truncate"><p id="player-title" class="font-bold text-sm"><span class="marquee">No Track</span></p><p id="player-artist" class="text-xs text-gray-400 truncate">Tap to play</p></div>
         </div>
         <div class="flex items-center justify-center space-x-4 w-1/3">
             <button onclick="event.stopPropagation(); skipBackward()" class="text-white/70 hover:text-white transition block"><i data-lucide="skip-back" class="w-5 h-5 fill-current"></i></button>
@@ -268,21 +268,53 @@
         let activeFilter = 'Trending', currentLang = 'en';
         let isTransitioning = false; 
         
-        // --- NEW REAL FEATURE VARIABLES ---
+        // --- FEATURE VARIABLES ---
         let fxMode = 0; // 0:Normal, 1:Nightcore, 2:Slowed
         let currentAmbientMode = null; 
         let gyroEnabled = false;
 
         const TRANSLATIONS={
-            it:{
-                greeting_m:"Buongiorno.",greeting_a:"Buon Pomeriggio.",greeting_e:"Buonasera.",vibe_ready:"La tua Vibe è pronta.",discover:"Scopri",sessions:"Le Tue Sessioni",saved_tracks:"I Tuoi Brani Salvati",profile:"Profilo Utente",login_btn:"Accedi con questo dispositivo",logout_btn:"Disconnetti",search_ph:"Cerca...",create_session:"Crea Sessione",create_session_modal:"Crea Nuova Sessione",add_session:"Aggiungi a Sessione",cancel:"Annulla",create:"Crea",history:"Cronologia Ascolti",language:"Lingua",premium_desc:"Accesso esclusivo attivo.",countdown_lbl:"Scadenza Offerta (1 Aprile)",status_guest:"Stato: Disconnesso",status_user:"Utente ID:",now_playing:"In Riproduzione",quick_access:"🎧 Accesso Rapido",quick_access_sub:"Riclicca per un nuovo brano.",mood_select:"✨ Mood Select",mood_select_sub:"Scegli la vibe perfetta.",trending_title:"🔥 I Più Ascoltati",trending_sub:"Selezione casuale.",results:"Risultati:",results_sub:"Brani filtrati.",back_home:"Torna alla Home",
-                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Hit atmosfera.",cat_cr2_title:"🕯️ CR2 - Ballate e Relax",cat_cr2_sub:"Melodie lente.",cat_cr3_title:"🔔 CR3 - I Classici",cat_cr3_sub:"Tracce tradizionali.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Musica strumentale.",
-                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Diretta da Bucarest", live_offline:"OFFLINE", live_soon:"IL LIVE INIZIA ALLE 23:00"
-            },
             en:{
                 greeting_m:"Good Morning.",greeting_a:"Good Afternoon.",greeting_e:"Good Evening.",vibe_ready:"Your Vibe is ready.",discover:"Discover",sessions:"Your Sessions",saved_tracks:"Saved Tracks",profile:"User Profile",login_btn:"Login with this device",logout_btn:"Logout",search_ph:"Search...",create_session:"Create Session",create_session_modal:"New Session",add_session:"Add to Session",cancel:"Cancel",create:"Create",history:"Listening History",language:"Language",premium_desc:"Exclusive access active.",countdown_lbl:"Offer Expires (April 1st)",status_guest:"Status: Guest",status_user:"User ID:",now_playing:"Now Playing",quick_access:"🎧 Quick Access",quick_access_sub:"Click again.",mood_select:"✨ Mood Select",mood_select_sub:"Choose vibe.",trending_title:"🔥 Trending Now",trending_sub:"Random selection.",results:"Results:",results_sub:"Filtered tracks.",back_home:"Back to Home",
                 cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Pop songs.",cat_cr2_title:"🕯️ CR2 - Ballads & Relax",cat_cr2_sub:"Slow melodies.",cat_cr3_title:"🔔 CR3 - Classics",cat_cr3_sub:"Traditional tracks.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumental music.",
-                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live from Bucharest", live_offline:"OFFLINE", live_soon:"LIVE STARTS AT 23:00"
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live from Bucharest", live_offline:"OFFLINE", live_soon:"LIVE STARTS AT 23:00",
+                auth_welcome:"Welcome", auth_btn:"Login with this device", caps_title:"Time Capsule", caps_desc:"Seal this track until a future date.", btn_seal:"Seal", btn_cancel:"Cancel", share_vibe:"Share Vibe", btn_down:"Download", btn_story:"Story", pl_new:"New Session", pl_add:"Add to Session"
+            },
+            it:{
+                greeting_m:"Buongiorno.",greeting_a:"Buon Pomeriggio.",greeting_e:"Buonasera.",vibe_ready:"La tua Vibe è pronta.",discover:"Scopri",sessions:"Le Tue Sessioni",saved_tracks:"I Tuoi Brani Salvati",profile:"Profilo Utente",login_btn:"Accedi con questo dispositivo",logout_btn:"Disconnetti",search_ph:"Cerca...",create_session:"Crea Sessione",create_session_modal:"Crea Nuova Sessione",add_session:"Aggiungi a Sessione",cancel:"Annulla",create:"Crea",history:"Cronologia Ascolti",language:"Lingua",premium_desc:"Accesso esclusivo attivo.",countdown_lbl:"Scadenza Offerta (1 Aprile)",status_guest:"Stato: Disconnesso",status_user:"Utente ID:",now_playing:"In Riproduzione",quick_access:"🎧 Accesso Rapido",quick_access_sub:"Riclicca per un nuovo brano.",mood_select:"✨ Mood Select",mood_select_sub:"Scegli la vibe perfetta.",trending_title:"🔥 I Più Ascoltati",trending_sub:"Selezione casuale.",results:"Risultati:",results_sub:"Brani filtrati.",back_home:"Torna alla Home",
+                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Hit atmosfera.",cat_cr2_title:"🕯️ CR2 - Ballate e Relax",cat_cr2_sub:"Melodie lente.",cat_cr3_title:"🔔 CR3 - I Classici",cat_cr3_sub:"Tracce tradizionali.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Musica strumentale.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Diretta da Bucarest", live_offline:"OFFLINE", live_soon:"IL LIVE INIZIA ALLE 23:00",
+                auth_welcome:"Benvenuto", auth_btn:"Accedi con questo dispositivo", caps_title:"Capsula Temporale", caps_desc:"Sigilla questo brano fino a una data futura.", btn_seal:"Sigilla", btn_cancel:"Annulla", share_vibe:"Condividi Vibe", btn_down:"Scarica", btn_story:"Storia", pl_new:"Nuova Sessione", pl_add:"Aggiungi a Sessione"
+            },
+            ro:{
+                greeting_m:"Bună Dimineața.",greeting_a:"Bună Ziua.",greeting_e:"Bună Seara.",vibe_ready:"Vibe-ul tău e gata.",discover:"Descoperă",sessions:"Sesiunile Tale",saved_tracks:"Piese Salvate",profile:"Profil Utilizator",login_btn:"Autentificare cu dispozitiv",logout_btn:"Deconectare",search_ph:"Caută...",create_session:"Creează Sesiune",create_session_modal:"Sesiune Nouă",add_session:"Adaugă la Sesiune",cancel:"Anulează",create:"Creează",history:"Istoric Ascultare",language:"Limbă",premium_desc:"Acces exclusiv activ.",countdown_lbl:"Oferta Expiră (1 Aprilie)",status_guest:"Stare: Oaspete",status_user:"ID Utilizator:",now_playing:"Acum se redă",quick_access:"🎧 Acces Rapid",quick_access_sub:"Click pentru piesă nouă.",mood_select:"✨ Selectare Mood",mood_select_sub:"Alege vibe-ul.",trending_title:"🔥 În Tendințe",trending_sub:"Selecție aleatorie.",results:"Rezultate:",results_sub:"Piese filtrate.",back_home:"Înapoi Acasă",
+                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Hituri pop.",cat_cr2_title:"🕯️ CR2 - Balade & Relax",cat_cr2_sub:"Melodii lente.",cat_cr3_title:"🔔 CR3 - Clasice",cat_cr3_sub:"Piese tradiționale.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Muzică instrumentală.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live din București", live_offline:"OFFLINE", live_soon:"LIVE ÎNCEPE LA 23:00",
+                auth_welcome:"Bine ai venit", auth_btn:"Intră în cont", caps_title:"Capsula Timpului", caps_desc:"Sigilează piesa până la o dată viitoare.", btn_seal:"Sigilează", btn_cancel:"Anulează", share_vibe:"Partajează Vibe", btn_down:"Descarcă", btn_story:"Story", pl_new:"Sesiune Nouă", pl_add:"Adaugă la Sesiune"
+            },
+            de:{
+                greeting_m:"Guten Morgen.",greeting_a:"Guten Tag.",greeting_e:"Guten Abend.",vibe_ready:"Dein Vibe ist bereit.",discover:"Entdecken",sessions:"Deine Sitzungen",saved_tracks:"Gespeicherte Titel",profile:"Benutzerprofil",login_btn:"Mit Gerät anmelden",logout_btn:"Abmelden",search_ph:"Suchen...",create_session:"Sitzung erstellen",create_session_modal:"Neue Sitzung",add_session:"Zur Sitzung hinzufügen",cancel:"Abbrechen",create:"Erstellen",history:"Hörverlauf",language:"Sprache",premium_desc:"Exklusiver Zugang aktiv.",countdown_lbl:"Angebot läuft ab (1. April)",status_guest:"Status: Gast",status_user:"Benutzer-ID:",now_playing:"Läuft gerade",quick_access:"🎧 Schnellzugriff",quick_access_sub:"Klicken für neuen Titel.",mood_select:"✨ Stimmungswahl",mood_select_sub:"Wähle deinen Vibe.",trending_title:"🔥 Im Trend",trending_sub:"Zufällige Auswahl.",results:"Ergebnisse:",results_sub:"Gefilterte Titel.",back_home:"Zurück zur Startseite",
+                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Pop-Hits.",cat_cr2_title:"🕯️ CR2 - Balladen & Entspannung",cat_cr2_sub:"Langsame Melodien.",cat_cr3_title:"🔔 CR3 - Klassiker",cat_cr3_sub:"Traditionelle Titel.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumentalmusik.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live aus Bukarest", live_offline:"OFFLINE", live_soon:"LIVE STARTET UM 23:00",
+                auth_welcome:"Willkommen", auth_btn:"Einloggen", caps_title:"Zeitkapsel", caps_desc:"Versiegele diesen Titel.", btn_seal:"Versiegeln", btn_cancel:"Abbrechen", share_vibe:"Vibe Teilen", btn_down:"Download", btn_story:"Story", pl_new:"Neue Sitzung", pl_add:"Hinzufügen"
+            },
+            es:{
+                greeting_m:"Buenos Días.",greeting_a:"Buenas Tardes.",greeting_e:"Buenas Noches.",vibe_ready:"Tu Vibe está listo.",discover:"Descubrir",sessions:"Tus Sesiones",saved_tracks:"Pistas Guardadas",profile:"Perfil de Usuario",login_btn:"Iniciar sesión",logout_btn:"Cerrar sesión",search_ph:"Buscar...",create_session:"Crear Sesión",create_session_modal:"Nueva Sesión",add_session:"Añadir a Sesión",cancel:"Cancelar",create:"Crear",history:"Historial",language:"Idioma",premium_desc:"Acceso exclusivo activo.",countdown_lbl:"Oferta expira (1 Abril)",status_guest:"Estado: Invitado",status_user:"ID Usuario:",now_playing:"Reproduciendo",quick_access:"🎧 Acceso Rápido",quick_access_sub:"Clic para nueva pista.",mood_select:"✨ Selección de Mood",mood_select_sub:"Elige tu vibe.",trending_title:"🔥 Tendencias",trending_sub:"Selección aleatoria.",results:"Resultados:",results_sub:"Pistas filtradas.",back_home:"Volver al Inicio",
+                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Éxitos pop.",cat_cr2_title:"🕯️ CR2 - Baladas y Relax",cat_cr2_sub:"Melodías lentas.",cat_cr3_title:"🔔 CR3 - Clásicos",cat_cr3_sub:"Temas tradicionales.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Música instrumental.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"En vivo desde Bucarest", live_offline:"OFFLINE", live_soon:"EN VIVO A LAS 23:00",
+                auth_welcome:"Bienvenido", auth_btn:"Entrar", caps_title:"Cápsula del Tiempo", caps_desc:"Sella esta pista.", btn_seal:"Sellar", btn_cancel:"Cancelar", share_vibe:"Compartir Vibe", btn_down:"Descargar", btn_story:"Historia", pl_new:"Nueva Sesión", pl_add:"Añadir"
+            },
+            ru:{
+                greeting_m:"Доброе утро.",greeting_a:"Добрый день.",greeting_e:"Добрый вечер.",vibe_ready:"Твой вайб готов.",discover:"Обзор",sessions:"Сессии",saved_tracks:"Сохраненные",profile:"Профиль",login_btn:"Войти",logout_btn:"Выйти",search_ph:"Поиск...",create_session:"Создать сессию",create_session_modal:"Новая сессия",add_session:"Добавить в сессию",cancel:"Отмена",create:"Создать",history:"История",language:"Язык",premium_desc:"Премиум доступ.",countdown_lbl:"Акция до 1 апреля",status_guest:"Статус: Гость",status_user:"ID:",now_playing:"Сейчас играет",quick_access:"🎧 Быстрый доступ",quick_access_sub:"Кликни для трека.",mood_select:"✨ Выбор настроения",mood_select_sub:"Выбери вайб.",trending_title:"🔥 В тренде",trending_sub:"Случайный выбор.",results:"Результаты:",results_sub:"Фильтр.",back_home:"На главную",
+                cat_cr1_title:"🎄 CR1 - Хиты",cat_cr1_sub:"Поп-музыка.",cat_cr2_title:"🕯️ CR2 - Баллады",cat_cr2_sub:"Медленные мелодии.",cat_cr3_title:"🔔 CR3 - Классика",cat_cr3_sub:"Традиционные.",cat_cr4_title:"❄️ CR4 - Эмбиент",cat_cr4_sub:"Инструментальная.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Прямой эфир из Бухареста", live_offline:"ОФФЛАЙН", live_soon:"НАЧАЛО В 23:00",
+                auth_welcome:"Добро пожаловать", auth_btn:"Войти", caps_title:"Капсула времени", caps_desc:"Запечатать трек.", btn_seal:"Запечатать", btn_cancel:"Отмена", share_vibe:"Поделиться", btn_down:"Скачать", btn_story:"Сториз", pl_new:"Новая сессия", pl_add:"Добавить"
+            },
+            ar:{
+                greeting_m:"صباح الخير",greeting_a:"مساء الخير",greeting_e:"مساء الخير",vibe_ready:"الأجواء جاهزة",discover:"اكتشف",sessions:"جلساتك",saved_tracks:"المحفوظات",profile:"الملف الشخصي",login_btn:"تسجيل الدخول",logout_btn:"تسجيل الخروج",search_ph:"بحث...",create_session:"إنشاء جلسة",create_session_modal:"جلسة جديدة",add_session:"إضافة لجلسة",cancel:"إلغاء",create:"إنشاء",history:"السجل",language:"اللغة",premium_desc:"وصول حصري",countdown_lbl:"ينتهي العرض (1 أبريل)",status_guest:"زائر",status_user:"مستخدم:",now_playing:"يعمل الآن",quick_access:"🎧 وصول سريع",quick_access_sub:"انقر للمزيد",mood_select:"✨ اختيار المزاج",mood_select_sub:"اختر الأجواء",trending_title:"🔥 الرائج",trending_sub:"اختيار عشوائي",results:"النتائج:",results_sub:"مصفاة",back_home:"العودة للرئيسية",
+                cat_cr1_title:"🎄 CR1 - أغان ضاربة",cat_cr1_sub:"بوب",cat_cr2_title:"🕯️ CR2 - هادئة",cat_cr2_sub:"ألحان بطيئة",cat_cr3_title:"🔔 CR3 - كلاسيكيات",cat_cr3_sub:"تقليدية",cat_cr4_title:"❄️ CR4 - موسيقى محيطة",cat_cr4_sub:"موسيقى آلية",
+                promo_fest_title:"مهرجان أورا", promo_fest_sub:"مباشر من بوخارست", live_offline:"غير متصل", live_soon:"يبدأ البث 23:00",
+                auth_welcome:"أهلاً بك", auth_btn:"دخول", caps_title:"كبسولة الزمن", caps_desc:"أغلق هذا المسار", btn_seal:"إغلاق", btn_cancel:"إلغاء", share_vibe:"مشاركة", btn_down:"تنزيل", btn_story:"قصة", pl_new:"جلسة جديدة", pl_add:"إضافة"
             }
         };
         const CATEGORY_KEYS_MAP = { 'CR1': { titleKey: 'cat_cr1_title', subKey: 'cat_cr1_sub' }, 'CR2': { titleKey: 'cat_cr2_title', subKey: 'cat_cr2_sub' }, 'CR3': { titleKey: 'cat_cr3_title', subKey: 'cat_cr3_sub' }, 'CR4': { titleKey: 'cat_cr4_title', subKey: 'cat_cr4_sub' } };
@@ -399,7 +431,41 @@
              updateLikeButton(track.id); lucide.createIcons();
         }
         function updateAmbientLight(hex, rgb) { if(hex) document.documentElement.style.setProperty('--ryzn-color-hex', hex); if(rgb) document.documentElement.style.setProperty('--ryzn-color-rgb', rgb); }
-        function updateLanguageUI() { const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en']; const h = new Date().getHours(); let g = t.greeting_e; if (h>=5 && h<13) g=t.greeting_m; else if(h>=13 && h<18) g=t.greeting_a; if(document.getElementById('home-greeting')) document.getElementById('home-greeting').textContent = `${g} ${t.vibe_ready}`; if(document.getElementById('nav-music')) document.getElementById('nav-music').textContent = t.discover; if(document.getElementById('txt-saved-tracks')) document.getElementById('txt-saved-tracks').textContent = t.saved_tracks; if(document.getElementById('txt-sessions')) document.getElementById('txt-sessions').textContent = t.sessions; if(document.getElementById('txt-profile-title')) document.getElementById('txt-profile-title').textContent = t.profile; if(document.getElementById('txt-history-title')) document.getElementById('txt-history-title').textContent = t.history; updateAuthUI(loggedInUser); }
+        function updateLanguageUI() { 
+            const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en']; 
+            const h = new Date().getHours(); let g = t.greeting_e; if (h>=5 && h<13) g=t.greeting_m; else if(h>=13 && h<18) g=t.greeting_a; 
+            
+            // Main Pages
+            if(document.getElementById('home-greeting')) document.getElementById('home-greeting').textContent = `${g} ${t.vibe_ready}`; 
+            if(document.getElementById('nav-music')) document.getElementById('nav-music').textContent = t.discover; 
+            if(document.getElementById('txt-saved-tracks')) document.getElementById('txt-saved-tracks').textContent = t.saved_tracks; 
+            if(document.getElementById('txt-sessions')) document.getElementById('txt-sessions').textContent = t.sessions; 
+            if(document.getElementById('txt-create-btn')) document.getElementById('txt-create-btn').textContent = t.create;
+            if(document.getElementById('txt-profile-title')) document.getElementById('txt-profile-title').textContent = t.profile; 
+            if(document.getElementById('txt-history-title')) document.getElementById('txt-history-title').textContent = t.history;
+            if(document.getElementById('txt-language-label')) document.getElementById('txt-language-label').textContent = t.language;
+            if(document.getElementById('txt-premium-desc')) document.getElementById('txt-premium-desc').textContent = t.premium_desc;
+            if(document.getElementById('txt-countdown-label')) document.getElementById('txt-countdown-label').textContent = t.countdown_lbl;
+            if(document.getElementById('txt-logout-btn')) document.getElementById('txt-logout-btn').textContent = t.logout_btn;
+            
+            // Modals & Dynamic UI
+            if(document.getElementById('txt-auth-welcome')) document.getElementById('txt-auth-welcome').textContent = t.auth_welcome;
+            if(document.getElementById('txt-auth-btn')) document.getElementById('txt-auth-btn').textContent = t.auth_btn;
+            if(document.getElementById('txt-capsule-title')) document.getElementById('txt-capsule-title').textContent = t.caps_title;
+            if(document.getElementById('txt-capsule-desc')) document.getElementById('txt-capsule-desc').textContent = t.caps_desc;
+            if(document.getElementById('btn-capsule-seal')) document.getElementById('btn-capsule-seal').textContent = t.btn_seal;
+            if(document.getElementById('btn-capsule-cancel')) document.getElementById('btn-capsule-cancel').textContent = t.btn_cancel;
+            if(document.getElementById('search-input')) document.getElementById('search-input').placeholder = t.search_ph;
+            if(document.getElementById('txt-new-session')) document.getElementById('txt-new-session').textContent = t.pl_new;
+            if(document.getElementById('txt-add-session')) document.getElementById('txt-add-session').textContent = t.pl_add;
+            if(document.getElementById('btn-session-cancel')) document.getElementById('btn-session-cancel').textContent = t.cancel;
+            if(document.getElementById('btn-session-create')) document.getElementById('btn-session-create').textContent = t.create;
+            if(document.getElementById('txt-share-vibe')) document.getElementById('txt-share-vibe').textContent = t.share_vibe;
+            if(document.getElementById('txt-btn-download')) document.getElementById('txt-btn-download').textContent = t.btn_down;
+            if(document.getElementById('txt-btn-story')) document.getElementById('txt-btn-story').textContent = t.btn_story;
+
+            updateAuthUI(loggedInUser); 
+        }
         function changeLanguage(lang) { currentLang = lang; localStorage.setItem('aura_lang', lang); updateLanguageUI(); if(document.getElementById('music-section').classList.contains('active')) renderHomePageWidgets(); }
         function analyzeVibe() { const history = listeningHistory.slice(0, 10); if (history.length === 0) return; let moods = { 'CR1': 0, 'CR2': 0, 'CR3': 0, 'CR4': 0 }; history.forEach(id => { const t = AURA_MAP.find(x => x.id === id); if(t && t.categoryID) moods[t.categoryID]++; }); let dominant = Object.keys(moods).reduce((a, b) => moods[a] > moods[b] ? a : b); const messages = { 'CR1': "Sei in modalità Party. 🚀", 'CR2': "Vedo che sei sentimentale. ❤️", 'CR3': "Un classico. Hai ottimo gusto. 🎩", 'CR4': "Zen master. 🧘‍♂️" }; const el = document.getElementById('vibe-check-text'); if(el) el.textContent = messages[dominant] || "La tua vibe è misteriosa..."; }
 
@@ -496,15 +562,15 @@
             if(!gyroEnabled) {
                 if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     DeviceOrientationEvent.requestPermission()
-                    .then(r => { if(r==='granted') activateGyro(btn); else showToast("Permesso Negato"); })
-                    .catch(e => showToast("Errore Gyro"));
+                    .then(r => { if(r==='granted') activateGyro(btn); else showToast("Permission Denied"); })
+                    .catch(e => showToast("Error Gyro"));
                 } else { activateGyro(btn); }
             } else {
                 window.removeEventListener('deviceorientation', handleGyro);
                 gyroEnabled = false; btn.classList.remove('active'); showToast("Gesture Off");
             }
         }
-        function activateGyro(btn) { window.addEventListener('deviceorientation', handleGyro); gyroEnabled = true; btn.classList.add('active'); showToast("📲 Ruota il telefono per Volume"); }
+        function activateGyro(btn) { window.addEventListener('deviceorientation', handleGyro); gyroEnabled = true; btn.classList.add('active'); showToast("📲 Rotate Phone for Volume"); }
         function handleGyro(e) { if(!gyroEnabled) return; let val = (e.gamma + 45) / 90; audioPlayer.volume = Math.max(0, Math.min(1, val)); }
 
         // 4. Time Capsule (Modal Logic)
@@ -515,16 +581,16 @@
             const d = document.getElementById('capsule-date').value;
             if(!d || !currentTrackData) return;
             const unlock = new Date(d).getTime();
-            if(unlock <= Date.now()) { showToast("Scegli data futura!"); return; }
+            if(unlock <= Date.now()) { showToast("Choose future date!"); return; }
             let caps = JSON.parse(localStorage.getItem('aura_capsules') || '[]');
             caps.push({ id: currentTrackData.id, title: currentTrackData.title, unlock: unlock, locked: true });
             localStorage.setItem('aura_capsules', JSON.stringify(caps));
-            showToast("🔒 Brano Sigillato!");
+            showToast("🔒 Track Sealed!");
             closeCapsuleModal(); audioPlayer.pause();
         }
         function checkCapsules() {
             let caps = JSON.parse(localStorage.getItem('aura_capsules') || '[]');
-            caps.forEach(c => { if(c.locked && Date.now() >= c.unlock) { c.locked = false; showToast(`🔓 Capsula Aperta: ${c.title}`); } });
+            caps.forEach(c => { if(c.locked && Date.now() >= c.unlock) { c.locked = false; showToast(`🔓 Capsule Opened: ${c.title}`); } });
             localStorage.setItem('aura_capsules', JSON.stringify(caps));
         }
 
@@ -532,7 +598,7 @@
         function openShareModal() { if (!currentTrackData) return; document.getElementById('share-card-title').innerText = currentTrackData.title; document.getElementById('share-card-artist').innerText = currentTrackData.artist; const coverImg = document.getElementById('share-card-cover'); coverImg.crossOrigin = "anonymous"; coverImg.src = currentTrackData.cover; const cardContent = document.getElementById('share-card-content'); const color = currentTrackData.color || '#555'; cardContent.style.background = `linear-gradient(135deg, ${color} 0%, #000000 100%)`; const qrContainer = document.getElementById('share-qr-container'); qrContainer.innerHTML = ""; qrContainer.style.display = "block"; const shareUrl = `https://aura-music.com/share?track=${encodeURIComponent(currentTrackData.id)}`; new QRCode(qrContainer, { text: shareUrl, width: 48, height: 48, colorDark : "#000000", colorLight : "#ffffff" }); document.getElementById('share-modal').classList.remove('hidden'); lucide.createIcons(); }
         function closeShareModal() { document.getElementById('share-modal').classList.add('hidden'); }
         function downloadShareImage() { const element = document.getElementById('share-card-content'); html2canvas(element, { useCORS: true, scale: 2, backgroundColor: null }).then(canvas => { const link = document.createElement('a'); link.download = `Aura_Share_${currentTrackData.title.replace(/\s+/g, '_')}.png`; link.href = canvas.toDataURL('image/png'); link.click(); }); }
-        function shareCanvasNative() { const element = document.getElementById('share-card-content'); html2canvas(element, { useCORS: true, scale: 2, backgroundColor: null }).then(canvas => { canvas.toBlob(async (blob) => { if (!blob) return; const file = new File([blob], "aura_story.png", { type: "image/png" }); if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Aura Music Vibe', text: `Ascolta ${currentTrackData.title} su Aura Music.` }); } catch (err) {} } else { downloadShareImage(); } }, 'image/png'); }); }
+        function shareCanvasNative() { const element = document.getElementById('share-card-content'); html2canvas(element, { useCORS: true, scale: 2, backgroundColor: null }).then(canvas => { canvas.toBlob(async (blob) => { if (!blob) return; const file = new File([blob], "aura_story.png", { type: "image/png" }); if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Aura Music Vibe', text: `Listen to ${currentTrackData.title} on Aura Music.` }); } catch (err) {} } else { downloadShareImage(); } }, 'image/png'); }); }
 
         // Utils
         function showToast(msg) { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = "p-4 mb-3 rounded-lg text-white shadow-xl bg-blue-600"; t.textContent = msg; c.appendChild(t); setTimeout(()=>t.remove(), 3000); }
