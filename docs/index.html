@@ -18,76 +18,67 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
-        /* STILI BASE */
+        /* --- STILI ORIGINALI & CORE --- */
         :root { --ryzn-color-hex: #00BFFF; --ryzn-color-rgb: 0 191 255; --ryzn-bg-color: #171717; }
         .ryzn-bg { background-color: var(--ryzn-bg-color); }
         .accent-text { color: var(--ryzn-color-hex); }
         .accent-bg { background-color: var(--ryzn-color-hex); }
-        .depth-glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+        .depth-glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .premium-gold { background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%); position: relative; overflow: hidden; }
         .premium-shine { position: absolute; top: 0; left: 0; width: 80%; height: 100%; background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%); transform: skewX(-20deg); animation: shimmer 3s infinite; pointer-events: none; z-index: 10; }
         @keyframes shimmer { 0%, 100% { transform: translateX(-150%) skewX(-20deg); } 50% { transform: translateX(150%) skewX(-20deg); } }
-        .floating-icon { animation: floatIcon 3s ease-in-out infinite; } @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         .fixed-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-image: url('https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User/Foto.png'); background-size: cover; background-position: center; pointer-events: none; }
         
-        /* FIREWORKS CANVAS */
         #fireworks-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-        /* VISUALIZER CANVAS */
-        #visualizer-canvas { position: fixed; bottom: 0; left: 0; width: 100%; height: 40%; z-index: -1; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black, transparent); -webkit-mask-image: linear-gradient(to top, black, transparent); }
+        #visualizer-canvas { position: fixed; bottom: 0; left: 0; width: 100%; height: 50%; z-index: -1; pointer-events: none; opacity: 0.6; mask-image: linear-gradient(to top, black, transparent); -webkit-mask-image: linear-gradient(to top, black, transparent); }
 
-        body { background-color: transparent; color: white; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 96px; overflow-x: hidden; position: relative; transition: background-color 0.5s ease; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: transparent; color: white; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 96px; overflow-x: hidden; position: relative; transition: background-color 0.5s ease; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: -1; pointer-events: none; }
         .container-app { flex-grow: 1; padding: 1rem; max-width: 1400px; margin: 0 auto; width: 100%; z-index: 1; }
         .section-page { display: none; opacity: 0; transition: opacity 0.5s ease; } .section-page.active { display: block; opacity: 1; }
-        .player-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 90px; z-index: 100; transform: translateY(100%); transition: transform 0.3s ease-out; padding-bottom: env(safe-area-inset-bottom); } .player-bar.active { transform: translateY(0); }
+        .player-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; z-index: 100; transform: translateY(100%); transition: transform 0.3s ease-out; } .player-bar.active { transform: translateY(0); }
         .modal { animation: fadeIn 0.3s ease-out; } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 200; width: 90%; max-width: 400px; pointer-events: none; }
-        #audio-player-container { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
-        .title-wrapper { overflow: hidden; white-space: nowrap; } .marquee { display: inline-block; animation: marquee 10s linear infinite; padding-left: 100%; animation-play-state: paused; } .title-wrapper.is-long .marquee { animation-play-state: running; } @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
-        .horizontal-scroll { display: flex; overflow-x: auto; padding-bottom: 1rem; gap: 1rem; scrollbar-width: none; -ms-overflow-style: none; } .horizontal-scroll::-webkit-scrollbar { display: none; } .horizontal-widget-item { flex: 0 0 150px; width: 150px; }
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 200; }
         
-        /* CONTROL DECK BUTTONS */
-        .control-deck-btn { position: relative; width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255,255,255,0.6); }
-        .control-deck-btn:active { transform: scale(0.92); }
-        .control-deck-btn.active { background: var(--ryzn-color-hex); color: #171717; border-color: transparent; box-shadow: 0 0 15px var(--ryzn-color-hex); }
-        .control-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 99px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-
+        /* SCROLL & WIDGETS */
+        .title-wrapper { overflow: hidden; white-space: nowrap; } .marquee { display: inline-block; animation: marquee 10s linear infinite; padding-left: 100%; animation-play-state: paused; } .title-wrapper.is-long .marquee { animation-play-state: running; } @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        .horizontal-scroll { display: flex; overflow-x: auto; padding-bottom: 1rem; gap: 1rem; scrollbar-width: none; -ms-overflow-style: none; } 
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+        .horizontal-widget-item { flex: 0 0 160px; width: 160px; }
+        
         /* PROMO BANNER */
         .promo-banner {
             background: linear-gradient(to bottom, rgba(13, 13, 13, 0.9), rgba(0, 20, 40, 0.85)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop'); 
             background-size: cover; background-position: center; border: 1px solid rgba(0, 191, 255, 0.15); border-radius: 24px; padding: 30px 20px; margin-bottom: 40px;
             box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.7); text-align: center; display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden;
         }
-        .promo-title { font-size: 2rem; font-weight: 900; text-align: center; color: white; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); line-height: 1.1; }
-        .promo-subtitle { font-size: 0.9rem; color: #40CFFF; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; text-shadow: 0 2px 5px rgba(0,0,0,1); }
-
-        /* COUNTDOWN */
+        .promo-title { font-size: 2.2rem; font-weight: 900; color: white; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); line-height: 1.1; }
+        .promo-subtitle { font-size: 0.95rem; color: #40CFFF; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; text-shadow: 0 2px 5px rgba(0,0,0,1); }
         .countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; max-width: 380px; }
-        .countdown-item { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 10px 0; display: flex; flex-direction: column; align-items: center; }
-        .cd-number { font-size: 1.2rem; font-weight: 800; color: white; font-family: monospace; line-height: 1; }
-        .cd-label { font-size: 0.55rem; color: #aaa; text-transform: uppercase; margin-top: 4px; font-weight: 600; }
-        
-        /* LYRICS */
-        .lyrics-container-spotify { width: 100%; height: 180px; overflow-y: auto; padding: 10px 0; text-align: center; margin-top: 20px; mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); scrollbar-width: none; }
-        .lyric-line { font-size: 1.1rem; line-height: 1.6; color: rgba(255, 255, 255, 0.4); margin-bottom: 12px; transition: all 0.4s; cursor: pointer; padding: 4px 10px; border-radius: 8px; } .lyric-line.active { color: #ffffff; transform: scale(1.08); font-weight: 800; }
-        
+        .countdown-item { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; }
+        .cd-number { font-size: 1.4rem; font-weight: 800; color: white; font-family: monospace; line-height: 1; }
+        .cd-label { font-size: 0.6rem; color: #888; text-transform: uppercase; margin-top: 4px; font-weight: 600; }
+
+        /* NUOVI STILI: CONTROL DECK (Immersive Mode) */
+        .control-deck-container { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; width: 100%; padding: 0 4px; }
+        .control-deck-btn { 
+            position: relative; flex: 1; height: 50px; 
+            border-radius: 16px; background: rgba(255,255,255,0.08); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            display: flex; align-items: center; justify-content: center; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255,255,255,0.7); 
+        }
+        .control-deck-btn:active { transform: scale(0.95); }
+        .control-deck-btn.active { background: var(--ryzn-color-hex); color: #000; border-color: transparent; box-shadow: 0 0 15px var(--ryzn-color-hex); }
+        .control-badge { position: absolute; top: -4px; right: -4px; background: #ff3b30; color: white; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 99px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
         /* PWA INSTALL BLOCKER */
         #install-blocker { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(15px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; transition: opacity 0.3s ease; }
         #install-blocker.hidden { display: none !important; opacity: 0; pointer-events: none; }
         
-        /* ANIMATIONS */
-        @keyframes soundWave { 0% { height: 20%; } 50% { height: 100%; } 100% { height: 20%; } }
-        .wave-bar { background-color: white; border-radius: 999px; animation: soundWave 1s ease-in-out infinite; }
-        .wave-bar:nth-child(1) { animation-duration: 0.8s; height: 40%; } .wave-bar:nth-child(2) { animation-duration: 1.2s; height: 80%; } .wave-bar:nth-child(3) { animation-duration: 0.9s; height: 50%; } .wave-bar:nth-child(4) { animation-duration: 1.1s; height: 90%; } .wave-bar:nth-child(5) { animation-duration: 0.7s; height: 60%; }
-
         .logo-aura { font-size: 2.5rem; font-weight: 900; }
         #share-qr-container { display: none; margin-top: 10px; background: white; padding: 5px; border-radius: 8px; }
         #share-qr-container img { display: block; }
-
-        /* SLIDERS */
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #ffffff; cursor: pointer; margin-top: -6px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 2px; }
     </style>
 </head>
 <body class="ryzn-bg">
@@ -98,194 +89,141 @@
     
     <div id="install-blocker" class="hidden">
         <div class="max-w-md w-full bg-white/10 border border-white/20 p-8 rounded-3xl shadow-2xl relative">
-            <div onclick="forceRecheckPWA()" class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 cursor-pointer hover:bg-white/20 transition"><i data-lucide="download" class="w-10 h-10 accent-text animate-bounce"></i></div>
             <h2 class="text-3xl font-extrabold text-white mb-4">Installa Aura</h2>
-            <p class="text-gray-300 mb-8 leading-relaxed">Per l'esperienza audio completa e background play, aggiungi alla home.</p>
-            <div class="space-y-4 text-left bg-black/30 p-4 rounded-xl mb-6">
-                <div class="flex items-start gap-3"><span class="bg-white/20 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-1">1</span><p class="text-sm text-gray-400">Tocca <span class="font-bold text-white">Condividi</span> <i data-lucide="share" class="w-3 h-3 inline"></i></p></div>
-                <div class="flex items-start gap-3"><span class="bg-white/20 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-1">2</span><p class="text-sm text-gray-400">Seleziona <span class="font-bold text-white">"Aggiungi alla Schermata Home"</span></p></div>
-            </div>
+            <p class="text-gray-300 mb-8">Per background audio continuo, installa l'app.</p>
             <p class="text-xs text-gray-500 cursor-pointer" onclick="forceRecheckPWA()">Tocca qui se hai già installato.</p>
         </div>
     </div>
 
     <div id="toast-container"></div>
     <div id="audio-player-container"><audio id="audioPlayer" playsinline preload="auto" crossorigin="anonymous"></audio></div>
-    <audio id="ambientPlayerRain" loop hidden src="https://assets.mixkit.co/active_storage/sfx/2515/2515-preview.m4a"></audio> <audio id="ambientPlayerFire" loop hidden src="https://assets.mixkit.co/active_storage/sfx/270/270-preview.m4a"></audio> <div id="auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4 modal">
-        <div class="depth-glass bg-ryzn-bg p-6 rounded-3xl w-full max-w-sm shadow-2xl relative text-center border border-white/10">
+    <audio id="ambientPlayerRain" loop hidden src="https://assets.mixkit.co/active_storage/sfx/2515/2515-preview.m4a"></audio>
+    <audio id="ambientPlayerFire" loop hidden src="https://assets.mixkit.co/active_storage/sfx/270/270-preview.m4a"></audio>
+
+    <div id="auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4 modal">
+        <div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative text-center">
             <h3 class="text-2xl font-bold mb-4 accent-text">Benvenuto</h3>
-            <p class="text-gray-400 mb-6 text-sm">Sincronizza il tuo Vibe Score e salva le sessioni.</p>
-            <button onclick="handleAuthAction('device')" class="w-full py-4 accent-bg rounded-2xl text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition"><i data-lucide="smartphone" class="w-5 h-5"></i> Accedi con Device ID</button>
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+            <button onclick="handleAuthAction('device')" class="w-full py-4 accent-bg rounded-xl text-white font-bold flex items-center justify-center gap-2"><i data-lucide="smartphone" class="w-5 h-5"></i> Accedi</button>
+            <button onclick="closeAuthModal()" class="absolute top-3 right-3 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
     </div>
     
-    <div id="capsule-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[150] hidden flex items-center justify-center p-4 modal">
+    <div id="capsule-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[160] hidden flex items-center justify-center p-4 modal">
         <div class="depth-glass bg-[#1a1a1a] p-8 rounded-3xl w-full max-w-sm shadow-2xl relative text-center border border-amber-500/30">
             <div class="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/50">
                 <i data-lucide="hourglass" class="w-8 h-8 text-amber-500"></i>
             </div>
             <h3 class="text-2xl font-bold mb-2 text-white">Capsula Temporale</h3>
-            <p class="text-gray-400 text-sm mb-6">Sigilla questo brano. Non potrai ascoltarlo fino alla data scelta.</p>
-            
-            <div class="mb-6">
-                <label class="block text-left text-xs font-bold text-gray-500 uppercase mb-2">Data Sblocco</label>
-                <input type="date" id="capsule-date" class="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white focus:border-amber-500 focus:outline-none transition">
-            </div>
-
-            <button onclick="confirmTimeCapsule()" class="w-full py-4 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl text-white font-bold shadow-lg hover:shadow-orange-500/20 transition">Sigilla Ora</button>
+            <p class="text-gray-400 text-sm mb-6">Sigilla questo brano fino a una data futura.</p>
+            <input type="date" id="capsule-date" class="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white mb-4 focus:outline-none">
+            <button onclick="confirmTimeCapsule()" class="w-full py-3 bg-amber-600 rounded-xl text-white font-bold">Sigilla</button>
             <button onclick="closeCapsuleModal()" class="mt-4 text-gray-500 text-sm">Annulla</button>
         </div>
     </div>
     
-    <div id="search-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[150] hidden flex flex-col p-4 modal">
-        <div class="w-full max-w-2xl mx-auto depth-glass bg-ryzn-bg p-6 rounded-3xl shadow-2xl relative">
-            <div class="flex items-center mb-4"><input type="text" id="search-input" oninput="performSearch()" placeholder="Cerca artisti, brani..." class="flex-grow p-4 rounded-l-2xl bg-white/5 border border-white/10 text-white focus:outline-none placeholder-gray-500"><button onclick="performSearch()" class="p-4 accent-bg rounded-r-2xl font-bold text-black"><i data-lucide="search" class="w-6 h-6"></i></button></div>
-            <div id="search-results" class="max-h-96 overflow-y-auto space-y-2 custom-scrollbar"><p class="text-center text-gray-500 mt-10">Inizia a digitare per cercare...</p></div>
-            <button onclick="closeSearchModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+    <div id="search-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex flex-col p-4 modal">
+        <div class="w-full max-w-2xl mx-auto depth-glass bg-ryzn-bg p-6 rounded-2xl shadow-2xl relative">
+            <div class="flex items-center mb-4"><input type="text" id="search-input" oninput="performSearch()" placeholder="Cerca..." class="flex-grow p-3 rounded-l-lg bg-white/10 border border-white/20 text-white focus:outline-none"><button onclick="performSearch()" class="p-3 accent-bg rounded-r-lg"><i data-lucide="search" class="w-6 h-6"></i></button></div>
+            <div id="search-results" class="max-h-96 overflow-y-auto space-y-3 p-2"><p class="text-center text-gray-500">Inizia a digitare...</p></div>
+            <button onclick="closeSearchModal()" class="absolute top-3 right-3 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div>
     </div>
 
-    <div id="create-playlist-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4"><div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative"><h3 class="text-xl font-bold mb-4 accent-text">Nuova Sessione</h3><input type="text" id="playlist-name-input" placeholder="Nome Sessione" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white mb-4 focus:outline-none focus:border-white/50"><div class="flex justify-end space-x-3"><button onclick="closeCreatePlaylistModal()" class="px-4 py-2 text-gray-400">Annulla</button><button onclick="createPlaylist()" class="px-4 py-2 accent-bg rounded-lg text-black font-bold">Crea</button></div></div></div>
+    <div id="create-playlist-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4"><div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative"><h3 class="text-xl font-bold mb-4 accent-text">Nuova Sessione</h3><input type="text" id="playlist-name-input" placeholder="Nome" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white mb-4"><div class="flex justify-end space-x-3"><button onclick="closeCreatePlaylistModal()" class="px-4 py-2 text-gray-400">Annulla</button><button onclick="createPlaylist()" class="px-4 py-2 accent-bg rounded-lg text-white font-bold">Crea</button></div></div></div>
     
-    <div id="add-to-playlist-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4"><div class="depth-glass bg-ryzn-bg p-6 rounded-2xl w-full max-w-sm shadow-2xl relative"><h3 class="text-xl font-bold mb-4 accent-text">Aggiungi a Sessione</h3><div id="playlist-selection-list" class="max-h-64 overflow-y-auto space-y-2 p-1"><p class="text-center text-gray-500">Nessuna sessione creata.</p></div><button onclick="closeAddToPlaylistModal()" class="absolute top-3 right-3 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
-    
-    <div id="share-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[160] hidden flex items-center justify-center p-4 modal"><div class="bg-[#111] border border-white/10 p-6 rounded-[32px] w-full max-w-sm shadow-2xl relative flex flex-col items-center"><h3 class="text-xl font-bold mb-6 text-white">Condividi Vibe</h3><div id="share-preview-container" class="w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl mb-6 relative group border border-white/5"><div id="share-card-content" class="w-full h-full p-6 flex flex-col justify-between relative bg-gradient-to-br from-gray-900 to-black"><div id="share-card-bg" class="absolute inset-0 opacity-40 mix-blend-overlay bg-cover bg-center"></div><div class="relative z-10 flex justify-between items-center opacity-90"><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full accent-bg"></div><span class="text-[10px] font-bold tracking-[0.2em] uppercase text-white">Aura Music</span></div><div id="share-qr-container" class="shadow-lg"></div></div><div class="relative z-10 self-center w-40 h-40 shadow-[0_20px_40px_rgba(0,0,0,0.6)] my-4 rounded-xl overflow-hidden"><img id="share-card-cover" src="" class="w-full h-full object-cover" crossorigin="anonymous"></div><div class="relative z-10 mt-auto"><h2 id="share-card-title" class="text-2xl font-black text-white leading-tight mb-1 drop-shadow-md line-clamp-2">Titolo</h2><p id="share-card-artist" class="text-sm text-gray-300 font-medium tracking-wide uppercase">Artista</p></div></div></div><div class="grid grid-cols-2 gap-3 w-full"><button onclick="downloadShareImage()" class="p-4 bg-white/5 hover:bg-white/10 rounded-2xl flex flex-col items-center justify-center gap-2 transition"><i data-lucide="download" class="w-5 h-5 text-white"></i><span class="text-xs font-bold text-gray-400">Salva</span></button><button onclick="shareCanvasNative()" class="p-4 accent-bg rounded-2xl flex flex-col items-center justify-center gap-2 accent-hover transition shadow-lg hover:scale-105"><i data-lucide="instagram" class="w-5 h-5 text-black"></i><span class="text-xs font-bold text-black">Storia</span></button></div><button onclick="closeShareModal()" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
+    <div id="share-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[160] hidden flex items-center justify-center p-4 modal"><div class="depth-glass bg-ryzn-bg p-6 rounded-3xl w-full max-w-sm shadow-2xl relative flex flex-col items-center"><h3 class="text-xl font-bold mb-6 accent-text">Condividi Vibe</h3><div id="share-preview-container" class="w-full aspect-[4/5] rounded-xl overflow-hidden shadow-2xl mb-6 relative group"><div id="share-card-content" class="w-full h-full p-6 flex flex-col justify-between relative bg-gradient-to-br from-gray-900 to-black"><div id="share-card-bg" class="absolute inset-0 opacity-40 mix-blend-overlay bg-cover bg-center"></div><div class="relative z-10 flex justify-between items-center opacity-80"><div class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-white"></i><span class="text-xs font-bold tracking-widest uppercase text-white">Aura Music</span></div><div id="share-qr-container"></div></div><div class="relative z-10 self-center w-40 h-40 sm:w-48 sm:h-48 shadow-2xl my-4"><img id="share-card-cover" src="" class="w-full h-full object-cover rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.5)]" crossorigin="anonymous"></div><div class="relative z-10 mt-auto"><h2 id="share-card-title" class="text-2xl font-black text-white leading-tight mb-1 drop-shadow-md line-clamp-2">Titolo</h2><p id="share-card-artist" class="text-lg text-gray-200 font-medium drop-shadow-sm">Artista</p></div></div></div><button onclick="downloadShareImage()" class="p-4 bg-white/10 w-full rounded-xl mb-2">Scarica</button><button onclick="closeShareModal()" class="absolute top-4 right-4 p-2 text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div></div>
 
-    <div id="immersive-mode" class="fixed inset-0 bg-[#0a0a0a]/95 backdrop-blur-3xl z-[150] hidden flex flex-col p-6 modal overflow-hidden">
+    <div id="immersive-mode" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[150] hidden flex flex-col items-center justify-center p-6 modal overflow-y-auto">
+        <div class="absolute top-6 left-6 flex items-center space-x-4 z-10"><button onclick="event.stopPropagation(); exitImmersiveMode()" class="text-white/80"><i data-lucide="chevron-down" class="w-8 h-8"></i></button><h2 class="text-xl font-semibold">In Riproduzione</h2></div>
         
-        <div class="flex justify-between items-center z-10 mt-2">
-            <button onclick="exitImmersiveMode()" class="p-3 bg-white/5 rounded-full hover:bg-white/10 text-white transition backdrop-blur-md"><i data-lucide="chevron-down" class="w-6 h-6"></i></button>
-            <div class="text-center">
-                <span class="text-xs font-bold text-gray-400 tracking-widest uppercase">In Riproduzione</span>
+        <div class="flex flex-col items-center w-full max-w-xl md:max-w-2xl pt-20 pb-10">
+            <div id="immersive-player-visual-container" class="w-full max-w-[280px] sm:max-w-sm aspect-square rounded-3xl shadow-2xl shadow-ryzn-accent/30 overflow-hidden bg-black flex items-center justify-center mb-8 sm:mb-10 relative border border-white/10">
+                 <img id="immersive-cover" src="" class="w-full h-full object-cover" crossorigin="anonymous">
+                 <iframe id="immersive-video-player" width="600" height="480" src="" scrolling="no" frameborder="0" allowfullscreen="true" class="w-full h-full object-contain bg-black hidden"></iframe>
             </div>
-            <button onclick="openShareModal()" class="p-3 bg-white/5 rounded-full hover:bg-white/10 text-white transition backdrop-blur-md"><i data-lucide="share-2" class="w-5 h-5"></i></button>
-        </div>
 
-        <div class="flex-grow flex flex-col items-center justify-center w-full max-w-md mx-auto relative my-4">
-            <div id="immersive-player-visual-container" class="w-full aspect-square rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden bg-[#111] relative border border-white/5">
-                 <img id="immersive-cover" src="" class="w-full h-full object-cover transition-transform duration-700 ease-in-out hover:scale-105" crossorigin="anonymous">
-                 <iframe id="immersive-video-player" src="" frameborder="0" allowfullscreen="true" class="w-full h-full object-cover bg-black hidden pointer-events-none"></iframe>
-                 
-                 <button id="switch-to-video-btn" onclick="toggleImmersiveVisuals()" class="absolute bottom-4 right-4 p-3 bg-black/60 backdrop-blur-md rounded-full text-white hover:bg-white hover:text-black transition hidden border border-white/10"><i data-lucide="video" class="w-4 h-4"></i></button>
-            </div>
-        </div>
-
-        <div class="flex flex-col space-y-6 w-full max-w-md mx-auto pb-8 z-10">
-            
-            <div class="flex justify-between items-end px-1">
-                <div class="overflow-hidden w-full mr-4">
-                    <div id="immersive-title-wrapper" class="title-wrapper w-full"><h3 id="immersive-title" class="text-2xl sm:text-3xl font-black text-white leading-tight"><span class="marquee">Titolo</span></h3></div>
-                    <p id="immersive-artist" class="text-lg text-gray-400 truncate font-medium mt-1">Artista</p>
+            <div class="flex flex-col items-center space-y-4 max-w-lg w-full px-4">
+                <div class="text-center w-full mb-4">
+                    <div id="immersive-title-wrapper" class="title-wrapper max-w-full text-3xl sm:text-4xl font-extrabold mx-auto"><h3 id="immersive-title" class="text-3xl sm:text-4xl font-extrabold"><span class="marquee"></span></h3></div>
+                    <p id="immersive-artist" class="text-lg sm:text-xl text-gray-400 truncate mt-2"></p>
                 </div>
-                <button onclick="toggleLike()" id="like-button-immersive" class="p-2 transition active:scale-90"><i data-lucide="heart" class="w-7 h-7"></i></button>
-            </div>
 
-            <div class="flex items-center justify-between gap-2 px-1">
-                <button onclick="toggleAmbientMenu()" id="btn-ambient" class="control-deck-btn" title="Focus Mode"><i data-lucide="cloud-rain" class="w-5 h-5"></i></button>
-                <button onclick="cycleAudioFX()" id="btn-fx" class="control-deck-btn" title="FX Engine"><i data-lucide="wand-2" class="w-5 h-5"></i><span id="fx-badge" class="hidden control-badge">1.2x</span></button>
-                <button onclick="toggleGyro()" id="btn-gyro" class="control-deck-btn" title="Gesture Volume"><i data-lucide="smartphone-rotate" class="w-5 h-5"></i></button>
-                <button onclick="openCapsuleModal()" class="control-deck-btn" title="Time Capsule"><i data-lucide="hourglass" class="w-5 h-5"></i></button>
-            </div>
-
-            <div class="w-full space-y-2">
-                <div id="progress-bar-immersive-container" class="w-full h-2 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group">
-                    <div id="progress-bar-immersive" class="h-full accent-bg rounded-full relative" style="width: 0;">
-                        <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition"></div>
-                    </div>
+                <div class="control-deck-container">
+                    <button onclick="toggleAmbientMenu()" id="btn-ambient" class="control-deck-btn" title="Focus: Rain/Fire"><i data-lucide="cloud-rain" class="w-6 h-6"></i></button>
+                    <button onclick="cycleAudioFX()" id="btn-fx" class="control-deck-btn" title="FX Engine"><i data-lucide="wand-2" class="w-6 h-6"></i><span id="fx-badge" class="hidden control-badge">1.2x</span></button>
+                    <button onclick="toggleGyro()" id="btn-gyro" class="control-deck-btn" title="Gesture DJ"><i data-lucide="smartphone-rotate" class="w-6 h-6"></i></button>
+                    <button onclick="openCapsuleModal()" class="control-deck-btn" title="Time Capsule"><i data-lucide="hourglass" class="w-6 h-6"></i></button>
                 </div>
-                <div class="flex justify-between text-xs text-gray-500 font-mono font-bold">
-                    <span id="time-current">0:00</span>
-                    <span id="time-duration">0:00</span>
+
+                <div id="progress-bar-immersive-container" class="w-full h-2 bg-white/20 rounded-full cursor-pointer relative group"><div id="progress-bar-immersive" class="h-2 accent-bg rounded-full relative" style="width: 0;"></div></div>
+                <div class="flex space-x-6 sm:space-x-10 items-center justify-center w-full mt-4">
+                    <button id="loop-button-immersive" onclick="event.stopPropagation(); toggleLoop()" class="text-white/70 hover:text-white transition"><i data-lucide="repeat" class="w-6 h-6 sm:w-8 sm:h-8"></i></button>
+                    <button onclick="event.stopPropagation(); skipBackward()" class="text-white/70 hover:text-white transition"><i data-lucide="skip-back" class="w-8 h-8 sm:w-10 sm:h-10 fill-current"></i></button>
+                    <button onclick="event.stopPropagation(); togglePlayPause()" class="p-4 accent-bg rounded-full hover:scale-105 transition shadow-xl shadow-ryzn-accent/50"><i id="immersive-play-icon" data-lucide="play" class="w-8 h-8 sm:w-10 sm:h-10 text-ryzn-bg animated-icon fill-current"></i></button>
+                    <button onclick="event.stopPropagation(); skipForward()" class="text-white/70 hover:text-white transition"><i data-lucide="skip-forward" class="w-8 h-8 sm:w-10 sm:h-10 fill-current"></i></button>
+                    <button onclick="event.stopPropagation(); toggleLike()" id="like-button-immersive" class="text-white/70 hover:text-red-400 transition"><i data-lucide="heart" class="w-6 h-6 sm:w-8 sm:h-8 fill-current"></i></button>
                 </div>
             </div>
-
-            <div class="flex items-center justify-between w-full px-2">
-                <button onclick="toggleLoop()" id="loop-btn" class="text-gray-500 hover:text-white transition"><i data-lucide="repeat" class="w-6 h-6"></i></button>
-                <button onclick="skipBackward()" class="text-white hover:scale-110 transition"><i data-lucide="skip-back" class="w-8 h-8 fill-white"></i></button>
-                <button onclick="togglePlayPause()" class="w-16 h-16 accent-bg rounded-full flex items-center justify-center hover:scale-105 transition shadow-[0_0_30px_rgba(0,191,255,0.4)] text-black"><i id="immersive-play-icon" data-lucide="play" class="w-8 h-8 fill-black translate-x-0.5"></i></button>
-                <button onclick="skipForward()" class="text-white hover:scale-110 transition"><i data-lucide="skip-forward" class="w-8 h-8 fill-white"></i></button>
-                <button onclick="toggleLyrics()" class="text-gray-500 hover:text-white transition"><i data-lucide="mic-2" class="w-6 h-6"></i></button>
-            </div>
-
-            <div id="lyrics-container" class="lyrics-container-spotify hidden"><p class="text-gray-500">Nessun testo disponibile.</p></div>
         </div>
     </div>
     
     <div class="container-app">
-        <header class="flex justify-between items-center mb-8 pt-4">
-            <div class="flex items-center space-x-6">
+        <header class="flex justify-between items-center mb-8">
+            <div class="flex items-center space-x-8">
                 <a href="#" onclick="showSection('music')" class="cursor-pointer">
-                    <h1 class="logo-aura flex items-center gap-2">
-                        <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="h-8 w-auto object-contain" alt="Aura">
-                    </h1>
+                    <h1 class="logo-aura flex items-center text-white">Aura <span class="text-[0.5rem] ml-1 bg-white/20 px-1 rounded">OS</span></h1>
                 </a>
+                <nav class="hidden sm:flex space-x-6 text-gray-400 text-lg font-medium"><button id="nav-music" onclick="showSection('music')" class="nav-item hover:accent-text transition pb-1">Scopri</button></nav>
             </div>
             <div class="flex items-center space-x-3">
-                 <button onclick="showSection('playlists')" class="p-3 depth-glass rounded-full text-white hover:bg-white/10 transition"><i data-lucide="list-music" class="w-5 h-5"></i></button>
-                 <button onclick="showSection('library')" class="p-3 depth-glass rounded-full text-white hover:bg-white/10 transition"><i data-lucide="heart" class="w-5 h-5 fill-current"></i></button>
-                 <button onclick="openSearchModal()" class="p-3 depth-glass rounded-full text-white hover:bg-white/10 transition"><i data-lucide="search" class="w-5 h-5"></i></button>
-                 <button id="auth-button-header" onclick="loggedInUser ? showSection('profile') : openAuthModal('device')" class="p-3 depth-glass rounded-full text-white hover:bg-white/10 transition"><i data-lucide="user" class="w-5 h-5"></i></button>
+                 <button onclick="showSection('playlists')" class="p-2 depth-glass rounded-full text-white hover:bg-white/10 transition"><i data-lucide="list-music" class="w-6 h-6"></i></button>
+                 <button onclick="showSection('library')" class="p-2 depth-glass rounded-full text-white hover:bg-white/10 transition"><i data-lucide="heart" class="w-6 h-6 fill-current"></i></button>
+                 <button onclick="openSearchModal()" class="p-2 depth-glass rounded-full text-white hover:bg-white/10 transition"><i data-lucide="search" class="w-6 h-6"></i></button>
+                 <button id="auth-button-header" onclick="loggedInUser ? showSection('profile') : openAuthModal('device')" class="p-2 depth-glass rounded-full text-white hover:bg-white/10 transition"><i data-lucide="user" class="w-6 h-6"></i></button>
             </div>
         </header>
-        
+
         <section id="music-section" class="section-page active">
-            <div class="mb-8">
-                <h2 id="home-greeting" class="text-3xl font-extrabold text-white mb-1">Buonasera.</h2>
-                <p class="text-gray-400 text-sm font-medium">Selezionato per la tua Vibe.</p>
-            </div>
-            <div id="home-widgets-container" class="space-y-12 pb-24"><p class="text-center text-gray-500 mt-20"><i data-lucide="loader-2" class="w-6 h-6 animate-spin inline-block"></i> Caricamento Aura...</p></div>
+            <h2 id="home-greeting" class="text-4xl font-extrabold mb-8 text-white">Buonasera.</h2>
+            <div id="home-widgets-container" class="space-y-10"><p class="text-center text-gray-400 col-span-full">Caricamento Aura...</p></div>
         </section>
-        
-        <section id="library-section" class="section-page pb-24"><h2 class="text-3xl font-bold mb-6" id="txt-saved-tracks">Salvati</h2><div id="liked-tracks-list" class="grid grid-cols-1 gap-3"></div></section>
-        <section id="playlists-section" class="section-page pb-24"><div class="flex justify-between items-center mb-6"><h2 class="text-3xl font-bold" id="txt-sessions">Sessioni</h2><button onclick="openCreatePlaylistModal()" class="flex items-center px-4 py-2 accent-bg rounded-full text-black font-bold text-sm hover:scale-105 transition"><i data-lucide="plus" class="w-4 h-4 mr-1"></i> Crea</button></div><div id="playlists-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div></section>
-        
-        <section id="profile-section" class="section-page pb-24">
-            <h2 class="text-3xl font-bold mb-6" id="txt-profile-title">Profilo</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="depth-glass p-6 rounded-3xl space-y-4 border border-white/5">
-                    <div class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center"><i data-lucide="user" class="w-6 h-6 text-white"></i></div><div><p class="text-xs text-gray-400 uppercase font-bold">Account</p><p id="profile-info" class="text-lg font-bold truncate">Guest</p></div></div></div>
-                    <div class="bg-black/40 p-4 rounded-xl border border-white/5"><div id="vibe-score-display" class="text-2xl accent-text font-black">Vibe: 0</div><p id="vibe-check-text" class="text-xs text-gray-400 mt-1">Ascolta musica per generare la tua aura.</p></div>
-                    <div class="pt-2">
-                        <label class="block text-gray-500 text-xs font-bold uppercase mb-2">Lingua</label>
-                        <select id="language-selector" onchange="changeLanguage(this.value)" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none">
-                            <option value="en">English</option><option value="it">Italiano</option><option value="ro">Română</option><option value="de">Deutsch</option><option value="es">Español</option><option value="ru">Русский</option><option value="ar">العربية</option>
-                        </select>
+
+        <section id="library-section" class="section-page"><h2 class="text-3xl font-bold mb-6" id="txt-saved-tracks">Salvati</h2><div id="liked-tracks-list" class="space-y-3"></div></section>
+        <section id="playlists-section" class="section-page"><div class="flex justify-between items-center mb-6"><h2 class="text-3xl font-bold" id="txt-sessions">Sessioni</h2><button onclick="openCreatePlaylistModal()" class="flex items-center px-4 py-2 accent-bg rounded-full text-sm font-semibold text-black"><i data-lucide="plus" class="w-4 h-4 mr-1"></i> Crea</button></div><div id="playlists-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></section>
+        <section id="profile-section" class="section-page">
+            <h2 class="text-3xl font-bold mb-6">Profilo</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+                <div class="depth-glass p-6 rounded-xl space-y-4">
+                    <div class="flex items-center justify-between"><p id="profile-info" class="text-lg font-semibold truncate">Guest</p><i data-lucide="user-circle" class="w-8 h-8 text-gray-400"></i></div>
+                    <div class="pt-4 border-t border-white/10">
+                        <label class="block text-gray-400 text-sm mb-2">Lingua</label>
+                        <select id="language-selector" onchange="changeLanguage(this.value)" class="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white"><option value="en">English</option><option value="it">Italiano</option></select>
                     </div>
-                    <button id="btn-logout" onclick="handleLogout()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl font-bold transition flex items-center justify-center gap-2 mt-2"><i data-lucide="log-out" class="w-4 h-4"></i> Esci</button>
+                    <button onclick="handleLogout()" class="w-full px-4 py-3 bg-red-600/80 rounded-lg text-white font-bold mt-4">Esci</button>
                 </div>
-                <div class="premium-gold p-6 rounded-3xl flex flex-col justify-between relative overflow-hidden text-black shadow-2xl">
-                     <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/30 rounded-full blur-3xl animate-pulse"></div>
-                     <div class="premium-shine"></div>
-                     <div class="relative z-10"><h3 class="text-2xl font-black uppercase tracking-wider mb-2 flex items-center gap-2"><i data-lucide="crown" class="w-6 h-6 fill-black/20"></i> Premium</h3><p class="font-bold text-black/70 text-sm">Accesso Illimitato Attivo.</p></div>
-                     <div class="relative z-10 mt-6 text-center border-t border-black/10 pt-4"><p class="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Scadenza Promo</p><div id="premium-countdown-timer" class="text-3xl font-mono font-black tracking-tighter">--</div></div>
-                </div>
+                <div class="premium-gold p-6 rounded-xl flex flex-col justify-between relative overflow-hidden text-black"><div class="premium-shine"></div><h3 class="text-2xl font-black uppercase"><i data-lucide="crown" class="w-8 h-8 inline"></i> Premium</h3><p class="font-bold">Accesso Attivo.</p></div>
             </div>
-            <div class="mt-8"><h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i data-lucide="history" class="w-5 h-5 accent-text"></i> Cronologia</h3><div id="history-list" class="space-y-2"></div></div>
+            <div class="mt-8"><h3 class="text-xl font-bold mb-4">Cronologia</h3><div id="history-list" class="space-y-2 max-w-4xl"></div></div>
         </section>
     </div> 
     
-    <div onclick="enterImmersiveMode()" class="player-bar depth-glass bg-[#121212]/90 border-t border-white/10 flex items-center justify-between px-4 cursor-pointer backdrop-blur-xl">
-        <div class="flex items-center space-x-3 w-full sm:w-1/3 overflow-hidden">
-            <img id="player-cover" src="https://via.placeholder.com/64" class="w-10 h-10 rounded-md object-cover flex-shrink-0 shadow-md" crossorigin="anonymous">
-            <div class="overflow-hidden flex-grow pr-2">
-                <div id="player-title-wrapper" class="title-wrapper"><p id="player-title" class="font-bold text-sm text-white"><span class="marquee">Aura Music</span></p></div>
-                <p id="player-artist" class="text-xs text-gray-400 truncate">Scegli una traccia</p>
-            </div>
+    <div onclick="enterImmersiveMode()" class="player-bar depth-glass bg-ryzn-bg/80 border-t border-white/10 flex items-center justify-between px-4 sm:px-8 cursor-pointer">
+        <div class="flex items-center space-x-4 w-1/3 overflow-hidden">
+            <img id="player-cover" src="https://via.placeholder.com/64" class="w-12 h-12 rounded-md object-cover flex-shrink-0" crossorigin="anonymous">
+            <div id="player-title-wrapper" class="title-wrapper truncate"><p id="player-title" class="font-bold text-sm"><span class="marquee">Nessun Brano</span></p><p id="player-artist" class="text-xs text-gray-400 truncate">Tocca per iniziare</p></div>
         </div>
-        <div class="hidden sm:flex items-center justify-center space-x-6 w-1/3">
-            <button onclick="event.stopPropagation(); skipBackward()" class="text-gray-400 hover:text-white transition"><i data-lucide="skip-back" class="w-5 h-5 fill-current"></i></button>
-            <button onclick="event.stopPropagation(); togglePlayPause()" class="p-2 bg-white text-black rounded-full hover:scale-105 transition"><i id="play-icon" data-lucide="play" class="w-5 h-5 fill-current translate-x-0.5"></i></button>
-            <button onclick="event.stopPropagation(); skipForward()" class="text-gray-400 hover:text-white transition"><i data-lucide="skip-forward" class="w-5 h-5 fill-current"></i></button>
+        <div class="flex items-center justify-center space-x-4 w-1/3">
+            <button onclick="event.stopPropagation(); skipBackward()" class="text-white/70 hover:text-white transition block"><i data-lucide="skip-back" class="w-5 h-5 fill-current"></i></button>
+            <button onclick="event.stopPropagation(); togglePlayPause()" class="p-2 accent-bg rounded-full hover:scale-105 transition shadow-lg shadow-ryzn-accent/30"><i id="play-icon" data-lucide="play" class="w-6 h-6 text-ryzn-bg animated-icon"></i></button>
+            <button onclick="event.stopPropagation(); skipForward()" class="text-white/70 hover:text-white transition block"><i data-lucide="skip-forward" class="w-5 h-5 fill-current"></i></button>
         </div>
-        <div class="flex items-center justify-end space-x-4 w-auto sm:w-1/3 pl-2">
-            <button onclick="event.stopPropagation(); togglePlayPause()" class="sm:hidden p-2 text-white"><i id="play-icon-mobile" data-lucide="play" class="w-6 h-6 fill-current"></i></button>
-            <button id="like-button" onclick="event.stopPropagation(); toggleLike()" class="text-gray-500 hover:text-red-500 transition hidden sm:block"><i data-lucide="heart" class="w-5 h-5"></i></button>
+        <div class="flex items-center justify-end space-x-4 w-1/3">
+            <button onclick="event.stopPropagation(); openShareModal()" class="text-white/50 hover:text-white transition"><i data-lucide="share-2" class="w-5 h-5"></i></button>
+            <button id="like-button" onclick="event.stopPropagation(); toggleLike()" class="text-white/50 hover:text-red-400 transition"><i data-lucide="heart" class="w-5 h-5 fill-current"></i></button>
         </div>
-        <div id="progress-bar-container" class="absolute bottom-0 left-0 w-full h-[2px] bg-transparent"><div id="progress-bar" class="h-full accent-bg" style="width: 0;"></div></div>
+        <div id="progress-bar-container" class="absolute bottom-0 left-0 w-full h-1 bg-transparent cursor-pointer"><div id="progress-bar" class="h-1 accent-bg" style="width: 0;"></div></div>
     </div>
 
     <script>
-        // CONFIG
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
         const FALLBACK_COVER_URL = "https://via.placeholder.com/192x192/171717/00BFFF?text=AURA"; 
         const AUDIO_BASE_URL = GITHUB_RAW_BASE + "audio/"; 
@@ -294,229 +232,174 @@
         const ARTIST_JSON_URL = GITHUB_RAW_BASE + "artist.json"; 
         
         let AURA_MAP = [], ARTISTS_DATA = []; 
-        let currentTrackData = null;
-        let audioPlayer, ambientPlayerRain, ambientPlayerFire;
+        let currentTrackData = null, audioPlayer = null; 
         let likedTracks = new Set(), userPlaylists = [], isLooping = false, loggedInUser = null, listeningHistory = []; 
-        let currentLang = 'en', activeFilter = 'Trending';
-        let currentLyrics = [];
-        
-        // --- FEATURE STATES ---
-        let currentAmbientMode = null; // 'rain', 'fire', or null
+        let currentLang = 'en';
+
+        // --- NEW FEATURE STATES ---
+        let fxMode = 0; // 0:Normal, 1:Nightcore, 2:Slowed
+        let currentAmbientMode = null; 
         let gyroEnabled = false;
-        let fxMode = 0; // 0: Normal, 1: Nightcore, 2: Slowed
 
         const TRANSLATIONS={
             it:{
-                greeting_m:"Buongiorno.",greeting_a:"Buon Pomeriggio.",greeting_e:"Buonasera.",vibe_ready:"La tua Vibe è pronta.",discover:"Scopri",sessions:"Le Tue Sessioni",saved_tracks:"Brani Salvati",profile:"Profilo",login_btn:"Accedi",logout_btn:"Esci",promo_fest_title:"Aura Music Festival", promo_fest_sub:"Diretta da Bucarest", live_offline:"OFFLINE", live_soon:"LIVE START 23:00"
+                greeting_m:"Buongiorno.",greeting_a:"Buon Pomeriggio.",greeting_e:"Buonasera.",discover:"Scopri",sessions:"Le Tue Sessioni",saved_tracks:"I Tuoi Brani Salvati",profile:"Profilo Utente",
+                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Hit atmosfera.",cat_cr2_title:"🕯️ CR2 - Ballate e Relax",cat_cr2_sub:"Melodie lente.",cat_cr3_title:"🔔 CR3 - I Classici",cat_cr3_sub:"Tracce tradizionali.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Musica strumentale.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Diretta da Bucarest", trending_title:"🔥 I Più Ascoltati",trending_sub:"Selezione casuale."
             },
             en:{
-                greeting_m:"Good Morning.",greeting_a:"Good Afternoon.",greeting_e:"Good Evening.",vibe_ready:"Your Vibe is ready.",discover:"Discover",sessions:"Your Sessions",saved_tracks:"Saved Tracks",profile:"Profile",login_btn:"Login",logout_btn:"Logout",promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live from Bucharest", live_offline:"OFFLINE", live_soon:"LIVE STARTS 23:00"
+                greeting_m:"Good Morning.",greeting_a:"Good Afternoon.",greeting_e:"Good Evening.",discover:"Discover",sessions:"Your Sessions",saved_tracks:"Saved Tracks",profile:"User Profile",
+                cat_cr1_title:"🎄 CR1 - Top Hits",cat_cr1_sub:"Pop songs.",cat_cr2_title:"🕯️ CR2 - Ballads & Relax",cat_cr2_sub:"Slow melodies.",cat_cr3_title:"🔔 CR3 - Classics",cat_cr3_sub:"Traditional tracks.",cat_cr4_title:"❄️ CR4 - Ambient Vibe",cat_cr4_sub:"Instrumental music.",
+                promo_fest_title:"Aura Music Festival", promo_fest_sub:"Live from Bucharest", trending_title:"🔥 Trending Now",trending_sub:"Random selection."
             }
-            // Altre lingue mantenute come placeholder per brevità codice
         };
+        const CATEGORY_KEYS_MAP = { 'CR1': { titleKey: 'cat_cr1_title', subKey: 'cat_cr1_sub' }, 'CR2': { titleKey: 'cat_cr2_title', subKey: 'cat_cr2_sub' }, 'CR3': { titleKey: 'cat_cr3_title', subKey: 'cat_cr3_sub' }, 'CR4': { titleKey: 'cat_cr4_title', subKey: 'cat_cr4_sub' } };
+        const CATEGORY_KEYS = Object.keys(CATEGORY_KEYS_MAP);
 
-        // --- INIT & UTILS ---
-        window.addEventListener('DOMContentLoaded', async () => {
-            loadLocalData();
-            getDOMElements();
-            checkPWAStatus();
-            await fetchTracks();
-            updateLanguageUI();
-            checkCapsules();
-            lucide.createIcons();
+        // --- CORE FUNCTIONS (RESTORED) ---
+        
+        async function fetchTracks() {
+            const container = document.getElementById('home-widgets-container');
+            container.innerHTML = `<p class="text-center text-gray-400">Caricamento...</p>`;
+            try {
+                const [tr, ar] = await Promise.all([fetch(TRACKS_JSON_URL), fetch(ARTIST_JSON_URL)]);
+                const tracksData = await tr.json();
+                const artists = ar.ok ? await ar.json() : [];
+                const artistMap = {}; artists.forEach(a => artistMap[a.id] = a.name);
+                
+                // MAPPING ORIGINALE ROBUSTO
+                AURA_MAP = (tracksData.tracks || []).map(track => {
+                    let fn = track.file.trim().replace(/\s(\.[a-zA-Z0-9]+)$/, '$1');
+                    let artistName = track.artistId && artistMap[track.artistId] ? artistMap[track.artistId] : track.artist;
+                    return {
+                        id: track.title.trim(), 
+                        title: track.title.trim(), 
+                        artist: artistName || "Unknown", 
+                        cover: track.albumId ? COVER_BASE_URL+encodeURIComponent(track.albumId.trim())+".png" : (track.categoryID ? COVER_BASE_URL+`${track.categoryID}.png` : FALLBACK_COVER_URL),
+                        audioUrl: AUDIO_BASE_URL + encodeURIComponent(fn), 
+                        videoUrl: track.videoUrl || null,
+                        categoryID: track.categoryID,
+                        color: '#00BFFF'
+                    };
+                });
+                renderHomePageWidgets(); 
+            } catch (error) { container.innerHTML = "Errore caricamento."; console.error(error); }
+        }
+
+        function renderHomePageWidgets() {
+            const container = document.getElementById('home-widgets-container');
+            if(!container) return;
+            const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en'];
             
-            // Check Twin Notification Loop
-            setInterval(() => {
-                if (!audioPlayer.paused && Math.random() < 0.05) {
-                    showToast("👯 Un altro utente sta ascoltando questo brano ora!");
+            let html = `<div class="promo-banner"><h3 class="promo-title">${t.promo_fest_title}</h3><p class="promo-subtitle">${t.promo_fest_sub}</p>
+                <div class="countdown-grid">
+                    <div class="countdown-item"><span class="cd-number">03</span><span class="cd-label">Days</span></div>
+                    <div class="countdown-item"><span class="cd-number">12</span><span class="cd-label">Hours</span></div>
+                    <div class="countdown-item"><span class="cd-number">45</span><span class="cd-label">Mins</span></div>
+                    <div class="countdown-item"><span class="cd-number">30</span><span class="cd-label">Secs</span></div>
+                </div></div>`;
+
+            // Restore Categories
+            CATEGORY_KEYS.forEach(catID => {
+                const k = CATEGORY_KEYS_MAP[catID];
+                const tracks = AURA_MAP.filter(x => x.categoryID === catID);
+                if(tracks.length) {
+                    html += `<div class="mb-8"><h3 class="text-2xl font-bold mb-2 text-white">${t[k.titleKey]}</h3>
+                    <p class="text-gray-400 mb-4">${t[k.subKey]}</p>
+                    <div class="horizontal-scroll">
+                        ${tracks.map(track => `
+                            <div onclick="playTrack('${track.id}')" class="horizontal-widget-item cursor-pointer hover:scale-95 transition">
+                                <img src="${track.cover}" class="w-full h-auto aspect-square rounded-xl object-cover mb-2 shadow-lg">
+                                <p class="font-bold text-white truncate text-sm">${track.title}</p>
+                                <p class="text-xs text-gray-400 truncate">${track.artist}</p>
+                            </div>
+                        `).join('')}
+                    </div></div>`;
                 }
-            }, 45000);
-        });
-
-        function getDOMElements() {
-            audioPlayer = document.getElementById('audioPlayer');
-            ambientPlayerRain = document.getElementById('ambientPlayerRain');
-            ambientPlayerFire = document.getElementById('ambientPlayerFire');
-            
-            // Player Events
-            audioPlayer.addEventListener('timeupdate', updateProgress);
-            audioPlayer.addEventListener('ended', onTrackEnded);
-            audioPlayer.addEventListener('play', () => updatePlayIcons(false));
-            audioPlayer.addEventListener('pause', () => updatePlayIcons(true));
-            audioPlayer.addEventListener('loadedmetadata', () => {
-                document.getElementById('time-duration').textContent = formatTime(audioPlayer.duration);
-                updateMediaSession();
             });
-
-            // Progress Click
-            const pbc = document.getElementById('progress-bar-immersive-container');
-            if(pbc) pbc.addEventListener('click', (e) => {
-                const rect = pbc.getBoundingClientRect();
-                const pos = (e.clientX - rect.left) / rect.width;
-                audioPlayer.currentTime = pos * audioPlayer.duration;
-            });
+            container.innerHTML = html;
+            lucide.createIcons();
         }
 
-        function formatTime(s) {
-            if(isNaN(s)) return "0:00";
-            const m = Math.floor(s / 60);
-            const sec = Math.floor(s % 60);
-            return `${m}:${sec < 10 ? '0' : ''}${sec}`;
-        }
-
-        // --- CORE PLAYER LOGIC ---
         window.playTrack = function(trackId) {
             const track = AURA_MAP.find(t => t.id === trackId);
             if (!track) return;
-            
             currentTrackData = track;
-            audioPlayer.src = track.audioUrl;
             
-            // Reset FX visual
-            audioPlayer.playbackRate = 1.0; 
-            audioPlayer.preservesPitch = true;
+            // RESET FX
             fxMode = 0; updateFXBadge();
+            audioPlayer.playbackRate = 1.0; audioPlayer.preservesPitch = true;
 
-            audioPlayer.play().catch(e => console.error(e));
+            audioPlayer.src = track.audioUrl;
+            audioPlayer.play();
             
             // Update UI
-            updatePlayerUI(track);
-            loadLyrics(track.lrcUrl);
-            updateListeningHistory(track.id);
-            updateMediaSession();
-            
-            // Color Theme
-            const img = new Image(); img.crossOrigin = "anonymous"; img.src = track.cover;
-            img.onload = () => {
-                try {
-                    const c = new ColorThief().getColor(img);
-                    document.documentElement.style.setProperty('--ryzn-color-hex', `rgb(${c[0]},${c[1]},${c[2]})`);
-                    document.documentElement.style.setProperty('--ryzn-color-rgb', `${c[0]} ${c[1]} ${c[2]}`);
-                } catch(e){}
-            };
-
-            // Init Visualizer if needed
-            if(!window.audioCtx) initAudioVisualizer();
-        }
-
-        function updatePlayerUI(track) {
-            // Text
             document.getElementById('player-title').innerHTML = `<span class="marquee">${track.title}</span>`;
-            document.getElementById('immersive-title').innerHTML = `<span class="marquee">${track.title}</span>`;
             document.getElementById('player-artist').textContent = track.artist;
-            document.getElementById('immersive-artist').textContent = track.artist;
-            
-            // Images
             document.getElementById('player-cover').src = track.cover;
+            document.getElementById('immersive-title').innerHTML = `<span class="marquee">${track.title}</span>`;
+            document.getElementById('immersive-artist').textContent = track.artist;
             document.getElementById('immersive-cover').src = track.cover;
             
-            // Video
-            const vidContainer = document.getElementById('immersive-player-visual-container');
-            const vidFrame = document.getElementById('immersive-video-player');
-            const vidBtn = document.getElementById('switch-to-video-btn');
-            
-            if (track.videoUrl) {
-                vidBtn.classList.remove('hidden');
-                vidFrame.src = track.videoUrl;
+            if(track.videoUrl) {
+                document.getElementById('immersive-video-player').src = track.videoUrl;
+                document.getElementById('immersive-video-player').classList.remove('hidden');
+                document.getElementById('immersive-cover').classList.add('hidden');
             } else {
-                vidBtn.classList.add('hidden');
-                vidFrame.classList.add('hidden');
+                document.getElementById('immersive-video-player').classList.add('hidden');
                 document.getElementById('immersive-cover').classList.remove('hidden');
-                vidFrame.src = "";
             }
+
+            // Color Thief
+            const img = new Image(); img.crossOrigin = "anonymous"; img.src = track.cover;
+            img.onload = function(){ 
+                try{ const c=new ColorThief().getColor(img); document.documentElement.style.setProperty('--ryzn-color-hex', `rgb(${c[0]},${c[1]},${c[2]})`); }catch(e){} 
+            };
             
-            // Like State
-            const isLiked = likedTracks.has(track.id);
-            const h = document.getElementById('like-button-immersive');
-            if(h) { h.classList.toggle('text-red-500', isLiked); h.querySelector('svg').style.fill = isLiked ? 'currentColor' : 'none'; }
-            
-            // Vibe Score
-            document.getElementById('vibe-score-display').textContent = `Vibe: ${Math.floor(Math.random()*20 + 80)}`; // Simulated dynamic score
-            
-            lucide.createIcons();
+            updateListeningHistory(track.id);
+            document.querySelector('.player-bar').classList.add('active');
+            updatePlayIcons(false);
         }
 
-        function updatePlayIcons(isPaused) {
-            const i1 = document.getElementById('play-icon');
-            const i2 = document.getElementById('immersive-play-icon');
-            const i3 = document.getElementById('play-icon-mobile');
-            const icon = isPaused ? 'play' : 'pause';
-            if(i1) i1.setAttribute('data-lucide', icon);
-            if(i2) i2.setAttribute('data-lucide', icon);
-            if(i3) i3.setAttribute('data-lucide', icon);
-            
-            // Marquee Animation
-            document.querySelectorAll('.title-wrapper').forEach(el => el.classList.toggle('is-long', !isPaused));
-            lucide.createIcons();
-        }
+        // --- NEW FEATURES REAL IMPLEMENTATION ---
 
-        function updateProgress() {
-            if (!audioPlayer.duration) return;
-            const pct = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-            document.getElementById('progress-bar').style.width = `${pct}%`;
-            document.getElementById('progress-bar-immersive').style.width = `${pct}%`;
-            document.getElementById('time-current').textContent = formatTime(audioPlayer.currentTime);
-            syncLyricsDisplay();
-        }
-
-        window.togglePlayPause = function() { audioPlayer.paused ? audioPlayer.play() : audioPlayer.pause(); }
-        window.skipForward = function() { 
-            if(!currentTrackData) return; 
-            let idx = AURA_MAP.findIndex(t=>t.id===currentTrackData.id);
-            playTrack(AURA_MAP[(idx+1)%AURA_MAP.length].id);
-        }
-        window.skipBackward = function() {
-            if(!currentTrackData) return; 
-            let idx = AURA_MAP.findIndex(t=>t.id===currentTrackData.id);
-            playTrack(AURA_MAP[(idx-1+AURA_MAP.length)%AURA_MAP.length].id);
-        }
-        window.onTrackEnded = function() { isLooping ? playTrack(currentTrackData.id) : skipForward(); }
-
-        // --- REAL FEATURES IMPLEMENTATION ---
-
-        // 1. REAL AMBIENT MIXING
+        // 1. Ambient Mode (Real Audio Mixing)
         window.toggleAmbientMenu = function() {
             const btn = document.getElementById('btn-ambient');
-            // Toggle Cycle: Off -> Rain -> Fire -> Off
-            if (currentAmbientMode === null) {
+            const rain = document.getElementById('ambientPlayerRain');
+            const fire = document.getElementById('ambientPlayerFire');
+            
+            if(currentAmbientMode === null) {
                 currentAmbientMode = 'rain';
-                ambientPlayerRain.volume = 0.4; ambientPlayerRain.play();
-                btn.classList.add('active'); showToast("🌧️ Focus: Rain Mode");
+                rain.volume = 0.3; rain.play();
+                btn.classList.add('active'); showToast("🌧️ Focus: Rain");
             } else if (currentAmbientMode === 'rain') {
-                ambientPlayerRain.pause();
-                currentAmbientMode = 'fire';
-                ambientPlayerFire.volume = 0.4; ambientPlayerFire.play();
-                showToast("🔥 Focus: Fire Mode");
+                rain.pause(); currentAmbientMode = 'fire';
+                fire.volume = 0.3; fire.play();
+                showToast("🔥 Focus: Fire");
             } else {
-                ambientPlayerFire.pause();
-                currentAmbientMode = null;
+                fire.pause(); currentAmbientMode = null;
                 btn.classList.remove('active'); showToast("Ambient Off");
             }
         }
 
-        // 2. REAL AUDIO FX ENGINE
+        // 2. Audio FX (Real PlaybackRate)
         window.cycleAudioFX = function() {
             fxMode = (fxMode + 1) % 3;
             const btn = document.getElementById('btn-fx');
             const badge = document.getElementById('fx-badge');
             
-            if (fxMode === 0) { // Normal
-                audioPlayer.playbackRate = 1.0;
-                audioPlayer.preservesPitch = true;
-                btn.classList.remove('active');
-                badge.classList.add('hidden');
+            if(fxMode === 0) { // Normal
+                audioPlayer.playbackRate = 1.0; audioPlayer.preservesPitch = true;
+                btn.classList.remove('active'); badge.classList.add('hidden');
                 showToast("FX: Normal");
             } else if (fxMode === 1) { // Nightcore
-                audioPlayer.playbackRate = 1.25;
-                audioPlayer.preservesPitch = false; // Pitch shift up
-                btn.classList.add('active');
-                badge.textContent = "NC"; badge.classList.remove('hidden');
+                audioPlayer.playbackRate = 1.25; audioPlayer.preservesPitch = false;
+                btn.classList.add('active'); badge.textContent = "NC"; badge.classList.remove('hidden');
                 showToast("⚡ FX: Nightcore");
-            } else if (fxMode === 2) { // Slowed + Reverb (Simulated slowed)
-                audioPlayer.playbackRate = 0.85;
-                audioPlayer.preservesPitch = true; // Just slower, keeps pitch usually better for "slowed" feel unless manually pitched
-                btn.classList.add('active');
-                badge.textContent = "SL"; badge.classList.remove('hidden');
+            } else if (fxMode === 2) { // Slowed
+                audioPlayer.playbackRate = 0.85; audioPlayer.preservesPitch = true;
+                btn.classList.add('active'); badge.textContent = "SL"; badge.classList.remove('hidden');
                 showToast("🐢 FX: Slowed");
             }
         }
@@ -525,227 +408,73 @@
             if(fxMode===0) { btn.classList.remove('active'); badge.classList.add('hidden'); }
         }
 
-        // 3. GESTURE DJ (IOS PERMISSION HANDLED)
+        // 3. Gyro (Permission + Event)
         window.toggleGyro = function() {
             const btn = document.getElementById('btn-gyro');
-            if (!gyroEnabled) {
-                // Request permission for iOS 13+
-                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    DeviceOrientationEvent.requestPermission().then(response => {
-                        if (response === 'granted') {
-                            activateGyro(btn);
-                        } else {
-                            showToast("Permesso Giroscopio Negato");
-                        }
-                    }).catch(console.error);
-                } else {
-                    // Non-iOS or older devices
-                    activateGyro(btn);
-                }
+            if(!gyroEnabled) {
+                if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission().then(r => { if(r==='granted') activateGyro(btn); }).catch(e=>showToast("Errore Gyro"));
+                } else { activateGyro(btn); }
             } else {
-                window.removeEventListener('deviceorientation', handleOrientation);
-                gyroEnabled = false;
-                btn.classList.remove('active');
-                showToast("Gesture DJ Off");
+                window.removeEventListener('deviceorientation', handleGyro);
+                gyroEnabled = false; btn.classList.remove('active'); showToast("Gesture Off");
             }
         }
-
         function activateGyro(btn) {
-            window.addEventListener('deviceorientation', handleOrientation);
-            gyroEnabled = true;
-            btn.classList.add('active');
-            showToast("📲 Ruota il telefono per il Volume");
+            window.addEventListener('deviceorientation', handleGyro);
+            gyroEnabled = true; btn.classList.add('active'); showToast("📲 Ruota telefono per Volume");
+        }
+        function handleGyro(e) {
+            if(!gyroEnabled) return;
+            let val = (e.gamma + 45) / 90; // Tilt L/R
+            audioPlayer.volume = Math.max(0, Math.min(1, val));
         }
 
-        function handleOrientation(event) {
-            if (!gyroEnabled) return;
-            // Gamma is left/right tilt (-90 to 90)
-            let tilt = event.gamma; 
-            // Map -45deg to 45deg range to 0.0 - 1.0 volume
-            let vol = (tilt + 45) / 90;
-            vol = Math.max(0, Math.min(1, vol));
-            audioPlayer.volume = vol;
-        }
-
-        // 4. TIME CAPSULE (MODAL)
+        // 4. Time Capsule
         window.openCapsuleModal = function() { document.getElementById('capsule-modal').classList.remove('hidden'); }
         window.closeCapsuleModal = function() { document.getElementById('capsule-modal').classList.add('hidden'); }
-        
         window.confirmTimeCapsule = function() {
-            const dateVal = document.getElementById('capsule-date').value;
-            if(!dateVal || !currentTrackData) { showToast("Seleziona una data valida"); return; }
+            const d = document.getElementById('capsule-date').value;
+            if(!d || !currentTrackData) return;
+            const unlock = new Date(d).getTime();
+            if(unlock <= Date.now()) { showToast("Scegli data futura!"); return; }
             
-            const unlockTimestamp = new Date(dateVal).getTime();
-            if(unlockTimestamp <= Date.now()) { showToast("La data deve essere futura!"); return; }
-
-            let capsules = JSON.parse(localStorage.getItem('aura_capsules') || '[]');
-            capsules.push({ 
-                trackId: currentTrackData.id, 
-                title: currentTrackData.title,
-                unlockDate: unlockTimestamp, 
-                locked: true 
-            });
-            localStorage.setItem('aura_capsules', JSON.stringify(capsules));
+            let caps = JSON.parse(localStorage.getItem('aura_capsules') || '[]');
+            caps.push({ id: currentTrackData.id, title: currentTrackData.title, unlock: unlock, locked: true });
+            localStorage.setItem('aura_capsules', JSON.stringify(caps));
             
+            showToast("🔒 Brano Sigillato!");
             closeCapsuleModal();
-            showToast("🔒 Brano sigillato nella Capsula");
-            audioPlayer.pause(); // Stop playing to emphasize effect
-            setTimeout(() => skipForward(), 1000);
+            audioPlayer.pause(); // Stop playing to signify lock
         }
-        
         function checkCapsules() {
-            let capsules = JSON.parse(localStorage.getItem('aura_capsules') || '[]');
-            let hasUnlocked = false;
-            capsules.forEach(c => {
-                if(c.locked && Date.now() >= c.unlockDate) {
-                    c.locked = false;
-                    hasUnlocked = true;
-                    showToast(`🔓 Capsula aperta: ${c.title}`);
+            let caps = JSON.parse(localStorage.getItem('aura_capsules') || '[]');
+            caps.forEach(c => {
+                if(c.locked && Date.now() >= c.unlock) {
+                    c.locked = false; showToast(`🔓 Capsula Aperta: ${c.title}`);
                 }
             });
-            if(hasUnlocked) localStorage.setItem('aura_capsules', JSON.stringify(capsules));
+            localStorage.setItem('aura_capsules', JSON.stringify(caps));
         }
 
-        // --- DATA & VISUALIZATION ---
-        
-        // Visualizer (Web Audio API)
-        function initAudioVisualizer() {
-            try {
-                window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const analyser = window.audioCtx.createAnalyser();
-                analyser.fftSize = 128;
-                const source = window.audioCtx.createMediaElementSource(audioPlayer);
-                source.connect(analyser);
-                analyser.connect(window.audioCtx.destination);
-                
-                const canvas = document.getElementById('visualizer-canvas');
-                const ctx = canvas.getContext('2d');
-                const dataArray = new Uint8Array(analyser.frequencyBinCount);
-                
-                function draw() {
-                    requestAnimationFrame(draw);
-                    analyser.getByteFrequencyData(dataArray);
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    const barWidth = (canvas.width / dataArray.length) * 2.5;
-                    let x = 0;
-                    const rgb = getComputedStyle(document.documentElement).getPropertyValue('--ryzn-color-rgb').trim();
-                    
-                    for(let i = 0; i < dataArray.length; i++) {
-                        const barHeight = (dataArray[i] / 255) * canvas.height;
-                        ctx.fillStyle = `rgba(${rgb}, ${dataArray[i]/300})`;
-                        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                        x += barWidth + 1;
-                    }
-                }
-                
-                // Resize handling
-                function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight * 0.4; }
-                window.addEventListener('resize', resize);
-                resize();
-                draw();
-            } catch(e) { console.log("Audio Context Init Failed (User interaction needed first)"); }
-        }
-
-        // Fireworks
-        (function() {
-            const canvas = document.getElementById('fireworks-canvas');
-            const ctx = canvas.getContext('2d');
-            let particles = [];
-            function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-            window.addEventListener('resize', resize); resize();
-            
-            function loop() {
-                requestAnimationFrame(loop);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                if(Math.random()<0.015) particles.push({x:Math.random()*canvas.width, y:canvas.height, vx:0, vy:-10-Math.random()*4, color:`hsl(${Math.random()*360},100%,50%)`, type:'up'});
-                
-                for(let i=particles.length-1; i>=0; i--) {
-                    let p = particles[i];
-                    if(p.type === 'up') {
-                        p.y += p.vy; p.vy += 0.15;
-                        if(p.vy >= 0) {
-                            particles.splice(i,1);
-                            for(let j=0; j<30; j++) {
-                                const a = Math.random()*Math.PI*2, s=Math.random()*3;
-                                particles.push({x:p.x, y:p.y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, color:p.color, type:'exp', alpha:1});
-                            }
-                        } else { ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,2,0,Math.PI*2); ctx.fill(); }
-                    } else {
-                        p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.alpha-=0.02;
-                        if(p.alpha<=0) particles.splice(i,1);
-                        else { ctx.globalAlpha=p.alpha; ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,1.5,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; }
-                    }
-                }
-            }
-            loop();
-        })();
-
-        // Data Fetching
-        async function fetchTracks() {
-            try {
-                const [tr, ar] = await Promise.all([fetch(TRACKS_JSON_URL), fetch(ARTIST_JSON_URL)]);
-                const tJson = await tr.json();
-                const aJson = ar.ok ? await ar.json() : [];
-                
-                // Map Artists
-                const artistMap = {}; aJson.forEach(a => artistMap[a.id] = a.name);
-                
-                AURA_MAP = (tJson.tracks || []).map(t => ({
-                    id: t.title.trim(),
-                    title: t.title.trim(),
-                    artist: t.artistId ? (artistMap[t.artistId] || t.artist) : t.artist,
-                    cover: t.albumId ? `${COVER_BASE_URL}${t.albumId.trim()}.png` : (t.categoryID ? `${COVER_BASE_URL}${t.categoryID}.png` : FALLBACK_COVER_URL),
-                    audioUrl: `${AUDIO_BASE_URL}${encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'))}`,
-                    videoUrl: t.videoUrl,
-                    lrcUrl: t.lrcUrl,
-                    categoryID: t.categoryID
-                }));
-                
-                renderHome();
-            } catch(e) { document.getElementById('home-widgets-container').innerHTML = "<p class='text-center text-red-500'>Errore caricamento dati.</p>"; }
-        }
-
-        function renderHome() {
-            const c = document.getElementById('home-widgets-container');
-            const cats = ['CR1', 'CR2', 'CR3', 'CR4'];
-            let html = `
-            <div class="promo-banner">
-                <h3 class="promo-title">Aura Festival</h3>
-                <p class="promo-subtitle">Live from Bucharest</p>
-                <div class="countdown-grid">
-                     <div class="countdown-item"><span class="cd-number">03</span><span class="cd-label">Days</span></div>
-                     <div class="countdown-item"><span class="cd-number">12</span><span class="cd-label">Hours</span></div>
-                     <div class="countdown-item"><span class="cd-number">45</span><span class="cd-label">Mins</span></div>
-                     <div class="countdown-item"><span class="cd-number">30</span><span class="cd-label">Secs</span></div>
-                </div>
-            </div>`;
-            
-            cats.forEach(cat => {
-                const tracks = AURA_MAP.filter(t => t.categoryID === cat);
-                if(tracks.length) {
-                    html += `<div class="mb-8"><h3 class="text-xl font-bold mb-4 text-white">${cat} Collection</h3><div class="horizontal-scroll">
-                        ${tracks.map(t => `
-                            <div onclick="playTrack('${t.id}')" class="horizontal-widget-item cursor-pointer hover:scale-95 transition group">
-                                <div class="relative mb-2">
-                                    <img src="${t.cover}" class="w-full aspect-square rounded-2xl object-cover shadow-lg">
-                                    <div class="absolute inset-0 bg-black/30 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i data-lucide="play" class="w-8 h-8 fill-white text-white"></i></div>
-                                </div>
-                                <p class="font-bold text-sm truncate text-white">${t.title}</p>
-                                <p class="text-xs text-gray-500 truncate">${t.artist}</p>
-                            </div>
-                        `).join('')}
-                    </div></div>`;
-                }
-            });
-            
-            c.innerHTML = html;
+        // --- UTILS ---
+        function updatePlayIcons(paused) {
+            const i = paused ? 'play' : 'pause';
+            if(document.getElementById('play-icon')) document.getElementById('play-icon').setAttribute('data-lucide', i);
+            if(document.getElementById('immersive-play-icon')) document.getElementById('immersive-play-icon').setAttribute('data-lucide', i);
             lucide.createIcons();
+            document.querySelectorAll('.title-wrapper').forEach(e => e.classList.toggle('is-long', !paused));
         }
-
-        // --- NAVIGATION & MODALS ---
-        window.enterImmersiveMode = function() { if(currentTrackData) document.getElementById('immersive-mode').classList.remove('hidden'); }
-        window.exitImmersiveMode = function() { document.getElementById('immersive-mode').classList.add('hidden'); }
+        function updateProgress() {
+            if(!audioPlayer.duration) return;
+            const p = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            document.getElementById('progress-bar').style.width = p+'%';
+            document.getElementById('progress-bar-immersive').style.width = p+'%';
+        }
+        window.togglePlayPause = function() { audioPlayer.paused ? audioPlayer.play() : audioPlayer.pause(); }
+        window.skipForward = function() { if(currentTrackData) { let i = AURA_MAP.findIndex(x=>x.id===currentTrackData.id); playTrack(AURA_MAP[(i+1)%AURA_MAP.length].id); } }
+        window.skipBackward = function() { if(currentTrackData) { let i = AURA_MAP.findIndex(x=>x.id===currentTrackData.id); playTrack(AURA_MAP[(i-1+AURA_MAP.length)%AURA_MAP.length].id); } }
+        
         window.showSection = function(id) {
             document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
             document.getElementById(id+'-section').classList.add('active');
@@ -754,60 +483,25 @@
             if(id === 'profile') renderHistory();
         }
         
-        // --- LYRICS ---
-        async function loadLyrics(u){ if(!u) { currentLyrics=[]; updateLyricsUI(); return; } try { const r = await fetch(u); if(r.ok) currentLyrics = parseLRC(await r.text()); else currentLyrics=[]; } catch { currentLyrics=[]; } updateLyricsUI(); }
-        function parseLRC(t){ const l=t.split('\n'), r=[]; const reg=/\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\]/; l.forEach(x=>{ const m=reg.exec(x); if(m) r.push({time: parseInt(m[1])*60 + parseInt(m[2]) + (m[3]?parseInt(m[3])/1000:0), text: x.replace(reg,'').trim()}); }); return r; }
-        function updateLyricsUI() { const c=document.getElementById('lyrics-container'); if(currentLyrics.length) { c.classList.remove('hidden'); c.innerHTML = currentLyrics.map((l,i)=>`<p id="line-${i}" class="lyric-line" onclick="audioPlayer.currentTime=${l.time}">${l.text}</p>`).join(''); } else { c.classList.add('hidden'); } }
-        function syncLyricsDisplay() { if(!currentLyrics.length) return; const t = audioPlayer.currentTime; let idx = currentLyrics.findIndex(l => l.time > t) - 1; if(idx < 0) idx = currentLyrics.length - 1; document.querySelectorAll('.lyric-line').forEach(e => e.classList.remove('active')); const el = document.getElementById(`line-${idx}`); if(el) { el.classList.add('active'); el.scrollIntoView({behavior:'smooth', block:'center'}); } }
-        window.toggleLyrics = function() { document.getElementById('lyrics-container').classList.toggle('hidden'); }
-
-        // --- SHARE ---
-        window.openShareModal = function() {
-            if(!currentTrackData) return;
-            document.getElementById('share-modal').classList.remove('hidden');
-            document.getElementById('share-card-title').textContent = currentTrackData.title;
-            document.getElementById('share-card-artist').textContent = currentTrackData.artist;
-            document.getElementById('share-card-cover').src = currentTrackData.cover;
-            
-            // QR Generation
-            const qc = document.getElementById('share-qr-container'); qc.innerHTML=""; qc.style.display="block";
-            new QRCode(qc, { text: `https://aura.app/track/${encodeURIComponent(currentTrackData.id)}`, width:48, height:48 });
-        }
-        window.closeShareModal = function() { document.getElementById('share-modal').classList.add('hidden'); }
-        window.downloadShareImage = function() {
-            html2canvas(document.getElementById('share-card-content'), {useCORS:true, scale:2}).then(c => {
-                const a = document.createElement('a'); a.download = 'Aura-Share.png'; a.href = c.toDataURL(); a.click();
-            });
-        }
-
-        // --- PERSISTENCE HELPERS ---
-        function saveLocalData() { localStorage.setItem('aura_likes', JSON.stringify([...likedTracks])); localStorage.setItem('aura_user', JSON.stringify(loggedInUser)); }
-        function loadLocalData() { 
-            const l = localStorage.getItem('aura_likes'); if(l) likedTracks = new Set(JSON.parse(l));
-            const u = localStorage.getItem('aura_user'); if(u) loggedInUser = JSON.parse(u);
-            updateAuthUI();
-        }
-        window.toggleLike = function() { if(!currentTrackData) return; likedTracks.has(currentTrackData.id) ? likedTracks.delete(currentTrackData.id) : likedTracks.add(currentTrackData.id); saveLocalData(); updatePlayerUI(currentTrackData); }
-        window.handleAuthAction = function() { loggedInUser = {id: 'USR-'+Date.now()}; saveLocalData(); closeAuthModal(); updateAuthUI(); }
-        window.handleLogout = function() { loggedInUser = null; saveLocalData(); updateAuthUI(); }
-        function updateAuthUI() { 
-            const h = document.getElementById('auth-button-header');
-            if(loggedInUser) { h.innerHTML = '<i data-lucide="user-check" class="w-5 h-5 text-green-400"></i>'; document.getElementById('profile-info').textContent = `ID: ${loggedInUser.id.substr(0,8)}`; }
-            else { h.innerHTML = '<i data-lucide="user" class="w-5 h-5"></i>'; document.getElementById('profile-info').textContent = "Guest"; }
-            lucide.createIcons();
-        }
-        function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
-        window.closeAuthModal = function() { document.getElementById('auth-modal').classList.add('hidden'); }
+        function renderLibrary() { document.getElementById('liked-tracks-list').innerHTML = AURA_MAP.filter(t=>likedTracks.has(t.id)).map(t=>`<div onclick="playTrack('${t.id}')" class="flex p-2 bg-white/5 rounded-xl gap-3"><img src="${t.cover}" class="w-10 h-10 rounded"><div><p class="font-bold text-sm">${t.title}</p></div></div>`).join('') || '<p>Vuoto</p>'; }
+        function renderHistory() { document.getElementById('history-list').innerHTML = listeningHistory.map(id=>AURA_MAP.find(x=>x.id===id)).filter(x=>x).map(t=>`<div class="p-2 border-b border-white/5 text-gray-400 text-sm">${t.title}</div>`).join(''); }
+        function updateListeningHistory(id) { listeningHistory = [id, ...listeningHistory.filter(x=>x!==id)].slice(0,15); saveLocal(); }
         
+        window.enterImmersiveMode = function() { if(currentTrackData) document.getElementById('immersive-mode').classList.remove('hidden'); }
+        window.exitImmersiveMode = function() { document.getElementById('immersive-mode').classList.add('hidden'); }
+        window.toggleLike = function() { if(currentTrackData) { likedTracks.has(currentTrackData.id) ? likedTracks.delete(currentTrackData.id) : likedTracks.add(currentTrackData.id); saveLocal(); showToast("Salvataggio aggiornato"); } }
+        function showToast(m) { const c = document.getElementById('toast-container'); const e = document.createElement('div'); e.className="bg-blue-600 text-white p-3 rounded-lg mb-2 shadow-lg"; e.innerText=m; c.appendChild(e); setTimeout(()=>e.remove(), 2500); }
+        function saveLocal() { localStorage.setItem('aura_data', JSON.stringify({likes:[...likedTracks], history:listeningHistory, playlists:userPlaylists, user:loggedInUser})); }
+        function loadLocal() { const d = JSON.parse(localStorage.getItem('aura_data')||'{}'); if(d.likes) likedTracks=new Set(d.likes); if(d.history) listeningHistory=d.history; if(d.user) loggedInUser=d.user; }
+
         // --- SEARCH ---
-        window.openSearchModal = function() { document.getElementById('search-modal').classList.remove('hidden'); document.getElementById('search-input').focus(); }
+        window.openSearchModal = function() { document.getElementById('search-modal').classList.remove('hidden'); }
         window.closeSearchModal = function() { document.getElementById('search-modal').classList.add('hidden'); }
         window.performSearch = function() {
             const q = document.getElementById('search-input').value.toLowerCase();
             const res = document.getElementById('search-results');
-            if(q.length < 2) { res.innerHTML = ''; return; }
             const hits = AURA_MAP.filter(t => t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q));
-            res.innerHTML = hits.map(t => `<div onclick="playTrack('${t.id}');closeSearchModal()" class="flex items-center gap-3 p-3 hover:bg-white/10 rounded-xl cursor-pointer"><img src="${t.cover}" class="w-10 h-10 rounded"><div><p class="font-bold text-white">${t.title}</p><p class="text-xs text-gray-400">${t.artist}</p></div></div>`).join('');
+            res.innerHTML = hits.map(t => `<div onclick="playTrack('${t.id}');closeSearchModal()" class="p-3 bg-white/5 mb-2 rounded-lg">${t.title} - ${t.artist}</div>`).join('');
         }
 
         // --- PWA ---
@@ -817,19 +511,21 @@
         }
         window.forceRecheckPWA = function() { document.getElementById('install-blocker').classList.add('hidden'); }
 
-        // --- TOAST ---
-        function showToast(m) { const c = document.getElementById('toast-container'); const el = document.createElement('div'); el.className="bg-white text-black font-bold p-3 rounded-xl shadow-2xl mb-2 text-center text-sm animate-[fadeIn_0.3s_ease-out]"; el.innerText = m; c.appendChild(el); setTimeout(()=>el.remove(), 3000); }
-        
-        // --- Library & History Renderers (Stubbed for brevity) ---
-        function renderLibrary() { const l=document.getElementById('liked-tracks-list'); const t=AURA_MAP.filter(x=>likedTracks.has(x.id)); l.innerHTML = t.length ? t.map(x=>`<div onclick="playTrack('${x.id}')" class="flex gap-3 p-3 bg-white/5 rounded-xl"><img src="${x.cover}" class="w-12 h-12 rounded"><div><p class="font-bold">${x.title}</p><p class="text-xs text-gray-400">${x.artist}</p></div></div>`).join('') : '<p class="text-gray-500">Nessun brano salvato.</p>'; }
-        function renderHistory() { const l=document.getElementById('history-list'); const t=listeningHistory.map(id=>AURA_MAP.find(x=>x.id===id)).filter(x=>x); l.innerHTML = t.length ? t.map(x=>`<div class="p-2 border-b border-white/5 text-sm text-gray-400">${x.title}</div>`).join('') : '<p class="text-xs">Cronologia vuota.</p>'; }
-        function updateListeningHistory(id) { listeningHistory = [id, ...listeningHistory.filter(x=>x!==id)].slice(0,10); }
-
-        function changeLanguage(val) { currentLang = val; updateLanguageUI(); }
-        function updateLanguageUI() { 
-            // Basic text updates based on TRANSLATIONS object
-        }
-
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            getDOMElements(); loadLocal(); fetchTracks(); checkPWAStatus(); checkCapsules();
+            lucide.createIcons();
+            // Start Visualizer
+            const vCanvas = document.getElementById('visualizer-canvas');
+            const vCtx = vCanvas.getContext('2d');
+            function drawVis() { 
+                vCanvas.width = window.innerWidth; vCanvas.height = window.innerHeight/2;
+                vCtx.fillStyle = 'rgba(0,191,255,0.1)'; vCtx.fillRect(0,0,vCanvas.width,vCanvas.height);
+                requestAnimationFrame(drawVis);
+            }
+            drawVis();
+        });
+        function getDOMElements() { audioPlayer = document.getElementById('audioPlayer'); audioPlayer.addEventListener('timeupdate', updateProgress); audioPlayer.addEventListener('ended', ()=>skipForward()); audioPlayer.addEventListener('play', ()=>updatePlayIcons(false)); audioPlayer.addEventListener('pause', ()=>updatePlayIcons(true)); }
     </script>
 </body>
 </html>
