@@ -3,13 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="google" content="notranslate">
-    <title>Aura | Experience</title>
-    
-    <link rel="icon" href="https://via.placeholder.com/192x192">
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/192x192">
-    <meta name="theme-color" content="#171717">
-    <link rel="manifest" href="./manifest.json">
+    <title>Aura | High-End Experience</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -19,22 +13,427 @@
     
     <style>
         :root { 
-            --ryzn-color-hex: #00BFFF; 
-            --ryzn-color-rgb: 0 191 255; 
-            --ryzn-bg-color: #0a0a0a; 
+            --accent: #00BFFF; 
+            --accent-rgb: 0, 191, 255;
+            --bg: #000000;
+            --surface: #121212;
+            --glass: rgba(255, 255, 255, 0.04);
         }
 
         body { 
-            background-color: var(--ryzn-bg-color); 
-            color: white; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
+            background: var(--bg); 
+            color: #ffffff; 
+            font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+            overflow: hidden; /* Gestito tramite scroll interno per eleganza */
+            height: 100vh;
         }
 
-        /* --- UI MODERNA --- */
-        .glass { 
-            background: rgba(255, 255, 255, 0.03); 
+        /* --- EFFETTI ESTETICI AVANZATI --- */
+        .premium-glass { 
+            background: var(--glass); 
+            backdrop-filter: blur(30px); 
+            -webkit-backdrop-filter: blur(30px); 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        .main-scroll {
+            height: 100vh;
+            overflow-y: scroll;
+            padding-bottom: 200px;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+        }
+        .main-scroll::-webkit-scrollbar { display: none; }
+
+        /* Animazioni di stato */
+        .page { display: none; animation: pageIn 0.5s cubic-bezier(0.2, 1, 0.3, 1) forwards; }
+        .page.active { display: block; }
+        @keyframes pageIn { 
+            from { opacity: 0; transform: scale(0.98) translateY(10px); filter: blur(10px); } 
+            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); } 
+        }
+
+        /* Track Card Design */
+        .track-card {
+            flex: 0 0 170px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .track-card img {
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .track-card:active { transform: scale(0.92); }
+
+        /* Player Bar - Eleganza Sospesa */
+        .floating-player {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            height: 72px;
+            border-radius: 22px;
+            z-index: 1000;
+            display: none;
+            padding: 0 12px;
+            transform: translateY(120%);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .floating-player.active { display: flex; transform: translateY(0); }
+
+        /* Control Buttons */
+        .action-btn {
+            height: 54px; border-radius: 18px; background: rgba(255,255,255,0.03);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+        }
+        .action-btn.active { 
+            background: var(--accent); color: black; 
+            box-shadow: 0 0 25px rgba(var(--accent-rgb), 0.4);
+            border: transparent;
+        }
+
+        /* PWA Blocker Style */
+        #pwa-shield {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        /* Visualizer Glow */
+        #canvas-vibe {
+            position: fixed; inset: 0; pointer-events: none; z-index: -1;
+            mask-image: linear-gradient(to top, black 20%, transparent 80%);
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pwa-shield" class="hidden text-center p-10">
+        <div class="w-24 h-24 bg-blue-500 rounded-3xl mb-8 shadow-[0_0_50px_rgba(0,191,255,0.3)] mx-auto flex items-center justify-center">
+            <i data-lucide="music" class="w-12 h-12 text-white"></i>
+        </div>
+        <h2 class="text-3xl font-black tracking-tighter mb-4">AURA PREMIUM</h2>
+        <p class="text-gray-500 max-w-xs mx-auto mb-10">Installa l'applicazione per sbloccare l'audio in background ad alta fedeltà.</p>
+        <button onclick="location.reload()" class="px-10 py-4 bg-white text-black rounded-full font-black text-sm tracking-widest uppercase transition-transform active:scale-95">Inizia</button>
+    </div>
+
+    <canvas id="canvas-vibe"></canvas>
+
+    <div class="main-scroll" id="scroll-engine">
+        <header class="p-8 flex justify-between items-center sticky top-0 z-50 bg-black/50 backdrop-blur-md">
+            <div>
+                <p class="text-[10px] font-black tracking-[0.3em] text-gray-500 uppercase">Sistema Aura</p>
+                <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="h-6 mt-1" alt="Logo">
+            </div>
+            <div class="flex gap-4">
+                <button onclick="openSearch()" class="w-12 h-12 premium-glass rounded-2xl flex items-center justify-center"><i data-lucide="search" class="w-5 h-5"></i></button>
+                <button onclick="showSection('profile')" class="w-12 h-12 premium-glass rounded-2xl flex items-center justify-center"><i data-lucide="user" class="w-5 h-5"></i></button>
+            </div>
+        </header>
+
+        <section id="music" class="page active px-6">
+            <h1 id="greeting" class="text-5xl font-black tracking-tighter mb-12 mt-4">Buongiorno.</h1>
+            <div id="dynamic-content" class="space-y-16">
+                </div>
+        </section>
+
+        <section id="profile" class="page px-6">
+            <h1 class="text-4xl font-black tracking-tighter mb-10">Profilo</h1>
+            <div class="premium-glass p-8 rounded-[40px] space-y-8">
+                <div class="flex items-center gap-6">
+                    <div class="w-20 h-20 rounded-[28px] bg-gradient-to-br from-blue-400 to-indigo-600 shadow-xl flex items-center justify-center text-3xl font-black">A</div>
+                    <div>
+                        <h3 id="user-display" class="text-xl font-bold tracking-tight">Utente Aura</h3>
+                        <p id="vibe-display" class="text-blue-400 font-mono text-xs mt-1">Vibe: 0/100</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Lingua Sistema</label>
+                    <select id="lang-sel" onchange="updateLang(this.value)" class="w-full bg-white/5 border border-white/10 p-5 rounded-3xl outline-none appearance-none">
+                        <option value="it">Italiano</option>
+                        <option value="en">English</option>
+                        <option value="ro">Română</option>
+                    </select>
+                </div>
+                <button onclick="logout()" class="w-full py-5 bg-red-500/10 text-red-500 rounded-3xl font-bold tracking-tight">Termina Sessione</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="mini-player" class="floating-player premium-glass" onclick="openImmersive()">
+        <img id="m-cover" class="w-14 h-14 rounded-2xl object-cover shadow-lg" src="">
+        <div class="flex-grow mx-4 overflow-hidden">
+            <p id="m-title" class="font-bold text-sm truncate tracking-tight">Scegli una traccia</p>
+            <p id="m-artist" class="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Aura Music</p>
+        </div>
+        <button onclick="event.stopPropagation(); togglePlay()" class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center transition-transform active:scale-90">
+            <i id="m-play-btn" data-lucide="play" class="fill-current w-5 h-5"></i>
+        </button>
+    </div>
+
+    <div id="immersive" class="fixed inset-0 bg-black z-[2000] hidden flex-col p-10 overflow-y-auto">
+        <button onclick="closeImmersive()" class="mb-10 w-12 h-12 premium-glass rounded-2xl flex items-center justify-center"><i data-lucide="chevron-down"></i></button>
+        
+        <div class="flex-grow flex flex-col items-center">
+            <div class="w-full aspect-square max-w-[360px] rounded-[50px] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.8)] border border-white/5 mb-14 transition-transform duration-700" id="art-container">
+                <img id="i-cover" class="w-full h-full object-cover" src="">
+            </div>
+
+            <div class="w-full text-center mb-12">
+                <h2 id="i-title" class="text-3xl font-black tracking-tighter mb-3">Titolo Traccia</h2>
+                <p id="i-artist" class="text-blue-400 text-lg font-medium opacity-80">Artista</p>
+            </div>
+
+            <div class="w-full grid grid-cols-4 gap-4 mb-14">
+                <button onclick="cycleFX()" id="f-zap" class="action-btn"><i data-lucide="zap"></i><span class="text-[8px] font-bold mt-1">FX</span></button>
+                <button onclick="toggleAmb()" id="f-amb" class="action-btn"><i data-lucide="cloud-rain"></i><span class="text-[8px] font-bold mt-1">MIX</span></button>
+                <button onclick="toggleGyro()" id="f-gyro" class="action-btn"><i data-lucide="smartphone"></i><span class="text-[8px] font-bold mt-1">GYRO</span></button>
+                <button onclick="openCapsule()" class="action-btn"><i data-lucide="hourglass"></i><span class="text-[8px] font-bold mt-1">TIME</span></button>
+            </div>
+
+            <div class="w-full px-2 mb-12">
+                <div class="h-1.5 w-full bg-white/5 rounded-full relative overflow-hidden" onclick="seek(event)">
+                    <div id="i-progress" class="absolute inset-y-0 left-0 bg-white rounded-full transition-all duration-100"></div>
+                </div>
+                <div class="flex justify-between mt-4 text-[10px] font-mono text-gray-500 tracking-tighter">
+                    <span id="t-cur">00:00</span>
+                    <span id="t-dur">00:00</span>
+                </div>
+            </div>
+
+            <div class="w-full flex justify-around items-center">
+                <button onclick="skip(-1)" class="opacity-60 active:scale-75 transition-all"><i data-lucide="skip-back" class="w-10 h-10 fill-current"></i></button>
+                <button onclick="togglePlay()" class="w-28 h-28 bg-white text-black rounded-full flex items-center justify-center shadow-[0_0_60px_rgba(255,255,255,0.2)] active:scale-90 transition-all">
+                    <i id="i-play-btn" data-lucide="play" class="w-12 h-12 fill-current ml-2"></i>
+                </button>
+                <button onclick="skip(1)" class="opacity-60 active:scale-75 transition-all"><i data-lucide="skip-forward" class="w-10 h-10 fill-current"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="main-audio" playsinline crossorigin="anonymous"></audio>
+    <audio id="amb-rain" loop src="https://assets.mixkit.co/active_storage/sfx/2515/2515-preview.m4a"></audio>
+    <audio id="amb-fire" loop src="https://assets.mixkit.co/active_storage/sfx/270/270-preview.m4a"></audio>
+
+    <script>
+        // --- LOGICA MECCANICA ORIGINALE ---
+        const GITHUB = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
+        let TRACK_LIST = [], LIKES = new Set();
+        let currentIdx = 0, isLoop = false, fxMode = 0, ambMode = 0, gyroOn = false;
+        
+        const audio = document.getElementById('main-audio');
+
+        async function boot() {
+            try {
+                const [trRes, arRes] = await Promise.all([
+                    fetch(GITHUB + "tracks.json"),
+                    fetch(GITHUB + "artist.json")
+                ]);
+                const tracks = await trRes.json();
+                const artists = await arRes.json();
+                const artMap = {}; artists.forEach(a => artMap[a.id] = a.name);
+
+                TRACK_LIST = tracks.tracks.map(t => ({
+                    id: t.title,
+                    title: t.title,
+                    artist: artMap[t.artistId] || t.artist || "Aura Selection",
+                    file: GITHUB + "audio/" + encodeURIComponent(t.file.trim().replace(/\s(\.[a-z0-9]+)$/i, '$1')),
+                    cover: GITHUB + "Covers/" + (t.albumId ? encodeURIComponent(t.albumId.trim()) : t.categoryID) + ".png",
+                    cat: t.categoryID,
+                    vibe: Math.floor(Math.random() * 40) + 60
+                }));
+
+                renderGrid();
+                setupMediaHandlers();
+                checkPWA();
+                lucide.createIcons();
+            } catch (e) { console.error("Boot Failure", e); }
+        }
+
+        // --- BACKGROUND AUDIO FIX (MEDIA SESSION API) ---
+        function setupMediaHandlers() {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.setActionHandler('play', () => audio.play());
+                navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+                navigator.mediaSession.setActionHandler('nexttrack', () => skip(1));
+                navigator.mediaSession.setActionHandler('previoustrack', () => skip(-1));
+            }
+        }
+
+        function updateMediaMeta(t) {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: t.title,
+                    artist: t.artist,
+                    artwork: [{ src: t.cover, sizes: '512x512', type: 'image/png' }]
+                });
+            }
+        }
+
+        // --- CORE FUNCTIONS ---
+        function playTrack(id) {
+            const track = TRACK_LIST.find(t => t.id === id);
+            if (!track) return;
+            currentIdx = TRACK_LIST.indexOf(track);
+            
+            audio.src = track.file;
+            audio.play().catch(e => console.log("Init required"));
+            
+            document.getElementById('mini-player').classList.add('active');
+            updateUI(track);
+            updateMediaMeta(track);
+            initVisualizer();
+        }
+
+        function togglePlay() {
+            if (audio.paused) audio.play(); else audio.pause();
+            syncPlayIcons();
+        }
+
+        function syncPlayIcons() {
+            const state = audio.paused ? 'play' : 'pause';
+            document.getElementById('m-play-btn').setAttribute('data-lucide', state);
+            document.getElementById('i-play-btn').setAttribute('data-lucide', state);
+            lucide.createIcons();
+            // Effetto Zoom sulla cover in riproduzione
+            document.getElementById('art-container').style.transform = audio.paused ? 'scale(0.9)' : 'scale(1)';
+        }
+
+        // --- FX ENGINE ---
+        function cycleFX() {
+            fxMode = (fxMode + 1) % 3;
+            const btn = document.getElementById('f-zap');
+            if(fxMode === 0) { audio.playbackRate = 1.0; audio.preservesPitch = true; btn.classList.remove('active'); }
+            if(fxMode === 1) { audio.playbackRate = 1.25; audio.preservesPitch = false; btn.classList.add('active'); }
+            if(fxMode === 2) { audio.playbackRate = 0.8; audio.preservesPitch = true; btn.classList.add('active'); }
+        }
+
+        function toggleAmb() {
+            ambMode = (ambMode + 1) % 3;
+            const r = document.getElementById('amb-rain'), f = document.getElementById('amb-fire');
+            r.pause(); f.pause();
+            if(ambMode === 1) { r.play(); r.volume = 0.4; }
+            if(ambMode === 2) { f.play(); f.volume = 0.4; }
+            document.getElementById('f-amb').classList.toggle('active', ambMode !== 0);
+        }
+
+        function toggleGyro() {
+            if(!gyroOn) {
+                if(typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission().then(res => { if(res==='granted') startGyro(); });
+                } else startGyro();
+            } else { gyroOn = false; window.removeEventListener('deviceorientation', handleGyro); document.getElementById('f-gyro').classList.remove('active'); }
+        }
+
+        function handleGyro(e) { 
+            let v = (e.gamma + 45) / 90; 
+            audio.volume = Math.max(0, Math.min(1, v)); 
+        }
+
+        function startGyro() { 
+            gyroOn = true; window.addEventListener('deviceorientation', handleGyro); 
+            document.getElementById('f-gyro').classList.add('active');
+        }
+
+        // --- RENDERING GRID ---
+        function renderGrid() {
+            const container = document.getElementById('dynamic-content');
+            const cats = [...new Set(TRACK_LIST.map(t => t.cat))];
+            let html = "";
+            cats.forEach(c => {
+                const tracks = TRACK_LIST.filter(t => t.cat === c);
+                html += `<div>
+                    <h3 class="text-[11px] font-black uppercase tracking-[0.4em] text-gray-500 mb-6 px-1">${c} Series</h3>
+                    <div class="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
+                        ${tracks.map(t => `
+                            <div onclick="playTrack('${t.id}')" class="track-card">
+                                <img src="${t.cover}" class="w-full aspect-square object-cover mb-4">
+                                <p class="text-[13px] font-bold truncate tracking-tight">${t.title}</p>
+                                <p class="text-[10px] text-gray-500 truncate uppercase tracking-widest mt-1">${t.artist}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // --- UI UTILS ---
+        function updateUI(t) {
+            document.getElementById('m-cover').src = t.cover;
+            document.getElementById('m-title').innerText = t.title;
+            document.getElementById('m-artist').innerText = t.artist;
+            document.getElementById('i-cover').src = t.cover;
+            document.getElementById('i-title').innerText = t.title;
+            document.getElementById('i-artist').innerText = t.artist;
+            document.getElementById('vibe-display').innerText = `Vibe: ${t.vibe}/100`;
+            syncPlayIcons();
+        }
+
+        function skip(dir) {
+            currentIdx = (currentIdx + dir + TRACK_LIST.length) % TRACK_LIST.length;
+            playTrack(TRACK_LIST[currentIdx].id);
+        }
+
+        audio.ontimeupdate = () => {
+            const p = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('i-progress').style.width = p + "%";
+            document.getElementById('t-cur').innerText = fmtTime(audio.currentTime);
+            document.getElementById('t-dur').innerText = fmtTime(audio.duration);
+        };
+
+        function fmtTime(s) { if(isNaN(s)) return "00:00"; let m = Math.floor(s/60), sec = Math.floor(s%60); return `${m<10?'0':''}${m}:${sec<10?'0':''}${sec}`; }
+
+        function showSection(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('scroll-engine').scrollTo(0,0);
+        }
+
+        function openImmersive() { document.getElementById('immersive').style.display = 'flex'; }
+        function closeImmersive() { document.getElementById('immersive').style.display = 'none'; }
+        
+        function checkPWA() {
+            if(!(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone)) 
+                document.getElementById('pwa-shield').classList.remove('hidden');
+        }
+
+        // --- VISUALIZER ---
+        function initVisualizer() {
+            const canvas = document.getElementById('canvas-vibe');
+            const ctx = canvas.getContext('2d');
+            let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            let analyser = audioCtx.createAnalyser();
+            let source = audioCtx.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            analyser.fftSize = 64;
+            let data = new Uint8Array(analyser.frequencyBinCount);
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            function draw() {
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(data);
+                ctx.clearRect(0,0, canvas.width, canvas.height);
+                let w = canvas.width / data.length;
+                data.forEach((v, i) => {
+                    let h = (v/255) * canvas.height * 0.8;
+                    ctx.fillStyle = `rgba(0, 191, 255, ${v/400})`;
+                    ctx.fillRect(i*w, canvas.height-h, w-2, h);
+                });
+            }
+            draw();
+        }
+
+        window.onload = boot;
+    </script>
+</body>
+</html>            background: rgba(255, 255, 255, 0.03); 
             backdrop-filter: blur(20px); 
             -webkit-backdrop-filter: blur(20px); 
             border: 1px solid rgba(255, 255, 255, 0.08); 
