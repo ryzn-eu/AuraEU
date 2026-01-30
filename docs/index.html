@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aura Music</title>
+    <meta name="google" content="notranslate">
+    <title>Aura | Experience</title>
+    
+    <link rel="icon" href="https://via.placeholder.com/192x192">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/192x192">
+    <meta name="theme-color" content="#171717">
+    <link rel="manifest" href="./manifest.json">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -13,28 +19,388 @@
     
     <style>
         :root { 
-            --accent: #00BFFF; 
-            --accent-rgb: 0, 191, 255;
-            --bg: #0a0a0a;
-            --glass: rgba(255, 255, 255, 0.08);
+            --ryzn-color-hex: #00BFFF; 
+            --ryzn-color-rgb: 0 191 255; 
+            --ryzn-bg-color: #0a0a0a; 
         }
 
         body { 
-            background-color: var(--bg); 
+            background-color: var(--ryzn-bg-color); 
             color: white; 
-            font-family: -apple-system, system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
-            user-select: none;
         }
 
-        /* Effetti Grafici Restaurati */
-        .glass { background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1); }
-        .accent-shadow { box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.3); }
-        
-        .section-page { display: none; padding-top: 20px; padding-bottom: 180px; animation: fadeIn 0.4s ease; }
-        .section-page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- UI MODERNA --- */
+        .glass { 
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+        }
 
+        .section-page { display: none; opacity: 0; transform: translateY(10px); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .section-page.active { display: block; opacity: 1; transform: translateY(0); }
+
+        /* Marquee per titoli lunghi */
+        .title-wrapper { overflow: hidden; white-space: nowrap; }
+        .marquee { display: inline-block; animation: marquee 10s linear infinite; padding-left: 100%; animation-play-state: paused; }
+        .is-long .marquee { animation-play-state: running; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        /* Widget Orizzontali */
+        .h-scroll { display: flex; overflow-x: auto; gap: 1.25rem; scrollbar-width: none; padding-bottom: 1rem; padding-left: 1rem; }
+        .h-scroll::-webkit-scrollbar { display: none; }
+        .track-card { flex: 0 0 150px; transition: transform 0.3s ease; }
+        .track-card:active { transform: scale(0.95); }
+
+        /* Background Layers */
+        #visualizer-canvas { position: fixed; bottom: 0; left: 0; width: 100%; height: 60%; z-index: -1; opacity: 0.4; pointer-events: none; mask-image: linear-gradient(to top, black, transparent); }
+        .fixed-background { position: fixed; inset: 0; z-index: -2; background-image: url('https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User/Foto.png'); background-size: cover; background-position: center; filter: brightness(0.3) blur(20px); }
+
+        /* Player Bar Floating */
+        .player-bar { 
+            position: fixed; bottom: 20px; left: 15px; right: 15px; height: 70px; 
+            border-radius: 20px; z-index: 1000; 
+            transform: translateY(150%); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .player-bar.active { transform: translateY(0); }
+
+        /* Control Deck Buttons */
+        .control-deck-btn { 
+            height: 50px; flex: 1; border-radius: 15px; background: rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+        }
+        .control-deck-btn.active { background: var(--ryzn-color-hex); color: black; box-shadow: 0 0 15px var(--ryzn-color-hex); }
+
+        /* PWA Blocker */
+        #install-blocker { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #install-blocker.hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="fixed-background"></div>
+    <canvas id="visualizer-canvas"></canvas>
+    
+    <div id="install-blocker" class="hidden p-8">
+        <h2 class="text-4xl font-black mb-4">Aura Music</h2>
+        <p class="text-gray-400 mb-8">Installa l'app per la riproduzione fluida in background.</p>
+        <button onclick="location.reload()" class="px-8 py-4 bg-white text-black rounded-full font-bold">Avvia Esperienza</button>
+    </div>
+
+    <div id="search-modal" class="fixed inset-0 glass z-[2000] hidden p-6">
+        <div class="max-w-2xl mx-auto">
+            <div class="flex gap-2 mb-6">
+                <input type="text" id="search-input" oninput="performSearch()" placeholder="Cerca musica..." class="flex-grow bg-white/10 p-4 rounded-2xl outline-none border border-white/10">
+                <button onclick="closeSearchModal()" class="p-4 bg-white/10 rounded-2xl"><i data-lucide="x"></i></button>
+            </div>
+            <div id="search-results" class="space-y-4 max-h-[70vh] overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <div id="capsule-modal" class="fixed inset-0 glass z-[2000] hidden flex items-center justify-center p-6">
+        <div class="bg-[#111] p-8 rounded-[32px] w-full max-w-sm border border-white/10 text-center">
+            <i data-lucide="hourglass" class="w-12 h-12 mx-auto mb-4 text-amber-500"></i>
+            <h3 class="text-2xl font-bold mb-2">Time Capsule</h3>
+            <p class="text-gray-400 mb-6">Sigilla questo brano fino a una data futura.</p>
+            <input type="date" id="capsule-date" class="w-full bg-white/5 p-4 rounded-xl mb-4 text-white border border-white/10">
+            <button onclick="confirmTimeCapsule()" class="w-full py-4 bg-amber-600 rounded-xl font-bold">Sigilla</button>
+            <button onclick="closeCapsuleModal()" class="mt-4 text-gray-500">Annulla</button>
+        </div>
+    </div>
+
+    <div class="max-w-2xl mx-auto px-4 pb-32">
+        <header class="flex justify-between items-center py-8">
+            <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="h-8" alt="Aura">
+            <div class="flex gap-3">
+                <button onclick="openSearchModal()" class="p-3 glass rounded-full"><i data-lucide="search" class="w-5 h-5"></i></button>
+                <button onclick="showSection('profile')" class="p-3 glass rounded-full"><i data-lucide="user" class="w-5 h-5"></i></button>
+            </div>
+        </header>
+
+        <section id="music-section" class="section-page active">
+            <h1 id="home-greeting" class="text-4xl font-black mb-8">Good Evening.</h1>
+            <div id="home-widgets-container" class="space-y-12">
+                </div>
+        </section>
+
+        <section id="profile-section" class="section-page">
+            <h2 class="text-3xl font-bold mb-6">Profile</h2>
+            <div class="glass p-6 rounded-[32px] space-y-6">
+                <div class="flex items-center gap-4 p-2">
+                    <div class="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-2xl font-black">G</div>
+                    <div>
+                        <p id="profile-info" class="font-bold">Guest User</p>
+                        <p id="vibe-score-display" class="text-blue-400 text-sm">Vibe Score: 0/100</p>
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-white/5">
+                    <label class="text-xs font-bold text-gray-500 uppercase mb-2 block">Lingua</label>
+                    <select id="language-selector" onchange="changeLanguage(this.value)" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10">
+                        <option value="en">English</option>
+                        <option value="it">Italiano</option>
+                        <option value="ro">Română</option>
+                    </select>
+                </div>
+                <button onclick="handleLogout()" class="w-full p-4 bg-red-500/10 text-red-500 rounded-2xl font-bold">Logout</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="mini-player" class="player-bar glass flex items-center px-4 gap-3 shadow-2xl" onclick="enterImmersiveMode()">
+        <img id="player-cover" class="w-12 h-12 rounded-xl object-cover" src="">
+        <div class="flex-grow overflow-hidden">
+            <div id="player-title-wrapper" class="title-wrapper font-bold text-sm truncate">Scegli brano</div>
+            <div id="player-artist" class="text-xs text-gray-400 truncate">Aura Music</div>
+        </div>
+        <button onclick="event.stopPropagation(); togglePlayPause()" class="p-3 bg-white text-black rounded-full">
+            <i id="play-icon" data-lucide="play" class="w-5 h-5 fill-current"></i>
+        </button>
+        <div id="progress-bar-container" class="absolute bottom-0 left-4 right-4 h-[2px] bg-white/10 overflow-hidden rounded-full">
+            <div id="progress-bar" class="h-full bg-white w-0"></div>
+        </div>
+    </div>
+
+    <div id="immersive-mode" class="fixed inset-0 bg-[#050505] z-[3000] hidden flex flex-col p-8 overflow-y-auto">
+        <button onclick="exitImmersiveMode()" class="mb-6 opacity-40"><i data-lucide="chevron-down" class="w-10 h-10"></i></button>
+        
+        <div class="flex-grow flex flex-col items-center justify-center">
+            <div id="visual-container" class="w-full aspect-square max-w-[340px] rounded-[48px] overflow-hidden shadow-2xl mb-12 border border-white/10">
+                <img id="immersive-cover" class="w-full h-full object-cover" src="">
+                <iframe id="immersive-video-player" class="hidden w-full h-full" frameborder="0"></iframe>
+            </div>
+
+            <div class="text-center w-full mb-10">
+                <h2 id="immersive-title" class="text-3xl font-black mb-2">Titolo Brano</h2>
+                <p id="immersive-artist" class="text-xl text-blue-400 font-medium">Artista</p>
+            </div>
+
+            <div class="w-full flex gap-3 mb-10">
+                <button onclick="toggleAmbientMenu()" id="btn-ambient" class="control-deck-btn"><i data-lucide="cloud-rain"></i></button>
+                <button onclick="cycleAudioFX()" id="btn-fx" class="control-deck-btn"><i data-lucide="zap"></i></button>
+                <button onclick="toggleGyro()" id="btn-gyro" class="control-deck-btn"><i data-lucide="smartphone"></i></button>
+                <button onclick="openCapsuleModal()" class="control-deck-btn"><i data-lucide="hourglass"></i></button>
+            </div>
+
+            <div class="w-full flex justify-around items-center">
+                <button onclick="skipBackward()"><i data-lucide="skip-back" class="w-10 h-10 fill-current"></i></button>
+                <button onclick="togglePlayPause()" class="w-24 h-24 bg-white text-black rounded-full flex items-center justify-center scale-110">
+                    <i id="immersive-play-icon" data-lucide="play" class="w-10 h-10 fill-current ml-1"></i>
+                </button>
+                <button onclick="skipForward()"><i data-lucide="skip-forward" class="w-10 h-10 fill-current"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" playsinline crossorigin="anonymous"></audio>
+    <audio id="ambientRain" loop src="https://assets.mixkit.co/active_storage/sfx/2515/2515-preview.m4a"></audio>
+    <audio id="ambientFire" loop src="https://assets.mixkit.co/active_storage/sfx/270/270-preview.m4a"></audio>
+
+    <script>
+        // --- CONFIGURAZIONE ORIGINALE ---
+        const GITHUB_RAW = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
+        const TRACKS_JSON = GITHUB_RAW + "tracks.json";
+        const ARTIST_JSON = GITHUB_RAW + "artist.json";
+        const AUDIO_BASE = GITHUB_RAW + "audio/";
+        const COVER_BASE = GITHUB_RAW + "Covers/";
+
+        let AURA_MAP = [], LIKED = new Set(), HISTORY = [];
+        let currentTrack = null, audioCtx, analyser, dataArray;
+        let fxMode = 0, ambMode = 0, gyroEnabled = false;
+
+        const player = document.getElementById('audioPlayer');
+
+        // --- INIZIALIZZAZIONE CORE ---
+        async function initialize() {
+            try {
+                const [tr, ar] = await Promise.all([fetch(TRACKS_JSON), fetch(ARTIST_JSON)]);
+                const tracksData = await tr.json();
+                const artistData = await ar.json();
+                
+                const artMap = {}; artistData.forEach(a => artMap[a.id] = a.name);
+
+                AURA_MAP = tracksData.tracks.map(t => {
+                    const cleanFile = t.file.trim().replace(/\s(\.[a-z0-9]+)$/i, '$1');
+                    return {
+                        id: t.title.trim(),
+                        title: t.title.trim(),
+                        artist: artMap[t.artistId] || t.artist || "Aura Choice",
+                        audio: AUDIO_BASE + encodeURIComponent(cleanFile),
+                        cover: COVER_BASE + (t.albumId ? encodeURIComponent(t.albumId.trim()) : t.categoryID) + ".png",
+                        video: t.videoUrl,
+                        category: t.categoryID,
+                        vibe: Math.floor(Math.random()*100) + 1
+                    };
+                });
+
+                renderHome();
+                setupMediaSession();
+                lucide.createIcons();
+                checkPWA();
+            } catch (e) { console.error("Aura Init Error", e); }
+        }
+
+        // --- BACKGROUND AUDIO FIX (MEDIA SESSION) ---
+        function setupMediaSession() {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.setActionHandler('play', () => player.play());
+                navigator.mediaSession.setActionHandler('pause', () => player.pause());
+                navigator.mediaSession.setActionHandler('previoustrack', () => skipBackward());
+                navigator.mediaSession.setActionHandler('nexttrack', () => skipForward());
+            }
+        }
+
+        function updateMediaSession(track) {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title,
+                    artist: track.artist,
+                    artwork: [{ src: track.cover, sizes: '512x512', type: 'image/png' }]
+                });
+            }
+        }
+
+        // --- CORE FUNCTIONS ---
+        window.playTrack = function(id) {
+            const track = AURA_MAP.find(t => t.id === id);
+            if (!track) return;
+            currentTrack = track;
+            
+            player.src = track.audio;
+            player.play().then(() => {
+                document.getElementById('mini-player').classList.add('active');
+                updateUI(track);
+                updateMediaSession(track);
+                if(!audioCtx) initVisualizer();
+            });
+        };
+
+        window.togglePlayPause = function() {
+            if (player.paused) player.play(); else player.pause();
+            updatePlayIcons();
+        };
+
+        function updatePlayIcons() {
+            const state = player.paused ? 'play' : 'pause';
+            document.getElementById('play-icon').setAttribute('data-lucide', state);
+            document.getElementById('immersive-play-icon').setAttribute('data-lucide', state);
+            lucide.createIcons();
+        }
+
+        // --- FX ENGINE (NIGHTCORE / SLOWED) ---
+        window.cycleAudioFX = function() {
+            fxMode = (fxMode + 1) % 3;
+            const btn = document.getElementById('btn-fx');
+            if(fxMode === 0) { player.playbackRate = 1.0; player.preservesPitch = true; btn.classList.remove('active'); }
+            else if(fxMode === 1) { player.playbackRate = 1.25; player.preservesPitch = false; btn.classList.add('active'); }
+            else { player.playbackRate = 0.85; player.preservesPitch = true; btn.classList.add('active'); }
+        };
+
+        // --- AMBIENT SOUNDS ---
+        window.toggleAmbientMenu = function() {
+            ambMode = (ambMode + 1) % 3;
+            const r = document.getElementById('ambientRain'), f = document.getElementById('ambientFire');
+            const btn = document.getElementById('btn-ambient');
+            r.pause(); f.pause();
+            if(ambMode === 1) { r.play(); btn.classList.add('active'); }
+            else if(ambMode === 2) { f.play(); btn.classList.add('active'); }
+            else { btn.classList.remove('active'); }
+        };
+
+        // --- RENDERING ---
+        function renderHome() {
+            const container = document.getElementById('home-widgets-container');
+            const categories = ['CR1', 'CR2', 'CR3', 'CR4'];
+            let html = "";
+            
+            categories.forEach(cat => {
+                const tracks = AURA_MAP.filter(t => t.category === cat);
+                if(tracks.length) {
+                    html += `<div><h3 class="text-xl font-bold mb-4 opacity-50 ml-4">${cat} Hits</h3><div class="h-scroll">`;
+                    tracks.forEach(t => {
+                        html += `
+                            <div onclick="playTrack('${t.id}')" class="track-card">
+                                <img src="${t.cover}" class="w-full aspect-square object-cover rounded-[24px] shadow-lg mb-2">
+                                <p class="text-sm font-bold truncate px-1">${t.title}</p>
+                            </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+            });
+            container.innerHTML = html;
+        }
+
+        // --- VISUALIZER ENGINE ---
+        function initVisualizer() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioCtx.createAnalyser();
+            const source = audioCtx.createMediaElementSource(player);
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            analyser.fftSize = 128;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            drawVisualizer();
+        }
+
+        function drawVisualizer() {
+            const canvas = document.getElementById('visualizer-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            function render() {
+                requestAnimationFrame(render);
+                analyser.getByteFrequencyData(dataArray);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const barWidth = (canvas.width / dataArray.length) * 2;
+                let x = 0;
+                dataArray.forEach(val => {
+                    const barHeight = (val / 255) * (canvas.height / 3);
+                    ctx.fillStyle = `rgba(0, 191, 255, ${val/512})`;
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 2;
+                });
+            }
+            render();
+        }
+
+        // --- UTILS ---
+        function updateUI(track) {
+            document.getElementById('player-cover').src = track.cover;
+            document.getElementById('player-title-wrapper').innerText = track.title;
+            document.getElementById('player-artist').innerText = track.artist;
+            document.getElementById('immersive-cover').src = track.cover;
+            document.getElementById('immersive-title').innerText = track.title;
+            document.getElementById('immersive-artist').innerText = track.artist;
+            document.getElementById('vibe-score-display').innerText = `Vibe Score: ${track.vibe}/100`;
+        }
+
+        player.ontimeupdate = () => {
+            const p = (player.currentTime / player.duration) * 100;
+            document.getElementById('progress-bar').style.width = p + "%";
+        };
+
+        window.showSection = (id) => {
+            document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
+            document.getElementById(id + '-section').classList.add('active');
+        };
+
+        window.enterImmersiveMode = () => document.getElementById('immersive-mode').classList.remove('hidden');
+        window.exitImmersiveMode = () => document.getElementById('immersive-mode').classList.add('hidden');
+        window.openSearchModal = () => document.getElementById('search-modal').classList.remove('hidden');
+        window.closeSearchModal = () => document.getElementById('search-modal').classList.add('hidden');
+
+        function checkPWA() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if(!isStandalone) document.getElementById('install-blocker').classList.remove('hidden');
+        }
+
+        window.onload = initialize;
+    </script>
+</body>
+</html>
         /* Marquee migliorato */
         .marquee { white-space: nowrap; overflow: hidden; display: block; }
         .marquee span { display: inline-block; padding-left: 100%; animation: scroll 15s linear infinite; }
