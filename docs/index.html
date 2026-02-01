@@ -137,6 +137,10 @@
         .marquee { white-space: nowrap; animation: scrolling 10s linear infinite; }
         @keyframes scrolling { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
         #visualizer-canvas { position: fixed; bottom: 0; left: 0; width: 100%; height: 30%; z-index: -1; pointer-events: none; opacity: 0.3; mask-image: linear-gradient(to top, black, transparent); }
+        
+        /* PWA Block Style */
+        #install-blocker { z-index: 9999; transition: opacity 0.3s ease; }
+        #install-blocker.hidden { display: none !important; opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -145,10 +149,10 @@
     <canvas id="visualizer-canvas"></canvas>
     <div id="toast-container" class="fixed top-6 right-6 z-[200] flex flex-col gap-2"></div>
 
-    <div id="install-blocker" class="hidden fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center p-8 text-center">
+    <div id="install-blocker" class="hidden fixed inset-0 bg-black flex flex-col items-center justify-center p-8 text-center">
         <h2 class="text-3xl font-bold mb-4">Aura App</h2>
-        <p class="text-gray-400 mb-6">Installa per l'esperienza completa.</p>
-        <button onclick="forceRecheckPWA()" class="text-sm underline text-white">Ho già installato</button>
+        <p class="text-gray-400 mb-6">Install app for full experience.</p>
+        <button onclick="forceRecheckPWA()" class="text-sm underline text-white opacity-60">Tap here if installed</button>
     </div>
 
     <div id="audio-player-container"><audio id="audioPlayer" playsinline preload="auto" crossorigin="anonymous"></audio></div>
@@ -177,20 +181,18 @@
         <main>
             <section id="music-section" class="section-page active">
                 <h2 id="home-greeting" class="text-2xl font-bold mb-4 px-1">Good Evening</h2>
-
                 <div id="home-history-grid" class="yt-grid-mobile-fix mb-8"></div>
-
                 <div id="home-widgets-container" class="space-y-8 pb-24"></div>
             </section>
 
             <section id="library-section" class="section-page">
-                <h2 class="text-2xl font-bold mb-4">Brani Salvati</h2>
+                <h2 id="txt-saved-tracks" class="text-2xl font-bold mb-4">Saved Tracks</h2>
                 <div id="liked-tracks-list" class="grid grid-cols-2 gap-3"></div>
             </section>
 
             <section id="playlists-section" class="section-page">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold">Sessioni</h2>
+                    <h2 id="txt-sessions" class="text-2xl font-bold">Sessions</h2>
                     <button onclick="openCreatePlaylistModal()" class="p-2 bg-white/10 rounded-full"><i data-lucide="plus" class="w-5 h-5"></i></button>
                 </div>
                 <div id="playlists-list" class="grid grid-cols-2 gap-3 pb-24"></div>
@@ -199,16 +201,22 @@
             <section id="profile-section" class="section-page">
                 <div class="glass-panel p-6 rounded-3xl mb-6 text-center relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 to-cyan-500"></div>
-                    <h3 id="profile-info" class="text-xl font-bold mt-2">Ospite</h3>
+                    <h3 id="profile-info" class="text-xl font-bold mt-2">Guest</h3>
                     <p id="vibe-score-display" class="text-sm text-cyan-400 font-bold mb-4">Vibe Score: 0</p>
-                    <div class="flex justify-center gap-3">
+                    <div class="flex justify-center gap-3 flex-wrap">
                         <select id="language-selector" onchange="changeLanguage(this.value)" class="bg-black/30 text-xs p-2 rounded-lg border border-white/10 text-white">
-                            <option value="en">English</option> <option value="it">Italiano</option>
+                            <option value="en">English</option>
+                            <option value="it">Italiano</option>
+                            <option value="ro">Română</option>
+                            <option value="de">Deutsch</option>
+                            <option value="es">Español</option>
+                            <option value="ru">Русский</option>
+                            <option value="ar">العربية</option>
                         </select>
-                        <button onclick="handleLogout()" class="text-xs bg-red-500/10 text-red-400 px-4 py-2 rounded-lg font-bold border border-red-500/20">Logout</button>
+                        <button id="btn-logout" onclick="handleLogout()" class="text-xs bg-red-500/10 text-red-400 px-4 py-2 rounded-lg font-bold border border-red-500/20">Logout</button>
                     </div>
                 </div>
-                <h3 class="font-bold mb-3 px-2">Cronologia</h3>
+                <h3 id="txt-history-title" class="font-bold mb-3 px-2">History</h3>
                 <div id="history-list" class="space-y-2 pb-24"></div>
             </section>
         </main>
@@ -230,9 +238,9 @@
 
             <div class="text-center w-full px-4 mb-6">
                 <div id="immersive-title-wrapper" class="w-full overflow-hidden h-10">
-                    <h2 id="immersive-title" class="text-2xl font-bold marquee">Scegli un brano</h2>
+                    <h2 id="immersive-title" class="text-2xl font-bold marquee">Choose Track</h2>
                 </div>
-                <p id="immersive-artist" class="text-lg text-gray-400 font-medium mt-1">Artista</p>
+                <p id="immersive-artist" class="text-lg text-gray-400 font-medium mt-1">Artist</p>
             </div>
 
             <div class="w-full max-w-sm px-2 mb-8 group" id="progress-bar-immersive-container">
@@ -283,18 +291,102 @@
         </div>
     </div>
 
-    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-8 rounded-3xl w-full max-w-sm text-center"><h2 class="text-2xl font-bold mb-2">Benvenuto</h2><button onclick="handleAuthAction('device')" class="w-full py-3 bg-white text-black rounded-xl font-bold mt-4">Login Ospite</button><button onclick="closeAuthModal()" class="mt-4 text-xs opacity-50">Chiudi</button></div></div>
-    <div id="capsule-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-8 rounded-3xl w-full max-w-sm border border-amber-500/30 text-center"><i data-lucide="hourglass" class="w-8 h-8 text-amber-500 mx-auto mb-2"></i><h3 class="text-xl font-bold">Time Capsule</h3><p class="text-xs text-gray-400 mb-4">Sigilla questo brano</p><input type="date" id="capsule-date" class="w-full bg-white/10 p-3 rounded-lg text-white mb-4"><button onclick="confirmTimeCapsule()" class="w-full py-3 bg-amber-600 rounded-lg font-bold">Sigilla</button><button onclick="closeCapsuleModal()" class="mt-3 text-xs opacity-50">Annulla</button></div></div>
-    <div id="share-modal" class="fixed inset-0 bg-black/90 z-[210] hidden flex flex-col items-center justify-center p-6"><div id="share-card-content" class="w-64 aspect-[4/5] bg-gradient-to-br from-violet-900 to-black rounded-2xl p-4 flex flex-col items-center justify-center shadow-2xl relative border border-white/10"><img id="share-card-cover" src="" class="w-32 h-32 rounded-full shadow-lg mb-4" crossorigin="anonymous"><h2 id="share-card-title" class="font-bold text-center text-sm"></h2><p id="share-card-artist" class="text-xs opacity-50"></p><div id="share-qr-container" class="mt-4 bg-white p-1 rounded"></div></div><div class="flex gap-4 mt-6"><button onclick="downloadShareImage()" class="p-3 bg-white/10 rounded-full"><i data-lucide="download"></i></button><button onclick="shareCanvasNative()" class="p-3 bg-cyan-600 rounded-full"><i data-lucide="share-2"></i></button></div><button onclick="closeShareModal()" class="mt-6 text-sm opacity-50">Chiudi</button></div>
-    <div id="search-modal" class="fixed inset-0 bg-black/90 z-[200] hidden flex flex-col p-4"><div class="flex gap-2 mb-4"><input type="text" id="search-input" oninput="performSearch()" placeholder="Cerca..." class="flex-1 bg-white/10 p-3 rounded-xl text-white outline-none"><button onclick="closeSearchModal()" class="p-3">X</button></div><div id="search-results" class="flex-1 overflow-y-auto space-y-2"></div></div>
+    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] hidden flex items-center justify-center p-6">
+        <div class="glass-panel p-8 rounded-3xl w-full max-w-sm text-center">
+            <h2 id="txt-auth-welcome" class="text-2xl font-bold mb-2">Welcome</h2>
+            <button id="txt-auth-btn" onclick="handleAuthAction('device')" class="w-full py-3 bg-white text-black rounded-xl font-bold mt-4">Login Guest</button>
+            <button id="btn-auth-close" onclick="closeAuthModal()" class="mt-4 text-xs opacity-50">Close</button>
+        </div>
+    </div>
+
+    <div id="capsule-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6">
+        <div class="glass-panel p-8 rounded-3xl w-full max-w-sm border border-amber-500/30 text-center">
+            <i data-lucide="hourglass" class="w-8 h-8 text-amber-500 mx-auto mb-2"></i>
+            <h3 id="txt-capsule-title" class="text-xl font-bold">Time Capsule</h3>
+            <p id="txt-capsule-desc" class="text-xs text-gray-400 mb-4">Seal this track.</p>
+            <input type="date" id="capsule-date" class="w-full bg-white/10 p-3 rounded-lg text-white mb-4">
+            <button id="btn-capsule-seal" onclick="confirmTimeCapsule()" class="w-full py-3 bg-amber-600 rounded-lg font-bold">Seal</button>
+            <button id="btn-capsule-cancel" onclick="closeCapsuleModal()" class="mt-3 text-xs opacity-50">Cancel</button>
+        </div>
+    </div>
+
+    <div id="share-modal" class="fixed inset-0 bg-black/90 z-[210] hidden flex flex-col items-center justify-center p-6"><div id="share-card-content" class="w-64 aspect-[4/5] bg-gradient-to-br from-violet-900 to-black rounded-2xl p-4 flex flex-col items-center justify-center shadow-2xl relative border border-white/10"><img id="share-card-cover" src="" class="w-32 h-32 rounded-full shadow-lg mb-4" crossorigin="anonymous"><h2 id="share-card-title" class="font-bold text-center text-sm"></h2><p id="share-card-artist" class="text-xs opacity-50"></p><div id="share-qr-container" class="mt-4 bg-white p-1 rounded"></div></div><div class="flex gap-4 mt-6"><button onclick="downloadShareImage()" class="p-3 bg-white/10 rounded-full"><i data-lucide="download"></i></button><button onclick="shareCanvasNative()" class="p-3 bg-cyan-600 rounded-full"><i data-lucide="share-2"></i></button></div><button onclick="closeShareModal()" class="mt-6 text-sm opacity-50">X</button></div>
+    <div id="search-modal" class="fixed inset-0 bg-black/90 z-[200] hidden flex flex-col p-4"><div class="flex gap-2 mb-4"><input type="text" id="search-input" oninput="performSearch()" placeholder="..." class="flex-1 bg-white/10 p-3 rounded-xl text-white outline-none"><button onclick="closeSearchModal()" class="p-3">X</button></div><div id="search-results" class="flex-1 overflow-y-auto space-y-2"></div></div>
     
-    <div id="create-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3 class="font-bold mb-4">Nuova Sessione</h3><input type="text" id="playlist-name-input" placeholder="Nome" class="w-full p-3 rounded-xl bg-white/10 text-white mb-4"><div class="flex justify-end gap-2"><button onclick="closeCreatePlaylistModal()" class="text-xs">Annulla</button><button onclick="createPlaylist()" class="bg-white text-black px-4 py-2 rounded-lg font-bold text-sm">Crea</button></div></div></div>
-    <div id="add-to-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3 class="font-bold mb-4">Aggiungi a...</h3><div id="playlist-selection-list" class="max-h-60 overflow-y-auto space-y-2"></div><button onclick="closeAddToPlaylistModal()" class="mt-4 w-full text-xs">Chiudi</button></div></div>
+    <div id="create-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3 id="txt-new-session" class="font-bold mb-4">New Session</h3><input type="text" id="playlist-name-input" placeholder="Name" class="w-full p-3 rounded-xl bg-white/10 text-white mb-4"><div class="flex justify-end gap-2"><button id="btn-session-cancel" onclick="closeCreatePlaylistModal()" class="text-xs">Cancel</button><button id="btn-session-create" onclick="createPlaylist()" class="bg-white text-black px-4 py-2 rounded-lg font-bold text-sm">Create</button></div></div></div>
+    <div id="add-to-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3 id="txt-add-session" class="font-bold mb-4">Add to...</h3><div id="playlist-selection-list" class="max-h-60 overflow-y-auto space-y-2"></div><button onclick="closeAddToPlaylistModal()" class="mt-4 w-full text-xs">Close</button></div></div>
 
     <script>
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
         const API = { tracks: GITHUB_RAW_BASE + "tracks.json", artists: GITHUB_RAW_BASE + "artist.json" };
         
+        // --- TRANSLATION ENGINE ---
+        const TRANSLATIONS = {
+            en:{
+                greeting_m:"Good Morning.", greeting_a:"Good Afternoon.", greeting_e:"Good Evening.",
+                saved_tracks:"Saved Tracks", sessions:"Sessions", profile:"Guest",
+                history:"History", logout:"Logout", auth_welcome:"Welcome", auth_btn:"Login Guest",
+                caps_title:"Time Capsule", caps_desc:"Seal this track.", btn_seal:"Seal", btn_cancel:"Cancel",
+                new_session:"New Session", add_session:"Add to Session", create:"Create", cancel:"Cancel",
+                rec_title:"Recommended", trend_title:"Trending Now", chill_title:"Relax & Chill", class_title:"Classics",
+                status_guest:"Guest", status_user:"User:"
+            },
+            it:{
+                greeting_m:"Buongiorno.", greeting_a:"Buon Pomeriggio.", greeting_e:"Buonasera.",
+                saved_tracks:"Brani Salvati", sessions:"Sessioni", profile:"Ospite",
+                history:"Cronologia", logout:"Esci", auth_welcome:"Benvenuto", auth_btn:"Entra come Ospite",
+                caps_title:"Capsula Temporale", caps_desc:"Sigilla il brano.", btn_seal:"Sigilla", btn_cancel:"Annulla",
+                new_session:"Nuova Sessione", add_session:"Aggiungi a...", create:"Crea", cancel:"Annulla",
+                rec_title:"Consigliati", trend_title:"In Tendenza", chill_title:"Relax", class_title:"Classici",
+                status_guest:"Ospite", status_user:"Utente:"
+            },
+            ro:{
+                greeting_m:"Bună Dimineața.", greeting_a:"Bună Ziua.", greeting_e:"Bună Seara.",
+                saved_tracks:"Piese Salvate", sessions:"Sesiuni", profile:"Oaspete",
+                history:"Istoric", logout:"Deconectare", auth_welcome:"Bine ai venit", auth_btn:"Intră ca Oaspete",
+                caps_title:"Capsula Timpului", caps_desc:"Sigilează piesa.", btn_seal:"Sigilează", btn_cancel:"Anulează",
+                new_session:"Sesiune Nouă", add_session:"Adaugă...", create:"Creează", cancel:"Anulează",
+                rec_title:"Recomandate", trend_title:"În Tendințe", chill_title:"Relaxare", class_title:"Clasice",
+                status_guest:"Oaspete", status_user:"Utilizator:"
+            },
+            de:{
+                greeting_m:"Guten Morgen.", greeting_a:"Guten Tag.", greeting_e:"Guten Abend.",
+                saved_tracks:"Gespeicherte", sessions:"Sitzungen", profile:"Gast",
+                history:"Verlauf", logout:"Abmelden", auth_welcome:"Willkommen", auth_btn:"Als Gast",
+                caps_title:"Zeitkapsel", caps_desc:"Versiegeln.", btn_seal:"Versiegeln", btn_cancel:"Abbrechen",
+                new_session:"Neue Sitzung", add_session:"Hinzufügen...", create:"Erstellen", cancel:"Abbrechen",
+                rec_title:"Empfohlen", trend_title:"Im Trend", chill_title:"Entspannung", class_title:"Klassiker",
+                status_guest:"Gast", status_user:"Benutzer:"
+            },
+            es:{
+                greeting_m:"Buenos Días.", greeting_a:"Buenas Tardes.", greeting_e:"Buenas Noches.",
+                saved_tracks:"Guardados", sessions:"Sesiones", profile:"Invitado",
+                history:"Historial", logout:"Salir", auth_welcome:"Bienvenido", auth_btn:"Entrar",
+                caps_title:"Cápsula", caps_desc:"Sellar pista.", btn_seal:"Sellar", btn_cancel:"Cancelar",
+                new_session:"Nueva Sesión", add_session:"Añadir a...", create:"Crear", cancel:"Cancelar",
+                rec_title:"Recomendados", trend_title:"Tendencias", chill_title:"Relax", class_title:"Clásicos",
+                status_guest:"Invitado", status_user:"Usuario:"
+            },
+            ru:{
+                greeting_m:"Доброе утро.", greeting_a:"Добрый день.", greeting_e:"Добрый вечер.",
+                saved_tracks:"Сохраненные", sessions:"Сессии", profile:"Гость",
+                history:"История", logout:"Выйти", auth_welcome:"Добро пожаловать", auth_btn:"Войти",
+                caps_title:"Капсула", caps_desc:"Запечатать.", btn_seal:"Запечатать", btn_cancel:"Отмена",
+                new_session:"Новая сессия", add_session:"Добавить...", create:"Создать", cancel:"Отмена",
+                rec_title:"Рекомендации", trend_title:"В тренде", chill_title:"Релакс", class_title:"Классика",
+                status_guest:"Гость", status_user:"Польз.:"
+            },
+            ar:{
+                greeting_m:"صباح الخير", greeting_a:"مساء الخير", greeting_e:"مساء الخير",
+                saved_tracks:"المحفوظات", sessions:"الجلسات", profile:"زائر",
+                history:"السجل", logout:"خروج", auth_welcome:"أهلاً", auth_btn:"دخول",
+                caps_title:"الكبسولة", caps_desc:"إغلاق.", btn_seal:"إغلاق", btn_cancel:"إلغاء",
+                new_session:"جلسة جديدة", add_session:"إضافة...", create:"إنشاء", cancel:"إلغاء",
+                rec_title:"موصى به", trend_title:"رائج", chill_title:"استرخاء", class_title:"كلاسيكيات",
+                status_guest:"زائر", status_user:"مستخدم:"
+            }
+        };
+
         let AURA_MAP = [], ARTISTS_DATA = []; 
         let currentTrackData = null, audioPlayer = null, immersiveVideoPlayer = null; 
         let likedTracks = new Set(), userPlaylists = [], isLooping = false, loggedInUser = null, listeningHistory = []; 
@@ -307,8 +399,23 @@
             checkPWAStatus();
             initVisualizer();
             lucide.createIcons();
+            updateLanguageUI();
             showSection('music');
         });
+
+        // --- PWA LOGIC ---
+        function checkPWAStatus() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            const blocker = document.getElementById('install-blocker');
+            if (isStandalone) {
+                blocker.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            } else {
+                blocker.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        window.forceRecheckPWA = () => window.location.reload();
 
         function getDOMElements() {
             audioPlayer = document.getElementById('audioPlayer');
@@ -333,7 +440,7 @@
                     return {
                         id: t.title.trim(),
                         title: t.title.trim(),
-                        artist: artistMap[t.artistId] || t.artist || "Artista Sconosciuto",
+                        artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
                         audioUrl: GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1')),
                         cover: coverUrl,
                         categoryID: t.categoryID,
@@ -393,6 +500,7 @@
 
         function renderHomePageWidgets() {
             const container = document.getElementById('home-widgets-container');
+            const t = TRANSLATIONS[currentLang];
             let html = "";
             
             let recommended = [];
@@ -401,10 +509,10 @@
                  if(last) recommended = AURA_MAP.filter(t => t.categoryID === last.categoryID && t.id !== last.id).slice(0, 8);
             }
             if(recommended.length === 0) recommended = AURA_MAP.slice(0, 8);
-            html += createWidgetBlock("Recommended for You", recommended);
+            html += createWidgetBlock(t.rec_title, recommended);
 
             const cr1 = AURA_MAP.filter(t => t.categoryID === 'CR1').slice(0, 8);
-            if(cr1.length) html += createWidgetBlock("Trending Now", cr1);
+            if(cr1.length) html += createWidgetBlock(t.trend_title, cr1);
             
             const visitors = Math.floor(Math.random() * 500) + 120;
             html += `
@@ -414,7 +522,7 @@
                          <div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="globe" class="w-4 h-4 text-green-400"></i></div>
                          <div>
                              <p class="text-2xl font-bold">${visitors}</p>
-                             <p class="text-[10px] text-gray-400"><span class="live-dot"></span>Online Now</p>
+                             <p class="text-[10px] text-gray-400"><span class="live-dot"></span>Online</p>
                          </div>
                      </div>
                 </div>
@@ -423,17 +531,17 @@
                          <div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i></div>
                          <div>
                              <p class="text-2xl font-bold">${likedTracks.size}</p>
-                             <p class="text-[10px] text-gray-400">Liked Tracks</p>
+                             <p class="text-[10px] text-gray-400">Likes</p>
                          </div>
                      </div>
                 </div>
             </div>`;
 
             const cr2 = AURA_MAP.filter(t => t.categoryID === 'CR2').slice(0, 8);
-            if(cr2.length) html += createWidgetBlock("Relax & Chill", cr2);
+            if(cr2.length) html += createWidgetBlock(t.chill_title, cr2);
 
             const cr3 = AURA_MAP.filter(t => t.categoryID === 'CR3').slice(0, 8);
-            if(cr3.length) html += createWidgetBlock("Classics", cr3);
+            if(cr3.length) html += createWidgetBlock(t.class_title, cr3);
 
             container.innerHTML = html;
         }
@@ -465,14 +573,74 @@
         function renderFullHistory() { document.getElementById('history-list').innerHTML=listeningHistory.map(id=>{const t=AURA_MAP.find(x=>x.id===id);return t?`<div onclick="playTrack('${t.id}')" class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><img src="${t.cover}" class="w-10 h-10 rounded"><div><p class="font-bold text-xs">${t.title}</p></div></div>`:'';}).join(''); }
         function initVisualizer() { const cvs=document.getElementById('visualizer-canvas');const ctx=cvs.getContext('2d');let w,h;const resize=()=>{w=cvs.width=window.innerWidth;h=cvs.height=window.innerHeight;};window.addEventListener('resize',resize);resize();function loop(){ctx.clearRect(0,0,w,h);requestAnimationFrame(loop);}loop(); }
         
-        // --- DATA PERSISTENCE (Updated for Playlists) ---
+        // --- DATA PERSISTENCE ---
         function saveLocalData(){
             localStorage.setItem('aura_hist',JSON.stringify(listeningHistory));
             localStorage.setItem('aura_playlists',JSON.stringify(userPlaylists));
+            localStorage.setItem('aura_lang', currentLang);
+            localStorage.setItem('aura_user', JSON.stringify(loggedInUser));
         }
         function loadLocalData(){
             listeningHistory=JSON.parse(localStorage.getItem('aura_hist')||'[]');
             userPlaylists=JSON.parse(localStorage.getItem('aura_playlists')||'[]');
+            currentLang=localStorage.getItem('aura_lang')||'en';
+            loggedInUser=JSON.parse(localStorage.getItem('aura_user')||'null');
+            document.getElementById('language-selector').value = currentLang;
+            updateAuthUI();
+        }
+
+        // --- LANGUAGE LOGIC ---
+        function changeLanguage(lang) {
+            currentLang = lang;
+            saveLocalData();
+            updateLanguageUI();
+            if(document.getElementById('music-section').classList.contains('active')) renderHomePageWidgets();
+        }
+
+        function updateLanguageUI() {
+            const t = TRANSLATIONS[currentLang];
+            const h = new Date().getHours();
+            let greet = t.greeting_e;
+            if(h >= 5 && h < 12) greet = t.greeting_m;
+            else if(h >= 12 && h < 18) greet = t.greeting_a;
+            
+            // Home & Sections
+            document.getElementById('home-greeting').innerText = greet;
+            document.getElementById('txt-saved-tracks').innerText = t.saved_tracks;
+            document.getElementById('txt-sessions').innerText = t.sessions;
+            document.getElementById('txt-history-title').innerText = t.history;
+            document.getElementById('btn-logout').innerText = t.logout;
+            
+            // Profile
+            const profileTxt = loggedInUser ? `${t.status_user} ${loggedInUser.name}` : t.status_guest;
+            document.getElementById('profile-info').innerText = profileTxt;
+
+            // Modals
+            document.getElementById('txt-auth-welcome').innerText = t.auth_welcome;
+            document.getElementById('txt-auth-btn').innerText = t.auth_btn;
+            document.getElementById('btn-auth-close').innerText = t.btn_cancel;
+            
+            document.getElementById('txt-capsule-title').innerText = t.caps_title;
+            document.getElementById('txt-capsule-desc').innerText = t.caps_desc;
+            document.getElementById('btn-capsule-seal').innerText = t.btn_seal;
+            document.getElementById('btn-capsule-cancel').innerText = t.btn_cancel;
+
+            document.getElementById('txt-new-session').innerText = t.new_session;
+            document.getElementById('txt-add-session').innerText = t.add_session;
+            document.getElementById('btn-session-create').innerText = t.create;
+            document.getElementById('btn-session-cancel').innerText = t.cancel;
+        }
+
+        function updateAuthUI() {
+             const t = TRANSLATIONS[currentLang];
+             if(loggedInUser) {
+                 document.getElementById('auth-dot').classList.remove('hidden');
+                 document.getElementById('profile-info').innerText = t.status_user + " Guest";
+                 document.getElementById('vibe-score-display').innerText = "Vibe Score: 50";
+             } else {
+                 document.getElementById('auth-dot').classList.add('hidden');
+                 document.getElementById('profile-info').innerText = t.status_guest;
+             }
         }
 
         function showToast(m){const t=document.createElement('div');t.className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold border border-white/20";t.innerText=m;document.getElementById('toast-container').appendChild(t);setTimeout(()=>t.remove(),2000);}
@@ -483,43 +651,43 @@
         window.skipBackward=()=>{if(currentTrackData){const i=AURA_MAP.findIndex(x=>x.id===currentTrackData.id);playTrack(AURA_MAP[(i-1+AURA_MAP.length)%AURA_MAP.length].id);}};
         window.enterImmersiveMode=()=>document.getElementById('immersive-mode').classList.remove('hidden');
         window.exitImmersiveMode=()=>document.getElementById('immersive-mode').classList.add('hidden');
-        window.checkPWAStatus=()=>{};window.forceRecheckPWA=()=>window.location.reload();window.handleLogout=()=>window.location.reload();
+        window.handleLogout=()=>{ loggedInUser=null; saveLocalData(); updateAuthUI(); showToast("Logged out"); };
         window.openAuthModal=()=>document.getElementById('auth-modal').classList.remove('hidden');
         window.closeAuthModal=()=>document.getElementById('auth-modal').classList.add('hidden');
-        window.handleAuthAction=()=>{loggedInUser=true;document.getElementById('auth-dot').classList.remove('hidden');closeAuthModal();showSection('profile');};
+        window.handleAuthAction=()=>{loggedInUser={name:"Guest", id:Date.now()}; saveLocalData(); updateAuthUI(); closeAuthModal(); showSection('profile');};
         window.toggleImmersiveVisuals=()=>{const v=document.getElementById('immersive-video-player');const c=document.getElementById('immersive-cover');if(v.classList.contains('hidden')){v.src=currentTrackData.videoUrl;v.classList.remove('hidden');c.classList.add('hidden');}else{v.classList.add('hidden');c.classList.remove('hidden');}};
         window.setImmersiveVisual=(m)=>{document.getElementById('immersive-cover').classList.remove('hidden');document.getElementById('immersive-video-player').classList.add('hidden');document.getElementById('switch-to-video-btn').classList.toggle('hidden',!currentTrackData.videoUrl);};
         window.toggleLoop=()=>{isLooping=!isLooping;showToast(isLooping?"Loop On":"Loop Off");};
-        window.toggleLike=()=>{if(likedTracks.has(currentTrackData.id))likedTracks.delete(currentTrackData.id);else likedTracks.add(currentTrackData.id);showToast(likedTracks.has(currentTrackData.id)?"Salvato":"Rimosso");renderLikedTracks();};
+        window.toggleLike=()=>{if(likedTracks.has(currentTrackData.id))likedTracks.delete(currentTrackData.id);else likedTracks.add(currentTrackData.id);showToast(likedTracks.has(currentTrackData.id)?"Saved":"Removed");renderLikedTracks();};
         function renderLikedTracks(){document.getElementById('liked-tracks-list').innerHTML=Array.from(likedTracks).map(id=>{const t=AURA_MAP.find(x=>x.id===id);return createYtCard(t);}).join('');}
         
-        // --- PLAYLIST LOGIC (NEW FIXED) ---
+        // --- PLAYLIST LOGIC ---
         window.openCreatePlaylistModal=()=>document.getElementById('create-playlist-modal').classList.remove('hidden');
         window.closeCreatePlaylistModal=()=>document.getElementById('create-playlist-modal').classList.add('hidden');
         
         window.createPlaylist = () => {
             const el = document.getElementById('playlist-name-input');
             const name = el.value.trim();
-            if(!name) return showToast("Inserisci un nome");
+            if(!name) return showToast("Name required");
             userPlaylists.push({ id: Date.now(), name: name, tracks: [] });
             saveLocalData();
             closeCreatePlaylistModal();
             renderPlaylists();
             el.value = ''; 
-            showToast("Sessione creata");
+            showToast("Session created");
         };
 
         window.renderPlaylists = () => {
             const container = document.getElementById('playlists-list');
             if(!container) return;
             if(userPlaylists.length === 0) {
-                container.innerHTML = '<p class="text-xs text-gray-500 col-span-2 text-center mt-4">Nessuna sessione.</p>';
+                container.innerHTML = '<p class="text-xs text-gray-500 col-span-2 text-center mt-4">No sessions.</p>';
                 return;
             }
             container.innerHTML = userPlaylists.map(pl => `
                 <div onclick="playPlaylist(${pl.id})" class="p-4 glass-panel rounded-xl cursor-pointer relative group">
                     <h3 class="font-bold">${pl.name}</h3>
-                    <p class="text-xs text-gray-400">${pl.tracks.length} brani</p>
+                    <p class="text-xs text-gray-400">${pl.tracks.length} tracks</p>
                     <button onclick="event.stopPropagation(); deletePlaylist(${pl.id})" class="absolute top-2 right-2 p-1 opacity-60 hover:opacity-100 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
             `).join('');
@@ -527,10 +695,10 @@
         };
 
         window.openAddToPlaylistModal = () => {
-            if(!currentTrackData) return showToast("Nessun brano in play");
+            if(!currentTrackData) return showToast("No track playing");
             const list = document.getElementById('playlist-selection-list');
             if(userPlaylists.length === 0) {
-                 list.innerHTML = '<p class="text-xs text-center text-gray-500">Crea prima una sessione.</p>';
+                 list.innerHTML = '<p class="text-xs text-center text-gray-500">Create a session first.</p>';
             } else {
                 list.innerHTML = userPlaylists.map(pl => {
                     const hasTrack = pl.tracks.includes(currentTrackData.id);
@@ -550,8 +718,8 @@
             const pl = userPlaylists.find(p => p.id == plId);
             if(pl) {
                 const idx = pl.tracks.indexOf(currentTrackData.id);
-                if(idx > -1) { pl.tracks.splice(idx, 1); showToast("Rimosso da " + pl.name); }
-                else { pl.tracks.push(currentTrackData.id); showToast("Aggiunto a " + pl.name); }
+                if(idx > -1) { pl.tracks.splice(idx, 1); showToast("Removed"); }
+                else { pl.tracks.push(currentTrackData.id); showToast("Added"); }
                 saveLocalData();
                 openAddToPlaylistModal(); 
                 renderPlaylists(); 
@@ -562,14 +730,14 @@
             const pl = userPlaylists.find(p => p.id == plId);
             if(pl && pl.tracks.length > 0) {
                 playTrack(pl.tracks[0]);
-                showToast(`Sessione: ${pl.name}`);
+                showToast(`Session: ${pl.name}`);
             } else {
-                showToast("Sessione vuota");
+                showToast("Empty session");
             }
         };
         
         window.deletePlaylist = (id) => {
-             if(confirm("Eliminare sessione?")) {
+             if(confirm("Delete session?")) {
                  userPlaylists = userPlaylists.filter(p => p.id != id);
                  saveLocalData();
                  renderPlaylists();
