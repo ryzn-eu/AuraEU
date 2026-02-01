@@ -53,15 +53,11 @@
         }
 
         /* --- GRIGLIA 3x2 (YT Style) --- */
-        .yt-grid-container {
-            display: grid;
-            grid-template-columns: repeat(1, 1fr); 
-            gap: 10px; margin-bottom: 2rem;
-        }
         .yt-grid-mobile-fix {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
+            margin-bottom: 2rem;
         }
         @media (min-width: 600px) { .yt-grid-mobile-fix { grid-template-columns: repeat(3, 1fr); } }
 
@@ -79,27 +75,39 @@
         .yt-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .yt-artist { font-size: 11px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* --- WIDGET BLOCKS --- */
+        /* --- WIDGET IOS STYLE (RIPRISTINATI) --- */
+        .ios-widget-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 24px 0;
+        }
+        .ios-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border-radius: 18px;
+            padding: 16px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            min-height: 120px;
+            position: relative; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .ios-card-large { grid-column: span 2; aspect-ratio: 2/1; background: #111; }
+        .ios-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6; z-index: 0; transition: transform 0.5s; }
+        .ios-content { position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+        .live-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; display: inline-block; margin-right: 6px; }
+
         .widget-block-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; padding-left: 4px; }
         
         /* --- PLAYER IMMERSIVO (QUADRATO) --- */
         #immersive-mode { background: radial-gradient(circle at center, #1e1b4b 0%, #000000 100%); }
-        
         .immersive-art-container {
             width: 280px; height: 280px;
             position: relative; margin: 2rem auto;
-            border-radius: 24px; /* Riquadrata */
+            border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-            transition: transform 0.3s ease;
         }
-        .art-square { 
-            width: 100%; height: 100%; 
-            border-radius: 24px; 
-            object-fit: cover; 
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+        .art-square { width: 100%; height: 100%; border-radius: 24px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* Pillola Controlli */
         .controls-pill {
             background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(20px);
             border-radius: 50px; padding: 12px 24px;
@@ -172,7 +180,7 @@
             <section id="music-section" class="section-page active">
                 <h2 id="home-greeting" class="text-2xl font-bold mb-4 px-1">Good Evening</h2>
 
-                <div id="home-history-grid" class="yt-grid-mobile-fix mb-10"></div>
+                <div id="home-history-grid" class="yt-grid-mobile-fix mb-8"></div>
 
                 <div id="home-widgets-container" class="space-y-8 pb-24"></div>
             </section>
@@ -315,16 +323,22 @@
                 const tJson = await tr.json(); const aJson = await ar.json();
                 const artistMap = {}; aJson.forEach(a => artistMap[a.id] = a.name);
                 
-                AURA_MAP = (tJson.tracks || []).map(t => ({
-                    id: t.title.trim(),
-                    title: t.title.trim(),
-                    artist: artistMap[t.artistId] || t.artist || "Artista Sconosciuto",
-                    audioUrl: GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1')),
-                    // CORRETTO: URL Copertine
-                    cover: t.albumId ? GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png" : "https://via.placeholder.com/300",
-                    categoryID: t.categoryID,
-                    videoUrl: t.videoUrl
-                }));
+                AURA_MAP = (tJson.tracks || []).map(t => {
+                    // FIX COPERTINE NATALE: Logica di fallback se manca albumId
+                    let coverUrl = "https://via.placeholder.com/300";
+                    if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
+                    else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
+
+                    return {
+                        id: t.title.trim(),
+                        title: t.title.trim(),
+                        artist: artistMap[t.artistId] || t.artist || "Artista Sconosciuto",
+                        audioUrl: GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1')),
+                        cover: coverUrl,
+                        categoryID: t.categoryID,
+                        videoUrl: t.videoUrl
+                    };
+                });
                 
                 renderHomePageWidgets();
                 renderHistoryGrid(); 
@@ -347,7 +361,6 @@
 
         function updateUI(t) {
             document.querySelectorAll('#player-title, #immersive-title, #share-card-title').forEach(e => e.innerText = t.title);
-            // CORRETTO: Aggiornamento artista nel player immersivo
             document.querySelectorAll('#player-artist, #immersive-artist, #share-card-artist').forEach(e => e.innerText = t.artist);
             document.querySelectorAll('#player-cover, #immersive-cover, #share-card-cover').forEach(e => e.src = t.cover);
             
@@ -390,28 +403,41 @@
             if(recommended.length === 0) recommended = AURA_MAP.slice(0, 8);
             html += createWidgetBlock("Recommended for You", recommended);
 
-            // 2. CR1 + Widget
+            // 2. CR1 (Natale/Hits)
             const cr1 = AURA_MAP.filter(t => t.categoryID === 'CR1').slice(0, 8);
             if(cr1.length) html += createWidgetBlock("Trending Now", cr1);
             
-            // 3. Widget iOS: New Release & Stats
-            const newRel = AURA_MAP.slice(-1)[0];
-            if(newRel) {
-                html += `
-                <div class="ios-widget-row">
-                    <div class="ios-card ios-card-large group cursor-pointer" onclick="playTrack('${newRel.id}')">
-                         <img src="${newRel.cover}" class="ios-bg-img">
-                         <div class="ios-content">
-                             <span class="bg-blue-600 w-max text-[9px] font-bold px-2 py-1 rounded">NEW</span>
-                             <div><h3 class="text-xl font-bold">${newRel.title}</h3><p class="text-xs opacity-80">${newRel.artist}</p></div>
+            // 3. WIDGET IOS RIPRISTINATI (Likes + Online)
+            const visitors = Math.floor(Math.random() * 500) + 120;
+            html += `
+            <div class="ios-widget-row">
+                <div class="ios-card">
+                     <div class="ios-content">
+                         <div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="globe" class="w-4 h-4 text-green-400"></i></div>
+                         <div>
+                             <p class="text-2xl font-bold">${visitors}</p>
+                             <p class="text-[10px] text-gray-400"><span class="live-dot"></span>Online Now</p>
                          </div>
-                    </div>
-                </div>`;
-            }
+                     </div>
+                </div>
+                <div class="ios-card cursor-pointer" onclick="showSection('library')">
+                     <div class="ios-content">
+                         <div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i></div>
+                         <div>
+                             <p class="text-2xl font-bold">${likedTracks.size}</p>
+                             <p class="text-[10px] text-gray-400">Liked Tracks</p>
+                         </div>
+                     </div>
+                </div>
+            </div>`;
 
             // 4. CR2
             const cr2 = AURA_MAP.filter(t => t.categoryID === 'CR2').slice(0, 8);
             if(cr2.length) html += createWidgetBlock("Relax & Chill", cr2);
+
+            // 5. CR3 (Altri widget o categorie)
+            const cr3 = AURA_MAP.filter(t => t.categoryID === 'CR3').slice(0, 8);
+            if(cr3.length) html += createWidgetBlock("Classics", cr3);
 
             container.innerHTML = html;
         }
