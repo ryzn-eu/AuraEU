@@ -101,11 +101,11 @@
             display: flex;
             overflow-x: auto;
             gap: 16px;
-            padding: 10px 4px; /* Padding laterale per non tagliare */
-            scrollbar-width: none; /* Firefox */
+            padding: 10px 4px; 
+            scrollbar-width: none; 
             margin-bottom: 1.5rem;
         }
-        .stories-scroll-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        .stories-scroll-container::-webkit-scrollbar { display: none; }
 
         .story-item {
             display: flex;
@@ -118,20 +118,20 @@
         .story-bubble {
             width: 70px; height: 70px;
             border-radius: 50%;
-            padding: 2px; /* Spazio per il bordo */
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); /* Instagram-ish fallback */
-            background: linear-gradient(to right, var(--primary), var(--secondary)); /* Aura Brand Colors */
+            padding: 2px; 
+            background: linear-gradient(45deg, #8b5cf6, #06b6d4); 
             display: flex; justify-content: center; align-items: center;
             transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         .story-bubble:active { transform: scale(0.95); }
         .story-inner {
             width: 100%; height: 100%;
-            background: #000;
+            background: #111;
             border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            font-size: 28px;
-            border: 2px solid black; /* Gap nero tra gradiente e contenuto */
+            font-size: 26px;
+            border: 3px solid var(--bg-deep); 
         }
         .story-username {
             font-size: 10px;
@@ -559,7 +559,7 @@
         let likedTracks = new Set(), userPlaylists = [], isLooping = false, loggedInUser = null, listeningHistory = []; 
         let currentLang = 'en', fxMode = 0, currentAmbientMode = null, gyroEnabled = false;
         
-        // --- STORIES DATA ---
+        // --- STORIES DATA (Hardcoded for stability) ---
         let USER_VIDEOS = [
           { "id": 1, "userName": "Ryzn Dev", "timestamp": "16.10.2025 - 14:30", "text": "Oggi è una giornata di pura concentrazione. Un visualizer ambient perfetto per la sessione di codice.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/concentrazione_vis.mp4", "trackId": 3 },
           { "id": 2, "userName": "Aura Team", "timestamp": "15.10.2025 - 20:15", "text": "Serata cinema a casa! Questo brano ci ricorda tantissimo il sound di una vecchia colonna sonora fantasy.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/fantasy_scene.mp4", "trackId": 5 },
@@ -628,46 +628,63 @@
         }
 
         async function fetchTracks() {
+            // FIX: Robust Error Handling & Sequencing
             try {
-                // FIXED: Better Fetch Logic to prevent race conditions or missing data
-                const [tr, ar] = await Promise.all([fetch(API.tracks), fetch(API.artists)]);
-                const tJson = await tr.json(); 
-                ARTISTS_FULL_LIST = await ar.json(); 
-                
-                const artistMap = {}; 
-                ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
-                
-                AURA_MAP = (tJson.tracks || []).map(t => {
-                    let coverUrl = "https://via.placeholder.com/300";
-                    if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
-                    else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
-
-                    return {
-                        id: t.id || t.title.trim(),
-                        title: t.title.trim(),
-                        artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
-                        artistId: t.artistId, 
-                        albumId: t.albumId,
-                        albumTitle: t.albumTitle,
-                        audioUrl: GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1')),
-                        cover: coverUrl,
-                        categoryID: t.categoryID,
-                        videoUrl: t.videoUrl,
-                        lrcUrl: t.lrcUrl,
-                        status: t.Status || null 
-                    };
-                });
-                
-                // Render everything once data is ready
+                // Render stories first (Hardcoded data is safe)
                 renderStories();
+                
+                // Fetch external data safely
+                try {
+                    const [tr, ar] = await Promise.all([fetch(API.tracks), fetch(API.artists)]);
+                    if(tr.ok) {
+                        const tJson = await tr.json();
+                        if(tJson.tracks) {
+                            // ARTISTS FETCH
+                            let artistMap = {};
+                            if(ar.ok) {
+                                ARTISTS_FULL_LIST = await ar.json();
+                                ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
+                            }
+
+                            // TRACKS MAPPING
+                            AURA_MAP = tJson.tracks.map(t => {
+                                let coverUrl = "https://via.placeholder.com/300";
+                                if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
+                                else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
+
+                                return {
+                                    id: t.id || t.title.trim(),
+                                    title: t.title.trim(),
+                                    artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
+                                    artistId: t.artistId, 
+                                    albumId: t.albumId,
+                                    albumTitle: t.albumTitle,
+                                    audioUrl: GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1')),
+                                    cover: coverUrl,
+                                    categoryID: t.categoryID,
+                                    videoUrl: t.videoUrl,
+                                    lrcUrl: t.lrcUrl,
+                                    status: t.Status || null // Important for new release widget
+                                };
+                            });
+                        }
+                    }
+                } catch(innerErr) {
+                    console.error("Fetch Error:", innerErr);
+                    showToast("Error loading online content");
+                }
+                
+                // Render UI regardless of fetch success (shows skeletons or empty state instead of crashing)
                 renderHomePageWidgets();
                 renderHistoryGrid(); 
-            } catch(e) { console.error("Errore Fetch", e); }
+                
+            } catch(e) { console.error("Critical Error", e); }
         }
 
         // --- STORIES RENDER LOGIC ---
         function renderStories() {
             const container = document.getElementById('stories-container');
+            if(!container) return;
             container.innerHTML = USER_VIDEOS.map(story => `
                 <div class="story-item" onclick="openStory(${story.id})">
                     <div class="story-bubble">
@@ -964,11 +981,12 @@
 
         function renderHomePageWidgets() {
             const container = document.getElementById('home-widgets-container');
-            if(!container) return; // FIX: Prevent error if section not active
+            if(!container) return; 
             const t = TRANSLATIONS[currentLang];
             let html = "";
             
             // --- NEW RELEASE WIDGET ---
+            // Checks for status == "New" (Case sensitive match to JSON data)
             const newReleaseTrack = AURA_MAP.find(track => track.status === "New");
             if (newReleaseTrack) {
                 html += `
