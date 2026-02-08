@@ -270,8 +270,7 @@
 
         <main>
             <section id="music-section" class="section-page active">
-                <div id="stories-container" class="stories-scroll-container">
-                    </div>
+                <div id="stories-container" class="stories-scroll-container"></div>
 
                 <h2 id="home-greeting" class="text-2xl font-bold mb-4 px-1">Good Evening</h2>
                 <div id="home-history-grid" class="yt-grid-mobile-fix mb-8"></div>
@@ -394,7 +393,7 @@
         <div class="absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 p-[1px]">
-                     <div class="w-full h-full bg-black rounded-full flex items-center justify-center text-lg" id="story-viewer-emoji">😎</div>
+                     <div class="w-full h-full bg-black rounded-full flex items-center justify-center text-lg" id="story-viewer-emoji"></div>
                 </div>
                 <div>
                     <h3 id="story-viewer-username" class="font-bold text-sm">Username</h3>
@@ -403,11 +402,9 @@
             </div>
             <button onclick="closeStory()" class="p-2 bg-white/10 rounded-full backdrop-blur"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
-        
         <div class="flex-1 relative bg-gray-900 flex items-center justify-center">
             <video id="story-video" class="w-full h-full object-cover" playsinline loop></video>
         </div>
-
         <div class="absolute bottom-0 left-0 right-0 z-20 p-6 pb-12 bg-gradient-to-t from-black via-black/80 to-transparent">
              <p id="story-viewer-text" class="text-sm font-medium mb-4 leading-relaxed"></p>
              <div class="flex gap-3">
@@ -428,26 +425,20 @@
     <div id="artist-modal" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-[220] hidden overflow-y-auto">
         <div class="relative min-h-screen flex flex-col items-center p-6 pt-12 animate-fadeIn">
             <button onclick="closeArtistModal()" class="absolute top-6 right-6 p-2 bg-white/10 rounded-full z-10 hover:bg-white/20 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
-            
             <img id="artist-modal-image" src="" class="w-40 h-40 rounded-full object-cover shadow-[0_0_50px_rgba(139,92,246,0.4)] mb-6 border-2 border-white/10">
-            
             <h2 id="artist-modal-name" class="text-3xl font-bold mb-1 text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400"></h2>
             <p id="artist-modal-genre" class="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.2em] mb-8 border border-cyan-500/30 px-3 py-1 rounded-full"></p>
-            
             <div class="w-full max-w-md bg-white/5 p-6 rounded-2xl border border-white/5 mb-6">
                 <p id="artist-modal-bio" class="text-sm text-gray-300 leading-relaxed text-justify opacity-90"></p>
             </div>
-
             <a id="artist-modal-social" href="#" target="_blank" class="flex items-center gap-3 bg-gradient-to-r from-pink-600 to-purple-600 px-8 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition hover:shadow-purple-500/50 mb-8">
                 <i data-lucide="instagram" class="w-5 h-5"></i> <span>Instagram</span>
             </a>
-
             <div class="w-full max-w-md pb-12">
                 <div id="artist-albums-container" class="mb-6 hidden">
                     <h3 class="text-xl font-bold mb-4 border-b border-white/10 pb-2">Albums</h3>
                     <div id="artist-albums-list" class="flex overflow-x-auto gap-4 pb-4"></div>
                 </div>
-
                 <div id="artist-singles-container" class="hidden">
                     <h3 class="text-xl font-bold mb-4 border-b border-white/10 pb-2">Singles & Tracks</h3>
                     <div id="artist-singles-list" class="space-y-3"></div>
@@ -479,6 +470,50 @@
             tracks: GITHUB_RAW_BASE + "tracks.json", 
             artists: GITHUB_RAW_BASE + "artist.json" 
         };
+
+        // --- HARDCODED DATA TO PREVENT LOADING ERRORS ---
+        const LOCAL_TRACKS = [
+            { "title": "8 Days of Christmas", "file": "8 Days of Christmas .mp3", "categoryID": "CR1" },
+            { "title": "A Little Love", "file": "A Little Love .mp3", "categoryID": "CR2" },
+            { "title": "All I Want for Christmas Is You", "file": "All I Want for Christmas Is You .mp3", "categoryID": "CR1" },
+            { "title": "Baby, It's Cold Outside", "file": "Baby, It's Cold Outside.mp3", "categoryID": "CR2" },
+            { "title": "Blue Christmas", "file": "Blue Christmas .mp3", "categoryID": "CR3" },
+            { "title": "Christmas", "file": "Christmas.mp3", "categoryID": "CR3" },
+            { "title": "Jingle Bell Rock", "file": "Jingle Bell Rock .mp3", "categoryID": "CR1" },
+            { "title": "Joy to the World", "file": "Joy to the World .mp3", "categoryID": "CR3" },
+            { "title": "Last Christmas", "file": "Last Christmas.mp3", "categoryID": "CR1" },
+            { "title": "Let It Snow!", "file": "Let It Snow!.mp3", "categoryID": "CR3" },
+            { "title": "Lonely This Christmas", "file": "Lonely This Christmas .mp3", "categoryID": "CR2" },
+            { "title": "Step Into Christmas", "file": "Step Into Christmas .mp3", "categoryID": "CR2" },
+            { "title": "White Christmas", "file": "White Christmas .mp3", "categoryID": "CR3" },
+            { "title": "Winter Wonderland", "file": "Winter Wonderland .mp3", "categoryID": "CR3" },
+            { "id": "Icy.030", "title": "Mi Fai..", "file": "mi fai.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/Mi%20Fai.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura", "Status": "New" },
+            { "id": "Icy.030", "title": "Aura official song", "file": "aura.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/aura.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
+            { "id": "Icy.030", "title": "Ton Silence", "file": "tons.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/tons.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
+            { "id": "Icy.030", "title": "Klein", "file": "klein.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/klein.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
+            { "id": "Icy.030", "title": "Asco", "file": "asco.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/asco.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" }
+        ];
+
+        const LOCAL_ARTISTS = [
+            {
+                "id": "Icy.030",
+                "name": "Icy.030",
+                "bio": "Icy (born in 2002) is an Italian music producer originally from Varese and now based in Brescia. His sound blends elements of trap, electronic, and ambient music, creating modern, atmospheric productions with a signature cold and cinematic vibe.",
+                "genre": "Trap / Elettronic",
+                "imageUrl": "https://github.com/ryzn-eu/AuraEU/blob/main/artist/Icy.030.jpg?raw=true",
+                "socials": { "instagram": "https://instagram.com/Icy.030" }
+            }
+        ];
+
+        let USER_VIDEOS = [
+          { "id": 1, "userName": "Ryzn Dev", "timestamp": "16.10.2025 - 14:30", "text": "Oggi è una giornata di pura concentrazione.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/concentrazione_vis.mp4", "trackId": 3 },
+          { "id": 2, "userName": "Aura Team", "timestamp": "15.10.2025 - 20:15", "text": "Serata cinema a casa!", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/fantasy_scene.mp4", "trackId": 5 },
+          { "id": 3, "userName": "CEO Horizon", "timestamp": "14.10.2025 - 10:45", "text": "Nuova visione per il brand!", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/brand_reveal.mp4", "trackId": 1 },
+          { "id": 4, "userName": "Tech Explorer", "timestamp": "16.10.2025 - 08:00", "text": "Playlist mattutina.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/interstellar_journey.mp4", "trackId": 4 },
+          { "id": 5, "userName": "Quiet Mind", "timestamp": "15.10.2025 - 22:45", "text": "Momento relax prima di dormire.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/calming_meditation.mp4", "trackId": 2 }
+        ];
+        
+        const STORY_EMOJIS = {1: "💻", 2: "🎬", 3: "🚀", 4: "🪐", 5: "🧘"};
         
         // --- TRANSLATION ENGINE ---
         const TRANSLATIONS = {
@@ -554,23 +589,11 @@
             }
         };
 
-        let AURA_MAP = [], ARTISTS_DATA = [], ARTISTS_FULL_LIST = []; 
+        let AURA_MAP = [], ARTISTS_FULL_LIST = []; 
         let currentTrackData = null, audioPlayer = null, immersiveVideoPlayer = null; 
         let likedTracks = new Set(), userPlaylists = [], isLooping = false, loggedInUser = null, listeningHistory = []; 
         let currentLang = 'en', fxMode = 0, currentAmbientMode = null, gyroEnabled = false;
         
-        // --- STORIES DATA (Hardcoded for stability) ---
-        let USER_VIDEOS = [
-          { "id": 1, "userName": "Ryzn Dev", "timestamp": "16.10.2025 - 14:30", "text": "Oggi è una giornata di pura concentrazione. Un visualizer ambient perfetto per la sessione di codice.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/concentrazione_vis.mp4", "trackId": 3 },
-          { "id": 2, "userName": "Aura Team", "timestamp": "15.10.2025 - 20:15", "text": "Serata cinema a casa! Questo brano ci ricorda tantissimo il sound di una vecchia colonna sonora fantasy.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/fantasy_scene.mp4", "trackId": 5 },
-          { "id": 3, "userName": "CEO Horizon", "timestamp": "14.10.2025 - 10:45", "text": "Nuova visione per il brand! L'Aura di stamattina è un mix di energia e mistero.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/brand_reveal.mp4", "trackId": 1 },
-          { "id": 4, "userName": "Tech Explorer", "timestamp": "16.10.2025 - 08:00", "text": "Playlist mattutina: suoni perfetti per un viaggio interstellare. Mi carica!", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/interstellar_journey.mp4", "trackId": 4 },
-          { "id": 5, "userName": "Quiet Mind", "timestamp": "15.10.2025 - 22:45", "text": "Momento relax prima di dormire. Un visual calming per allontanare lo stress.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/calming_meditation.mp4", "trackId": 2 }
-        ];
-
-        // Assign random emojis for stories since they aren't in JSON
-        const STORY_EMOJIS = {1: "💻", 2: "🎬", 3: "🚀", 4: "🪐", 5: "🧘"};
-
         // --- LYRICS VARIABLES ---
         let currentLyrics = [];
         let isLyricsMode = false;
@@ -578,7 +601,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             getDOMElements();
             loadLocalData();
-            await fetchTracks();
+            await fetchTracks(); // Now uses LOCAL data
             checkPWAStatus();
             initVisualizer();
             lucide.createIcons();
@@ -604,7 +627,6 @@
             audioPlayer = document.getElementById('audioPlayer');
             immersiveVideoPlayer = document.getElementById('immersive-video-player');
             
-            // Timeupdate now handles lyrics syncing too
             audioPlayer.addEventListener('timeupdate', () => {
                 updateProgress();
                 syncLyrics();
@@ -614,7 +636,6 @@
             audioPlayer.addEventListener('play', () => { document.querySelector('.player-bar-new').classList.add('active'); togglePlayIcon(false); });
             audioPlayer.addEventListener('pause', () => togglePlayIcon(true));
             
-            // --- Scrubbing Logic ---
             const pBarContainer = document.getElementById('progress-bar-immersive-container');
             pBarContainer.addEventListener('click', (e) => {
                 const rect = pBarContainer.getBoundingClientRect();
@@ -628,57 +649,37 @@
         }
 
         async function fetchTracks() {
-            // FIX: Robust Error Handling & Sequencing
             try {
-                // Render stories first (Hardcoded data is safe)
+                // FORCE LOAD LOCAL DATA
+                ARTISTS_FULL_LIST = LOCAL_ARTISTS;
+                const artistMap = {};
+                ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
+
+                AURA_MAP = LOCAL_TRACKS.map(t => {
+                    let coverUrl = "https://via.placeholder.com/300";
+                    if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
+                    else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
+
+                    return {
+                        id: t.id || t.title.trim(),
+                        title: t.title.trim(),
+                        artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
+                        artistId: t.artistId, 
+                        albumId: t.albumId,
+                        albumTitle: t.albumTitle,
+                        audioUrl: GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1')),
+                        cover: coverUrl,
+                        categoryID: t.categoryID,
+                        videoUrl: t.videoUrl,
+                        lrcUrl: t.lrcUrl,
+                        status: t.Status || null
+                    };
+                });
+
                 renderStories();
-                
-                // Fetch external data safely
-                try {
-                    const [tr, ar] = await Promise.all([fetch(API.tracks), fetch(API.artists)]);
-                    if(tr.ok) {
-                        const tJson = await tr.json();
-                        if(tJson.tracks) {
-                            // ARTISTS FETCH
-                            let artistMap = {};
-                            if(ar.ok) {
-                                ARTISTS_FULL_LIST = await ar.json();
-                                ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
-                            }
-
-                            // TRACKS MAPPING
-                            AURA_MAP = tJson.tracks.map(t => {
-                                let coverUrl = "https://via.placeholder.com/300";
-                                if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
-                                else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
-
-                                return {
-                                    id: t.id || t.title.trim(),
-                                    title: t.title.trim(),
-                                    artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
-                                    artistId: t.artistId, 
-                                    albumId: t.albumId,
-                                    albumTitle: t.albumTitle,
-                                    audioUrl: GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1')),
-                                    cover: coverUrl,
-                                    categoryID: t.categoryID,
-                                    videoUrl: t.videoUrl,
-                                    lrcUrl: t.lrcUrl,
-                                    status: t.Status || null // Important for new release widget
-                                };
-                            });
-                        }
-                    }
-                } catch(innerErr) {
-                    console.error("Fetch Error:", innerErr);
-                    showToast("Error loading online content");
-                }
-                
-                // Render UI regardless of fetch success (shows skeletons or empty state instead of crashing)
                 renderHomePageWidgets();
                 renderHistoryGrid(); 
-                
-            } catch(e) { console.error("Critical Error", e); }
+            } catch(e) { console.error("Error Loading Local Data", e); }
         }
 
         // --- STORIES RENDER LOGIC ---
@@ -731,10 +732,9 @@
             audioPlayer.playbackRate = 1.0; fxMode = 0; updateFXBadge();
             audioPlayer.play().catch(e=>console.log(e));
             
-            // Reset Lyrics
             currentLyrics = [];
             document.getElementById('lyrics-container').innerHTML = '<p class="text-gray-500 mt-20">Loading...</p>';
-            if(isLyricsMode && !t.lrcUrl) toggleLyrics(); // Close if no lyrics
+            if(isLyricsMode && !t.lrcUrl) toggleLyrics(); 
             if(t.lrcUrl) fetchLyrics(t.lrcUrl);
             else document.getElementById('lyrics-container').innerHTML = '<p class="text-gray-500 mt-20">No lyrics available</p>';
 
@@ -780,11 +780,11 @@
 
         function renderLyrics() {
             const container = document.getElementById('lyrics-container');
-            container.innerHTML = '<div style="height: 50%;"></div>' + // Spacer top
+            container.innerHTML = '<div style="height: 50%;"></div>' + 
                 currentLyrics.map((line, index) => 
                     `<p class="lyric-line" id="lyric-${index}" onclick="seekTo(${line.time})">${line.text}</p>`
                 ).join('') + 
-                '<div style="height: 50%;"></div>'; // Spacer bottom
+                '<div style="height: 50%;"></div>'; 
         }
 
         function syncLyrics() {
@@ -876,7 +876,6 @@
                     socialBtn.classList.add('hidden');
                 }
 
-                // --- GROUP TRACKS ---
                 const artistTracks = AURA_MAP.filter(t => 
                     (t.artistId && t.artistId === artist.id) || 
                     t.artist === artist.name
@@ -894,7 +893,6 @@
                     }
                 });
 
-                // Render Albums
                 const albumContainer = document.getElementById('artist-albums-container');
                 const albumList = document.getElementById('artist-albums-list');
                 
@@ -914,7 +912,6 @@
                     albumContainer.classList.add('hidden');
                 }
 
-                // Render Singles
                 const singlesContainer = document.getElementById('artist-singles-container');
                 const singlesList = document.getElementById('artist-singles-list');
 
@@ -949,7 +946,6 @@
             document.getElementById('artist-modal').classList.add('hidden');
         };
 
-        // --- SMART MARQUEE ---
         function updateSmartMarquee() {
             const titleElement = document.getElementById('immersive-title');
             const wrapperElement = document.getElementById('immersive-title-wrapper');
@@ -985,8 +981,6 @@
             const t = TRANSLATIONS[currentLang];
             let html = "";
             
-            // --- NEW RELEASE WIDGET ---
-            // Checks for status == "New" (Case sensitive match to JSON data)
             const newReleaseTrack = AURA_MAP.find(track => track.status === "New");
             if (newReleaseTrack) {
                 html += `
