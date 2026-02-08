@@ -234,7 +234,7 @@
                             <option value="ro">Română</option>
                             <option value="de">Deutsch</option>
                             <option value="es">Español</option>
-                            <option value="ru">Русский</option>
+                            <option value="py">Русский</option>
                             <option value="ar">العربية</option>
                         </select>
                         <button id="btn-logout" onclick="handleLogout()" class="text-xs bg-red-500/10 text-red-400 px-4 py-2 rounded-lg font-bold border border-red-500/20">Logout</button>
@@ -553,6 +553,7 @@
                     audioUrl: rawAudioUrl,
                     cover: coverUrl,
                     lrcUrl: t.lrcUrl,
+                    originalLang: t.originalLang, // Mappiamo la lingua originale dal JSON
                     status: t.Status
                 };
             });
@@ -607,7 +608,8 @@
                 lyricsCont.classList.remove('hidden');
                 cover.classList.add('hidden');
                 document.getElementById('immersive-video-player').classList.add('hidden');
-                fetchLyrics(t.lrcUrl);
+                // USIAMO LA NUOVA LOGICA INTELLIGENTE
+                fetchSmartLyrics(t);
             } else {
                 isLyricsMode = false;
                 lyricsCont.classList.add('hidden');
@@ -763,6 +765,35 @@
             document.getElementById('artist-modal').classList.remove('hidden');
         };
         window.closeArtistModal = () => document.getElementById('artist-modal').classList.add('hidden');
+
+        // --- SMART LYRICS LOGIC ---
+        async function fetchSmartLyrics(track) {
+            const userLang = currentLang; 
+            const songLang = track.originalLang || 'en'; // Default inglese se manca nel JSON
+            let finalUrl = track.lrcUrl;
+
+            // Se la lingua utente è diversa da quella originale, cerchiamo la traduzione
+            if (userLang !== songLang && track.lrcUrl) {
+                // Esempio: da "file.lrc" a "file_it.lrc"
+                const extensionIndex = track.lrcUrl.lastIndexOf('.lrc');
+                if (extensionIndex > -1) {
+                    const translationUrl = track.lrcUrl.substring(0, extensionIndex) + '_' + userLang + '.lrc';
+                    
+                    try {
+                        // Controlliamo se il file tradotto esiste davvero sul server
+                        const response = await fetch(translationUrl, { method: 'HEAD' });
+                        if (response.ok) {
+                            console.log(`Traduzione trovata: ${userLang}`);
+                            finalUrl = translationUrl;
+                        }
+                    } catch (e) {
+                        console.warn("Check traduzione fallito, uso originale.");
+                    }
+                }
+            }
+            // Scarica il testo finale (Originale o Tradotto)
+            fetchLyrics(finalUrl);
+        }
 
         // --- LYRICS & TRANSLATION ---
         async function fetchLyrics(url) {
