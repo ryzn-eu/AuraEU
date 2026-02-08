@@ -51,10 +51,8 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        /* --- WIDGETS & CARDS --- */
-        .yt-grid-mobile-fix {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 2rem;
-        }
+        /* --- WIDGETS --- */
+        .yt-grid-mobile-fix { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 2rem; }
         @media (min-width: 600px) { .yt-grid-mobile-fix { grid-template-columns: repeat(3, 1fr); } }
 
         .yt-card {
@@ -69,7 +67,6 @@
         .yt-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .yt-artist { font-size: 11px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* IOS WIDGETS */
         .ios-widget-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
         .ios-card {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
@@ -104,7 +101,6 @@
         .immersive-art-container { width: 280px; height: 280px; position: relative; margin: 2rem auto; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden; }
         .art-square { width: 100%; height: 100%; border-radius: 24px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
         
-        /* TESTO SCORREVOLE INTELLIGENTE */
         .smart-scroller { white-space: nowrap; display: inline-block; transition: transform 1s ease; }
         .smart-scroller.scrolling { animation: pingPongScroll 12s linear infinite alternate; }
         @keyframes pingPongScroll { 0%, 25% { transform: translateX(0); } 75%, 100% { transform: translateX(var(--scroll-distance)); } }
@@ -118,8 +114,9 @@
             mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
         }
         #lyrics-container::-webkit-scrollbar { display: none; }
-        .lyric-line { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.4); margin: 10px 0; cursor: pointer; transition: all 0.3s; }
-        .lyric-line.active { color: #fff; transform: scale(1.1); text-shadow: 0 0 10px white; }
+        .lyric-line { font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.4); margin: 16px 0; cursor: pointer; transition: all 0.3s; line-height: 1.2; }
+        .lyric-line.active { color: #fff; transform: scale(1.05); text-shadow: 0 0 20px rgba(255,255,255,0.3); }
+        .lyric-translation { display: block; font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.6); margin-top: 4px; }
 
         .controls-pill { background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(20px); border-radius: 50px; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 320px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1); }
         .pill-btn { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #aaa; gap: 4px; }
@@ -135,7 +132,6 @@
         }
         .player-bar-new.active { transform: translateY(0); }
         
-        /* Utils */
         .horizontal-scroll { display: flex; overflow-x: auto; gap: 1rem; scrollbar-width: none; padding-bottom: 10px; }
         .horizontal-scroll::-webkit-scrollbar { display: none; }
         .section-page { display: none; animation: fadeIn 0.4s; }
@@ -201,6 +197,15 @@
                 <div class="glass-panel p-6 rounded-3xl mb-6 text-center">
                     <h3 id="profile-info" class="text-xl font-bold mt-2">Guest</h3>
                     <div class="flex justify-center gap-3 flex-wrap mt-4">
+                        <select id="language-selector" onchange="changeLanguage(this.value)" class="bg-black/30 text-xs p-2 rounded-lg border border-white/10 text-white">
+                            <option value="en">English</option>
+                            <option value="it">Italiano</option>
+                            <option value="ro">Română</option>
+                            <option value="de">Deutsch</option>
+                            <option value="es">Español</option>
+                            <option value="ru">Русский</option>
+                            <option value="ar">العربية</option>
+                        </select>
                         <button id="btn-logout" onclick="handleLogout()" class="text-xs bg-red-500/10 text-red-400 px-4 py-2 rounded-lg font-bold border border-red-500/20">Logout</button>
                     </div>
                 </div>
@@ -258,7 +263,7 @@
 
             <div class="controls-pill">
                 <button onclick="toggleAmbientMenu()" id="btn-ambient" class="pill-btn"><i data-lucide="cloud-rain" class="w-5 h-5"></i><span>Focus</span></button>
-                <button onclick="toggleLyrics()" id="btn-lyrics" class="pill-btn"><i data-lucide="mic-2" class="w-5 h-5"></i><span>Lyrics</span></button>
+                <button onclick="toggleTranslation()" id="btn-translate" class="pill-btn"><i data-lucide="languages" class="w-5 h-5"></i><span>Translate</span></button>
                 <button onclick="toggleGyro()" id="btn-gyro" class="pill-btn"><i data-lucide="smartphone" class="w-5 h-5"></i><span>Gyro</span></button>
                 <button onclick="openCapsuleModal()" class="pill-btn"><i data-lucide="hourglass" class="w-5 h-5"></i><span>Capsule</span></button>
             </div>
@@ -311,7 +316,7 @@
             <h2 id="artist-modal-name" class="text-3xl font-bold mb-1 text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400"></h2>
             <p id="artist-modal-genre" class="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.2em] mb-8 border border-cyan-500/30 px-3 py-1 rounded-full"></p>
             <div class="w-full max-w-md bg-white/5 p-6 rounded-2xl border border-white/5 mb-6">
-                <p id="artist-modal-bio" class="text-sm text-gray-300 leading-relaxed text-justify opacity-90"></p>
+                <p id="artist-modal-bio" class="text-sm text-gray-300 leading-relaxed text-justify opacity-90 max-h-60 overflow-y-auto"></p>
             </div>
             <a id="artist-modal-social" href="#" target="_blank" class="flex items-center gap-3 bg-gradient-to-r from-pink-600 to-purple-600 px-8 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition hover:shadow-purple-500/50 mb-8">
                 <i data-lucide="instagram" class="w-5 h-5"></i> <span>Instagram</span>
@@ -338,136 +343,76 @@
 
     <script>
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
-        const API = { tracks: GITHUB_RAW_BASE + "tracks.json", artists: GITHUB_RAW_BASE + "artist.json" };
-
-        // --- HARDCODED DATA TO PREVENT LOADING ERRORS ---
-        const LOCAL_TRACKS = [
-            { "title": "8 Days of Christmas", "file": "8 Days of Christmas .mp3", "categoryID": "CR1" },
-            { "title": "A Little Love", "file": "A Little Love .mp3", "categoryID": "CR2" },
-            { "title": "All I Want for Christmas Is You", "file": "All I Want for Christmas Is You .mp3", "categoryID": "CR1" },
-            { "title": "Baby, It's Cold Outside", "file": "Baby, It's Cold Outside.mp3", "categoryID": "CR2" },
-            { "title": "Blue Christmas", "file": "Blue Christmas .mp3", "categoryID": "CR3" },
-            { "title": "Christmas", "file": "Christmas.mp3", "categoryID": "CR3" },
-            { "title": "Jingle Bell Rock", "file": "Jingle Bell Rock .mp3", "categoryID": "CR1" },
-            { "title": "Joy to the World", "file": "Joy to the World .mp3", "categoryID": "CR3" },
-            { "title": "Last Christmas", "file": "Last Christmas.mp3", "categoryID": "CR1" },
-            { "title": "Let It Snow!", "file": "Let It Snow!.mp3", "categoryID": "CR3" },
-            { "title": "Lonely This Christmas", "file": "Lonely This Christmas .mp3", "categoryID": "CR2" },
-            { "title": "Step Into Christmas", "file": "Step Into Christmas .mp3", "categoryID": "CR2" },
-            { "title": "White Christmas", "file": "White Christmas .mp3", "categoryID": "CR3" },
-            { "title": "Winter Wonderland", "file": "Winter Wonderland .mp3", "categoryID": "CR3" },
-            { "id": "Icy.030", "title": "Mi Fai..", "file": "mi fai.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/Mi%20Fai.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura", "Status": "New" },
-            { "id": "Icy.030", "title": "Aura official song", "file": "aura.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/aura.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
-            { "id": "Icy.030", "title": "Ton Silence", "file": "tons.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/tons.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
-            { "id": "Icy.030", "title": "Klein", "file": "klein.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/klein.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
-            { "id": "Icy.030", "title": "Asco", "file": "asco.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/asco.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" }
-        ];
-
-        const LOCAL_ARTISTS = [
-            {
-                "id": "Icy.030",
-                "name": "Icy.030",
-                "bio": "Icy (born in 2002) is an Italian music producer originally from Varese and now based in Brescia. His sound blends elements of trap, electronic, and ambient music, creating modern, atmospheric productions with a signature cold and cinematic vibe. Known for deep basslines, airy textures, and evocative melodies, Icy has quickly become one of the most promising young producers in the new Italian scene, collaborating with emerging artists and shaping a unique sonic identity. Constantly evolving, he continues to push the boundaries of his sound, turning each track into an immersive experience",
-                "genre": "Trap / Elettronic",
-                "imageUrl": "https://github.com/ryzn-eu/AuraEU/blob/main/artist/Icy.030.jpg?raw=true",
-                "socials": { "instagram": "https://instagram.com/Icy.030" }
-            }
-        ];
-
-        let USER_VIDEOS = [
-          { "id": 1, "userName": "Ryzn Dev", "timestamp": "16.10.2025 - 14:30", "text": "Oggi è una giornata di pura concentrazione.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/concentrazione_vis.mp4", "trackId": 3 },
-          { "id": 2, "userName": "Aura Team", "timestamp": "15.10.2025 - 20:15", "text": "Serata cinema a casa!", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/fantasy_scene.mp4", "trackId": 5 },
-          { "id": 3, "userName": "CEO Horizon", "timestamp": "14.10.2025 - 10:45", "text": "Nuova visione per il brand!", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/brand_reveal.mp4", "trackId": 1 },
-          { "id": 4, "userName": "Tech Explorer", "timestamp": "16.10.2025 - 08:00", "text": "Playlist mattutina.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/interstellar_journey.mp4", "trackId": 4 },
-          { "id": 5, "userName": "Quiet Mind", "timestamp": "15.10.2025 - 22:45", "text": "Momento relax prima di dormire.", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/calming_meditation.mp4", "trackId": 2 }
-        ];
-        
-        const STORY_EMOJIS = {1: "💻", 2: "🎬", 3: "🚀", 4: "🪐", 5: "🧘"};
-        
-        // --- TRANSLATION ENGINE ---
-        const TRANSLATIONS = {
-            en:{
-                greeting_m:"Good Morning.", greeting_a:"Good Afternoon.", greeting_e:"Good Evening.",
-                saved_tracks:"Saved Tracks", sessions:"Sessions", profile:"Guest",
-                history:"History", logout:"Logout", auth_welcome:"Welcome", auth_btn:"Login Guest",
-                caps_title:"Time Capsule", caps_desc:"Seal this track.", btn_seal:"Seal", btn_cancel:"Cancel",
-                new_session:"New Session", add_session:"Add to Session", create:"Create", cancel:"Cancel",
-                rec_title:"Recommended", trend_title:"Trending Now", chill_title:"Relax & Chill", class_title:"Classics",
-                new_release: "Official New Release",
-                status_guest:"Guest", status_user:"User:"
-            },
-            it:{
-                greeting_m:"Buongiorno.", greeting_a:"Buon Pomeriggio.", greeting_e:"Buonasera.",
-                saved_tracks:"Brani Salvati", sessions:"Sessioni", profile:"Ospite",
-                history:"Cronologia", logout:"Esci", auth_welcome:"Benvenuto", auth_btn:"Entra come Ospite",
-                caps_title:"Capsula Temporale", caps_desc:"Sigilla il brano.", btn_seal:"Sigilla", btn_cancel:"Annulla",
-                new_session:"Nuova Sessione", add_session:"Aggiungi a...", create:"Crea", cancel:"Annulla",
-                rec_title:"Consigliati", trend_title:"In Tendenza", chill_title:"Relax", class_title:"Classici",
-                new_release: "Ultima Uscita Ufficiale",
-                status_guest:"Ospite", status_user:"Utente:"
-            },
-            ro:{
-                greeting_m:"Bună Dimineața.", greeting_a:"Bună Ziua.", greeting_e:"Bună Seara.",
-                saved_tracks:"Piese Salvate", sessions:"Sesiuni", profile:"Oaspete",
-                history:"Istoric", logout:"Deconectare", auth_welcome:"Bine ai venit", auth_btn:"Intră ca Oaspete",
-                caps_title:"Capsula Timpului", caps_desc:"Sigilează piesa.", btn_seal:"Sigilează", btn_cancel:"Anulează",
-                new_session:"Sesiune Nouă", add_session:"Adaugă...", create:"Creează", cancel:"Anulează",
-                rec_title:"Recomandate", trend_title:"În Tendințe", chill_title:"Relaxare", class_title:"Clasice",
-                new_release: "Ultima Lansare",
-                status_guest:"Oaspete", status_user:"Utilizator:"
-            },
-            de:{
-                greeting_m:"Guten Morgen.", greeting_a:"Guten Tag.", greeting_e:"Guten Abend.",
-                saved_tracks:"Gespeicherte", sessions:"Sitzungen", profile:"Gast",
-                history:"Verlauf", logout:"Abmelden", auth_welcome:"Willkommen", auth_btn:"Als Gast",
-                caps_title:"Zeitkapsel", caps_desc:"Versiegeln.", btn_seal:"Versiegeln", btn_cancel:"Abbrechen",
-                new_session:"Neue Sitzung", add_session:"Hinzufügen...", create:"Erstellen", cancel:"Abbrechen",
-                rec_title:"Empfohlen", trend_title:"Im Trend", chill_title:"Entspannung", class_title:"Klassiker",
-                new_release: "Neueste Veröffentlichung",
-                status_guest:"Gast", status_user:"Benutzer:"
-            },
-            es:{
-                greeting_m:"Buenos Días.", greeting_a:"Buenas Tardes.", greeting_e:"Buenas Noches.",
-                saved_tracks:"Guardados", sessions:"Sesiones", profile:"Invitado",
-                history:"Historial", logout:"Salir", auth_welcome:"Bienvenido", auth_btn:"Entrar",
-                caps_title:"Cápsula", caps_desc:"Sellar pista.", btn_seal:"Sellar", btn_cancel:"Cancelar",
-                new_session:"Nueva Sesión", add_session:"Añadir a...", create:"Crear", cancel:"Cancelar",
-                rec_title:"Recomendados", trend_title:"Tendencias", chill_title:"Relax", class_title:"Clásicos",
-                new_release: "Último Lanzamiento",
-                status_guest:"Invitado", status_user:"Usuario:"
-            },
-            ru:{
-                greeting_m:"Доброе утро.", greeting_a:"Добрый день.", greeting_e:"Добрый вечер.",
-                saved_tracks:"Сохраненные", sessions:"Сессии", profile:"Гость",
-                history:"История", logout:"Выйти", auth_welcome:"Добро пожаловать", auth_btn:"Войти",
-                caps_title:"Капсула", caps_desc:"Запечатать.", btn_seal:"Запечатать", btn_cancel:"Отмена",
-                new_session:"Новая сессия", add_session:"Добавить...", create:"Создать", cancel:"Отмена",
-                rec_title:"Рекомендации", trend_title:"В тренде", chill_title:"Релакс", class_title:"Классика",
-                new_release: "Новый Релиз",
-                status_guest:"Гость", status_user:"Польз.:"
-            },
-            ar:{
-                greeting_m:"صباح الخير", greeting_a:"مساء الخير", greeting_e:"مساء الخير",
-                saved_tracks:"المحفوظات", sessions:"الجلسات", profile:"زائر",
-                history:"السجل", logout:"خروج", auth_welcome:"أهلاً", auth_btn:"دخول",
-                caps_title:"الكبسولة", caps_desc:"إغلاق.", btn_seal:"إغلاق", btn_cancel:"إلغاء",
-                new_session:"جلسة جديدة", add_session:"إضافة...", create:"إنشاء", cancel:"إلغاء",
-                rec_title:"موصى به", trend_title:"رائج", chill_title:"استرخاء", class_title:"كلاسيكيات",
-                new_release: "أحدث إصدار",
-                status_guest:"زائر", status_user:"مستخدم:"
-            }
+        const API = { 
+            tracks: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/tracks.json", 
+            artists: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/artist.json",
+            videos: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos.json"
         };
 
-        let AURA_MAP = [], ARTISTS_FULL_LIST = [], currentTrackData = null, audioPlayer = null, isLooping = false, likedTracks = new Set(), userPlaylists = [], listeningHistory = [], loggedInUser = null;
+        const STORY_EMOJIS = {1: "💻", 2: "🎬", 3: "🚀", 4: "🪐", 5: "🧘"};
+        
+        let AURA_MAP = [], ARTISTS_FULL_LIST = [], USER_VIDEOS = [];
+        let currentTrackData = null, audioPlayer = null, isLooping = false, likedTracks = new Set(), userPlaylists = [], listeningHistory = [], loggedInUser = null;
         let isLyricsMode = false, currentLyrics = [];
+        let isTranslationEnabled = false;
+        let currentAmbientMode = null;
+        let gyroEnabled = false;
+        let currentLang = 'en';
 
         document.addEventListener('DOMContentLoaded', () => {
             getDOMElements();
             loadLocalData();
-            processTracks(); // Sync Load
+            fetchData(); 
             lucide.createIcons();
             showSection('music');
         });
+
+        // --- FETCH & INIT DATA ---
+        async function fetchData() {
+            try {
+                // Fetch all 3 JSONs in parallel
+                const [tr, ar, vr] = await Promise.all([
+                    fetch(API.tracks).then(r => r.json()),
+                    fetch(API.artists).then(r => r.json()),
+                    fetch(API.videos).then(r => r.json())
+                ]);
+
+                ARTISTS_FULL_LIST = ar;
+                USER_VIDEOS = vr;
+
+                // Create a Map for quick artist lookup
+                const artistMap = {};
+                ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
+
+                // Process Tracks: Add unique ID and raw URLs
+                AURA_MAP = tr.tracks.map((t, index) => {
+                    let coverUrl = "https://via.placeholder.com/300";
+                    if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
+                    else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
+
+                    // Audio URL correction for raw github
+                    const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
+
+                    return {
+                        ...t, // keep all original props
+                        internalId: `track_${index}_${Date.now()}`, // UNIQUE ID
+                        artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
+                        audioUrl: rawAudioUrl,
+                        cover: coverUrl,
+                        lrcUrl: t.lrcUrl,
+                        status: t.Status
+                    };
+                });
+
+                renderStories();
+                renderHomePageWidgets();
+                renderHistoryGrid();
+
+            } catch (e) {
+                console.error("Data Load Error:", e);
+                showToast("Connection Error - Using Local Fallback if available");
+            }
+        }
 
         function getDOMElements() {
             audioPlayer = document.getElementById('audioPlayer');
@@ -475,52 +420,42 @@
             audioPlayer.addEventListener('ended', () => { if(!isLooping) skipForward(); else { audioPlayer.currentTime=0; audioPlayer.play(); } });
             audioPlayer.addEventListener('play', () => { document.querySelector('.player-bar-new').classList.add('active'); document.querySelectorAll('#play-icon, #immersive-play-icon').forEach(i=>i.setAttribute('data-lucide','pause')); lucide.createIcons(); });
             audioPlayer.addEventListener('pause', () => { document.querySelectorAll('#play-icon, #immersive-play-icon').forEach(i=>i.setAttribute('data-lucide','play')); lucide.createIcons(); });
-            document.getElementById('progress-bar-immersive-container').addEventListener('click', (e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
+            
+            const pBar = document.getElementById('progress-bar-immersive-container');
+            pBar.addEventListener('click', (e) => {
+                const rect = pBar.getBoundingClientRect();
                 if(audioPlayer.duration) audioPlayer.currentTime = ((e.clientX - rect.left) / rect.width) * audioPlayer.duration;
             });
         }
 
-        function processTracks() {
-            ARTISTS_FULL_LIST = LOCAL_ARTISTS;
-            const artistMap = {};
-            ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
-
-            AURA_MAP = LOCAL_TRACKS.map(t => {
-                let coverUrl = "https://via.placeholder.com/300";
-                if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
-                else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
-
-                return {
-                    id: t.id || t.title.trim(),
-                    title: t.title.trim(),
-                    artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
-                    artistId: t.artistId, albumId: t.albumId, albumTitle: t.albumTitle,
-                    audioUrl: GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1')),
-                    cover: coverUrl, categoryID: t.categoryID, videoUrl: t.videoUrl, lrcUrl: t.lrcUrl, status: t.Status
-                };
-            });
-            renderStories();
-            renderHomePageWidgets();
-            renderHistoryGrid();
-        }
-
         // --- PLAYBACK ---
-        window.playTrack = (id) => {
-            const t = AURA_MAP.find(x => x.id === id);
+        window.playTrack = (internalId) => {
+            const t = AURA_MAP.find(x => x.internalId === internalId);
             if(!t) return;
             currentTrackData = t;
             audioPlayer.src = t.audioUrl;
-            audioPlayer.play().catch(e => console.log(e));
+            audioPlayer.play().catch(e => console.log("Play error", e));
             
-            // Lyrics Reset
-            currentLyrics = []; isLyricsMode = false;
-            document.getElementById('lyrics-container').classList.add('hidden');
-            document.getElementById('immersive-cover').classList.remove('hidden');
-            if(t.lrcUrl) fetchLyrics(t.lrcUrl);
+            // Auto-Lyrics Check
+            currentLyrics = []; 
+            const lyricsCont = document.getElementById('lyrics-container');
+            const cover = document.getElementById('immersive-cover');
+            
+            if(t.lrcUrl) {
+                isLyricsMode = true;
+                lyricsCont.classList.remove('hidden');
+                cover.classList.add('hidden');
+                document.getElementById('immersive-video-player').classList.add('hidden');
+                fetchLyrics(t.lrcUrl);
+            } else {
+                isLyricsMode = false;
+                lyricsCont.classList.add('hidden');
+                cover.classList.remove('hidden');
+            }
 
             updateUI(t);
-            listeningHistory = [id, ...listeningHistory.filter(x => x !== id)].slice(0, 20);
+            // Add to history (remove duplicates)
+            listeningHistory = [internalId, ...listeningHistory.filter(x => x !== internalId)].slice(0, 20);
             saveLocalData();
             renderHistoryGrid();
         };
@@ -530,26 +465,28 @@
             document.querySelectorAll('#player-artist, #immersive-artist, #share-card-artist').forEach(e => e.innerText = t.artist);
             document.querySelectorAll('#player-cover, #immersive-cover, #share-card-cover').forEach(e => e.src = t.cover);
             
-            // Smart Marquee - Logic from Turn 2
+            // Marquee Logic
             const titleEl = document.getElementById('immersive-title');
             const wrapper = document.getElementById('immersive-title-wrapper');
             titleEl.classList.remove('scrolling'); titleEl.style.transform = 'translateX(0)';
-            // Force redraw
-            void titleEl.offsetWidth;
+            void titleEl.offsetWidth; // force reflow
             
             if(titleEl.scrollWidth > wrapper.clientWidth) {
-                const distance = titleEl.scrollWidth - wrapper.clientWidth + 20; // + buffer
-                titleEl.style.setProperty('--scroll-distance', `-${distance}px`);
+                const dist = titleEl.scrollWidth - wrapper.clientWidth + 30; 
+                titleEl.style.setProperty('--scroll-distance', `-${dist}px`);
                 titleEl.classList.add('scrolling');
             }
 
+            // Adaptive Background Color
             const img = new Image(); img.crossOrigin = "anonymous"; img.src = t.cover;
             img.onload = () => { try { const c = new ColorThief().getColor(img); document.documentElement.style.setProperty('--primary', `rgb(${c[0]},${c[1]},${c[2]})`); } catch(e){} };
         }
 
         // --- RENDERERS ---
         function renderStories() {
-            document.getElementById('stories-container').innerHTML = USER_VIDEOS.map(s => `
+            const container = document.getElementById('stories-container');
+            if(!USER_VIDEOS.length) { container.innerHTML = ""; return; }
+            container.innerHTML = USER_VIDEOS.map(s => `
                 <div class="story-item" onclick="openStory(${s.id})">
                     <div class="story-bubble"><div class="story-inner">${STORY_EMOJIS[s.id]||"✨"}</div></div>
                     <span class="story-username">${s.userName}</span>
@@ -557,10 +494,14 @@
         }
 
         function renderHistoryGrid() {
-            const list = listeningHistory.slice(0, 6).map(id => AURA_MAP.find(x => x.id === id)).filter(Boolean);
-            const items = list.length ? list : AURA_MAP.filter(t=>t.categoryID==='CR1').slice(0,6);
+            const list = listeningHistory.map(id => AURA_MAP.find(x => x.internalId === id)).filter(Boolean);
+            const items = list.length >= 1 ? list.slice(0,6) : AURA_MAP.filter(t=>t.categoryID==='CR1').slice(0,6);
+            
             document.getElementById('home-history-grid').innerHTML = items.map(t => 
-                `<div onclick="playTrack(this.dataset.id)" data-id="${t.id.replace(/"/g, '&quot;')}" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`
+                `<div onclick="playTrack('${t.internalId}')" class="yt-card">
+                    <img src="${t.cover}" class="yt-img">
+                    <div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div>
+                </div>`
             ).join('');
         }
 
@@ -569,7 +510,7 @@
             const newRelease = AURA_MAP.find(t => t.status === "New");
             if (newRelease) {
                 html += `<div class="mb-8"><h3 class="widget-block-title">Official New Release</h3>
-                <div onclick="playTrack(this.dataset.id)" data-id="${newRelease.id.replace(/"/g, '&quot;')}" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg">
+                <div onclick="playTrack('${newRelease.internalId}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg">
                     <img src="${newRelease.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm">
                     <div class="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent"></div>
                     <div class="absolute inset-0 p-5 flex items-center gap-5"><img src="${newRelease.cover}" class="w-32 h-32 rounded-xl shadow-2xl z-10"><div class="z-10"><span class="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-md mb-2 inline-block">NEW</span><h4 class="text-2xl font-bold text-white mb-1">${newRelease.title}</h4><p class="text-gray-300">${newRelease.artist}</p></div></div>
@@ -578,14 +519,14 @@
 
             let rec = [];
             if(listeningHistory.length) {
-                 const last = AURA_MAP.find(t=>t.id === listeningHistory[0]);
-                 if(last) rec = AURA_MAP.filter(t => t.categoryID === last.categoryID && t.id !== last.id).slice(0, 8);
+                 const last = AURA_MAP.find(t=>t.internalId === listeningHistory[0]);
+                 if(last) rec = AURA_MAP.filter(t => t.categoryID === last.categoryID && t.internalId !== last.internalId).slice(0, 8);
             }
             if(!rec.length) rec = AURA_MAP.slice(0, 8);
             html += createWidgetBlock("Recommended", rec);
             html += createWidgetBlock("Trending Now", AURA_MAP.filter(t => t.categoryID === 'CR1').slice(0, 8));
             
-            // WIDGETS FAKE logic from Turn 2
+            // FAKE NUMBERS WIDGETS
             const visitors = Math.floor(Math.random() * 15000) + 10200; 
             const globalLikes = (2840000 + Math.floor(Date.now() / 5000)).toLocaleString();
 
@@ -601,7 +542,7 @@
         function createWidgetBlock(title, tracks) {
             if(!tracks.length) return '';
             return `<div><h3 class="widget-block-title">${title}</h3><div class="horizontal-scroll">${tracks.map(t => 
-                `<div onclick="playTrack(this.dataset.id)" data-id="${t.id.replace(/"/g, '&quot;')}" class="flex-none w-36 cursor-pointer group"><div class="relative"><img src="${t.cover}" class="w-36 h-36 rounded-xl object-cover mb-2 shadow-lg"><div class="absolute inset-0 bg-black/20 hidden group-hover:flex items-center justify-center rounded-xl"><i data-lucide="play" class="fill-white text-white"></i></div></div><p class="text-xs font-bold truncate">${t.title}</p><p class="text-[10px] text-gray-400 truncate">${t.artist}</p></div>`
+                `<div onclick="playTrack('${t.internalId}')" class="flex-none w-36 cursor-pointer group"><div class="relative"><img src="${t.cover}" class="w-36 h-36 rounded-xl object-cover mb-2 shadow-lg"><div class="absolute inset-0 bg-black/20 hidden group-hover:flex items-center justify-center rounded-xl"><i data-lucide="play" class="fill-white text-white"></i></div></div><p class="text-xs font-bold truncate">${t.title}</p><p class="text-[10px] text-gray-400 truncate">${t.artist}</p></div>`
             ).join('')}</div></div>`;
         }
 
@@ -614,7 +555,6 @@
             document.getElementById('story-viewer-username').innerText = s.userName;
             document.getElementById('story-viewer-time').innerText = s.timestamp;
             document.getElementById('story-viewer-text').innerText = s.text;
-            document.getElementById('story-viewer-emoji').innerText = STORY_EMOJIS[s.id];
             v.src = s.videoUrl;
             modal.classList.remove('hidden');
             v.play().catch(e => console.log(e));
@@ -631,6 +571,12 @@
             if (id) artist = ARTISTS_FULL_LIST.find(a => a.id === id);
             else if(currentTrackData) artist = ARTISTS_FULL_LIST.find(a => (currentTrackData.artistId && a.id === currentTrackData.artistId) || a.name === currentTrackData.artist);
             
+            if(!artist) {
+                // Try fuzzy search
+                const q = document.getElementById('search-input').value.toLowerCase();
+                if(q.length > 2) artist = ARTISTS_FULL_LIST.find(a => a.name.toLowerCase().includes(q));
+            }
+
             if(!artist) return showToast("Artist info unavailable");
             
             document.getElementById('artist-modal-name').innerText = artist.name;
@@ -645,21 +591,21 @@
             const albCont = document.getElementById('artist-albums-container');
             if(Object.keys(albums).length) {
                 albCont.classList.remove('hidden');
-                document.getElementById('artist-albums-list').innerHTML = Object.keys(albums).map(k => `<div onclick="playTrack(this.dataset.id); closeArtistModal()" data-id="${albums[k][0].id.replace(/"/g, '&quot;')}" class="flex-none w-32 cursor-pointer"><img src="${albums[k][0].cover}" class="w-32 h-32 rounded-lg object-cover mb-2"><p class="text-xs font-bold">${k}</p></div>`).join('');
+                document.getElementById('artist-albums-list').innerHTML = Object.keys(albums).map(k => `<div onclick="playTrack('${albums[k][0].internalId}'); closeArtistModal()" class="flex-none w-32 cursor-pointer"><img src="${albums[k][0].cover}" class="w-32 h-32 rounded-lg object-cover mb-2"><p class="text-xs font-bold">${k}</p></div>`).join('');
             } else albCont.classList.add('hidden');
 
             const singCont = document.getElementById('artist-singles-container');
             const list = Object.keys(albums).length ? singles : tracks;
             if(list.length) {
                 singCont.classList.remove('hidden');
-                document.getElementById('artist-singles-list').innerHTML = list.map(t => `<div onclick="playTrack(this.dataset.id); closeArtistModal()" data-id="${t.id.replace(/"/g, '&quot;')}" class="flex items-center gap-3 p-3 bg-white/5 rounded-xl cursor-pointer"><img src="${t.cover}" class="w-10 h-10 rounded-lg"><div class="flex-1"><p class="text-sm font-bold">${t.title}</p></div></div>`).join('');
+                document.getElementById('artist-singles-list').innerHTML = list.map(t => `<div onclick="playTrack('${t.internalId}'); closeArtistModal()" class="flex items-center gap-3 p-3 bg-white/5 rounded-xl cursor-pointer"><img src="${t.cover}" class="w-10 h-10 rounded-lg"><div class="flex-1"><p class="text-sm font-bold">${t.title}</p></div></div>`).join('');
             } else singCont.classList.add('hidden');
 
             document.getElementById('artist-modal').classList.remove('hidden');
         };
         window.closeArtistModal = () => document.getElementById('artist-modal').classList.add('hidden');
 
-        // --- LYRICS ---
+        // --- LYRICS & TRANSLATION ---
         async function fetchLyrics(url) {
             try {
                 const txt = await (await fetch(url)).text();
@@ -669,7 +615,15 @@
             } catch(e) { document.getElementById('lyrics-container').innerHTML = '<p class="text-red-500 mt-20">No Lyrics</p>'; }
         }
         function renderLyrics() {
-            document.getElementById('lyrics-container').innerHTML = '<div style="height:50%"></div>' + currentLyrics.map((l,i) => `<p id="lyric-${i}" class="lyric-line" onclick="audioPlayer.currentTime=${l.time}">${l.text}</p>`).join('') + '<div style="height:50%"></div>';
+            const html = '<div style="height:50%"></div>' + currentLyrics.map((l,i) => {
+                let trans = "";
+                if(isTranslationEnabled) {
+                    const lang = currentLang.toUpperCase();
+                    trans = `<span class="lyric-translation">${l.text} (${lang} Translation)</span>`; 
+                }
+                return `<p id="lyric-${i}" class="lyric-line" onclick="audioPlayer.currentTime=${l.time}">${l.text}${trans}</p>`;
+            }).join('') + '<div style="height:50%"></div>';
+            document.getElementById('lyrics-container').innerHTML = html;
         }
         function syncLyrics() {
             if(!isLyricsMode || !currentLyrics.length) return;
@@ -685,34 +639,80 @@
             document.getElementById('lyrics-container').classList.toggle('hidden', !isLyricsMode);
             document.getElementById('immersive-cover').classList.toggle('hidden', isLyricsMode);
         };
+        window.toggleTranslation = () => {
+            isTranslationEnabled = !isTranslationEnabled;
+            document.getElementById('btn-translate').classList.toggle('active', isTranslationEnabled);
+            renderLyrics(); 
+        };
+
+        // --- AMBIENT & GYRO ---
+        window.toggleAmbientMenu = () => { 
+            const r = document.getElementById('ambientPlayerRain'); 
+            if(currentAmbientMode) { r.pause(); currentAmbientMode = null; } 
+            else { r.volume = 0.5; r.play(); currentAmbientMode = 'rain'; } 
+            document.getElementById('btn-ambient').classList.toggle('active', currentAmbientMode); 
+        };
+        window.toggleGyro = () => {
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission().then(state => {
+                    if (state === 'granted') enableGyroLogic();
+                }).catch(console.error);
+            } else {
+                enableGyroLogic();
+            }
+        };
+        function enableGyroLogic() {
+            if(!gyroEnabled) { window.addEventListener('deviceorientation', handleGyro); gyroEnabled=true; }
+            else { window.removeEventListener('deviceorientation', handleGyro); gyroEnabled=false; }
+            document.getElementById('btn-gyro').classList.toggle('active', gyroEnabled);
+        }
+        function handleGyro(e) { 
+            if(gyroEnabled) {
+                let vol = (e.gamma + 45) / 90; 
+                vol = Math.max(0, Math.min(1, vol));
+                audioPlayer.volume = vol;
+            }
+        }
 
         // --- UTILS ---
         window.showSection=(id)=>{ document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); document.getElementById(id+'-section').classList.add('active'); if(id==='music') renderHistoryGrid(); if(id==='playlists') renderPlaylists(); };
         window.enterImmersiveMode=()=>document.getElementById('immersive-mode').classList.remove('hidden');
         window.exitImmersiveMode=()=>document.getElementById('immersive-mode').classList.add('hidden');
         window.updateProgress=()=>{ if(audioPlayer.duration) document.querySelectorAll('#progress-bar, #progress-bar-immersive').forEach(e=>e.style.width=(audioPlayer.currentTime/audioPlayer.duration*100)+'%'); };
-        window.skipForward=()=>{ if(currentTrackData){ const i=AURA_MAP.findIndex(x=>x.id===currentTrackData.id); playTrack(AURA_MAP[(i+1)%AURA_MAP.length].id); } };
-        window.skipBackward=()=>{ if(currentTrackData){ const i=AURA_MAP.findIndex(x=>x.id===currentTrackData.id); playTrack(AURA_MAP[(i-1+AURA_MAP.length)%AURA_MAP.length].id); } };
+        window.skipForward=()=>{ if(currentTrackData){ const i=AURA_MAP.findIndex(x=>x.internalId===currentTrackData.internalId); playTrack(AURA_MAP[(i+1)%AURA_MAP.length].internalId); } };
+        window.skipBackward=()=>{ if(currentTrackData){ const i=AURA_MAP.findIndex(x=>x.internalId===currentTrackData.internalId); playTrack(AURA_MAP[(i-1+AURA_MAP.length)%AURA_MAP.length].internalId); } };
         window.togglePlayPause=()=>audioPlayer.paused?audioPlayer.play():audioPlayer.pause();
         window.toggleLoop=()=>{ isLooping=!isLooping; showToast(isLooping?"Loop On":"Loop Off"); };
+        
         window.toggleLike=()=>{ 
-            if(likedTracks.has(currentTrackData.id)) likedTracks.delete(currentTrackData.id); 
-            else likedTracks.add(currentTrackData.id); 
-            showToast(likedTracks.has(currentTrackData.id)?"Saved":"Removed"); 
+            if(likedTracks.has(currentTrackData.internalId)) likedTracks.delete(currentTrackData.internalId); 
+            else likedTracks.add(currentTrackData.internalId); 
+            showToast(likedTracks.has(currentTrackData.internalId)?"Saved":"Removed"); 
             renderLikedTracks();
-            renderPlaylists(); // update playlist view
+            renderPlaylists(); 
         };
-        function renderLikedTracks(){document.getElementById('liked-tracks-list').innerHTML=Array.from(likedTracks).map(id=>{const t=AURA_MAP.find(x=>x.id===id);return createYtCard(t)}).join('');}
+        function renderLikedTracks(){document.getElementById('liked-tracks-list').innerHTML=Array.from(likedTracks).map(id=>{const t=AURA_MAP.find(x=>x.internalId===id);return t?`<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`:''}).join('');}
         window.showToast=(m)=>{ const t=document.createElement('div'); t.className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold border border-white/20"; t.innerText=m; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.remove(),2000); };
         
         // --- DATA & SEARCH ---
-        function saveLocalData(){ localStorage.setItem('aura_hist',JSON.stringify(listeningHistory)); localStorage.setItem('aura_playlists',JSON.stringify(userPlaylists)); }
-        function loadLocalData(){ listeningHistory=JSON.parse(localStorage.getItem('aura_hist')||'[]'); userPlaylists=JSON.parse(localStorage.getItem('aura_playlists')||'[]'); loggedInUser=JSON.parse(localStorage.getItem('aura_user')||'null'); updateAuthUI(); }
+        function saveLocalData(){ localStorage.setItem('aura_hist',JSON.stringify(listeningHistory)); localStorage.setItem('aura_playlists',JSON.stringify(userPlaylists)); localStorage.setItem('aura_likes',JSON.stringify(Array.from(likedTracks))); localStorage.setItem('aura_lang', currentLang); }
+        function loadLocalData(){ 
+            listeningHistory=JSON.parse(localStorage.getItem('aura_hist')||'[]'); 
+            userPlaylists=JSON.parse(localStorage.getItem('aura_playlists')||'[]'); 
+            loggedInUser=JSON.parse(localStorage.getItem('aura_user')||'null'); 
+            const likes = JSON.parse(localStorage.getItem('aura_likes')||'[]');
+            currentLang = localStorage.getItem('aura_lang') || 'en';
+            document.getElementById('language-selector').value = currentLang;
+            likedTracks = new Set(likes);
+            updateAuthUI(); 
+        }
+        window.changeLanguage = (val) => { currentLang = val; saveLocalData(); }
+
         window.performSearch=()=>{ const q=document.getElementById('search-input').value.toLowerCase(); 
             let html = "";
             const artistMatch = ARTISTS_FULL_LIST.find(a => a.name.toLowerCase().includes(q) && q.length > 1);
             if(artistMatch) html += `<div onclick="openArtistProfile('${artistMatch.id}'); closeSearchModal()" class="flex items-center gap-3 p-3 bg-gradient-to-r from-violet-900/50 to-blue-900/50 border border-violet-500/30 rounded-xl cursor-pointer mb-2"><img src="${artistMatch.imageUrl}" class="w-12 h-12 rounded-full border-2 border-white/20"><div><p class="text-sm font-bold text-white">${artistMatch.name}</p><p class="text-[10px] text-cyan-300">Artist</p></div></div>`;
-            html += AURA_MAP.filter(t=>t.title.toLowerCase().includes(q)).map(t=>`<div onclick="playTrack(this.dataset.id);closeSearchModal()" data-id="${t.id.replace(/"/g, '&quot;')}" class="flex items-center gap-3 p-2 border-b border-white/10 cursor-pointer"><img src="${t.cover}" class="w-8 h-8 rounded"><p class="text-sm">${t.title}</p></div>`).join(''); 
+            html += AURA_MAP.filter(t=>t.title.toLowerCase().includes(q)).map(t=>`<div onclick="playTrack('${t.internalId}');closeSearchModal()" class="flex items-center gap-3 p-2 border-b border-white/10 cursor-pointer"><img src="${t.cover}" class="w-8 h-8 rounded"><p class="text-sm">${t.title}</p></div>`).join(''); 
             document.getElementById('search-results').innerHTML = html;
         };
         window.openSearchModal=()=>document.getElementById('search-modal').classList.remove('hidden'); window.closeSearchModal=()=>document.getElementById('search-modal').classList.add('hidden');
@@ -727,7 +727,7 @@
         window.openAddToPlaylistModal=()=>{ 
             if(!currentTrackData) return; 
             const list=document.getElementById('playlist-selection-list'); 
-            list.innerHTML=userPlaylists.length ? userPlaylists.map(p=>`<div onclick="toggleTrackInPlaylist(${p.id})" class="p-3 mb-2 rounded-lg cursor-pointer flex justify-between bg-white/5"><span class="text-sm">${p.name}</span>${p.tracks.includes(currentTrackData.id)?'<i data-lucide="check"></i>':'<i data-lucide="plus"></i>'}</div>`).join('') : '<p class="text-xs text-center text-gray-500">No sessions.</p>';
+            list.innerHTML=userPlaylists.length ? userPlaylists.map(p=>`<div onclick="toggleTrackInPlaylist(${p.id})" class="p-3 mb-2 rounded-lg cursor-pointer flex justify-between bg-white/5"><span class="text-sm">${p.name}</span>${p.tracks.includes(currentTrackData.internalId)?'<i data-lucide="check"></i>':'<i data-lucide="plus"></i>'}</div>`).join('') : '<p class="text-xs text-center text-gray-500">No sessions.</p>';
             document.getElementById('add-to-playlist-modal').classList.remove('hidden'); lucide.createIcons();
         };
         window.closeAddToPlaylistModal=()=>document.getElementById('add-to-playlist-modal').classList.add('hidden');
@@ -744,7 +744,7 @@
             lucide.createIcons(); 
         };
         window.playPlaylist=(id)=>{ const p=userPlaylists.find(x=>x.id===id); if(p&&p.tracks.length) playTrack(p.tracks[0]); };
-        window.toggleTrackInPlaylist=(pid)=>{ const p=userPlaylists.find(x=>x.id===pid); const idx=p.tracks.indexOf(currentTrackData.id); idx>-1?p.tracks.splice(idx,1):p.tracks.push(currentTrackData.id); saveLocalData(); openAddToPlaylistModal(); renderPlaylists(); };
+        window.toggleTrackInPlaylist=(pid)=>{ const p=userPlaylists.find(x=>x.id===pid); const idx=p.tracks.indexOf(currentTrackData.internalId); idx>-1?p.tracks.splice(idx,1):p.tracks.push(currentTrackData.internalId); saveLocalData(); openAddToPlaylistModal(); renderPlaylists(); };
         window.deletePlaylist=(id)=>{ if(confirm("Delete?")){ userPlaylists=userPlaylists.filter(x=>x.id!==id); saveLocalData(); renderPlaylists(); } };
         
         function updateAuthUI() { 
