@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="google" content="notranslate">
-    <title>Aura</title>
+    <title>Aura Music</title>
     
     <link rel="icon" href="https://via.placeholder.com/192x192">
     <link rel="apple-touch-icon" href="https://via.placeholder.com/192x192">
@@ -594,7 +594,6 @@
         let likedTracks = new Set(), userPlaylists = [], isLooping = false, loggedInUser = null, listeningHistory = []; 
         let currentLang = 'en', fxMode = 0, currentAmbientMode = null, gyroEnabled = false;
         
-        // --- LYRICS VARIABLES ---
         let currentLyrics = [];
         let isLyricsMode = false;
 
@@ -680,6 +679,12 @@
                 renderHomePageWidgets();
                 renderHistoryGrid(); 
             } catch(e) { console.error("Error Loading Local Data", e); }
+        }
+
+        // --- SAFE STRING FUNCTION (FIX FOR APOSTROPHES) ---
+        function escapeStr(str) {
+            if (!str) return '';
+            return str.replace(/'/g, "\\'"); 
         }
 
         // --- STORIES RENDER LOGIC ---
@@ -902,7 +907,7 @@
                          const tracks = albumsMap[title];
                          const cover = tracks[0].cover;
                          return `
-                         <div onclick="playTrack('${tracks[0].id}'); closeArtistModal()" class="flex-none w-32 cursor-pointer group">
+                         <div onclick="playTrack('${escapeStr(tracks[0].id)}'); closeArtistModal()" class="flex-none w-32 cursor-pointer group">
                              <img src="${cover}" class="w-32 h-32 rounded-lg object-cover mb-2 shadow-lg">
                              <p class="text-xs font-bold truncate">${title}</p>
                              <p class="text-[10px] text-gray-400">${tracks.length} tracks</p>
@@ -920,7 +925,7 @@
                 if(listToShow.length > 0) {
                     singlesContainer.classList.remove('hidden');
                     singlesList.innerHTML = listToShow.map(t => `
-                        <div onclick="playTrack('${t.id}'); closeArtistModal()" class="flex items-center gap-3 p-3 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition">
+                        <div onclick="playTrack('${escapeStr(t.id)}'); closeArtistModal()" class="flex items-center gap-3 p-3 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition">
                             <img src="${t.cover}" class="w-10 h-10 rounded-lg object-cover">
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-bold truncate">${t.title}</p>
@@ -972,7 +977,7 @@
         }
         
         function createYtCard(t) {
-            return `<div onclick="playTrack('${t.id}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`;
+            return `<div onclick="playTrack('${escapeStr(t.id)}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`;
         }
 
         function renderHomePageWidgets() {
@@ -986,7 +991,7 @@
                 html += `
                 <div class="mb-8">
                     <h3 class="widget-block-title">${t.new_release}</h3>
-                    <div onclick="playTrack('${newReleaseTrack.id}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg group">
+                    <div onclick="playTrack('${escapeStr(newReleaseTrack.id)}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg group">
                         <img src="${newReleaseTrack.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm">
                         <div class="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent"></div>
                         <div class="absolute inset-0 p-5 flex items-center gap-5">
@@ -1052,7 +1057,7 @@
         function createWidgetBlock(title, tracks) {
             if(!tracks.length) return '';
             return `<div><h3 class="widget-block-title">${title}</h3><div class="horizontal-scroll">${tracks.map(t => `
-                <div onclick="playTrack('${t.id}')" class="flex-none w-36 cursor-pointer group">
+                <div onclick="playTrack('${escapeStr(t.id)}')" class="flex-none w-36 cursor-pointer group">
                     <div class="relative"><img src="${t.cover}" class="w-36 h-36 rounded-xl object-cover mb-2 shadow-lg group-active:scale-95 transition"><div class="absolute inset-0 bg-black/20 hidden group-hover:flex items-center justify-center rounded-xl"><i data-lucide="play" class="fill-white text-white"></i></div></div>
                     <p class="text-xs font-bold truncate">${t.title}</p><p class="text-[10px] text-gray-400 truncate">${t.artist}</p>
                 </div>`).join('')}</div></div>`;
@@ -1096,7 +1101,7 @@
             );
 
             html += trackMatches.map(t => 
-                `<div onclick="playTrack('${t.id}'); closeSearchModal()" class="flex items-center gap-3 p-2 border-b border-white/10 cursor-pointer">
+                `<div onclick="playTrack('${escapeStr(t.id)}'); closeSearchModal()" class="flex items-center gap-3 p-2 border-b border-white/10 cursor-pointer">
                     <img src="${t.cover}" class="w-8 h-8 rounded">
                     <div class="overflow-hidden">
                         <p class="text-sm truncate">${t.title}</p>
@@ -1109,7 +1114,7 @@
         };
 
         window.showSection=(id)=>{ document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); document.getElementById(id+'-section').classList.add('active'); if(id==='music')renderHistoryGrid(); if(id==='profile')renderFullHistory(); if(id==='playlists')renderPlaylists(); };
-        function renderFullHistory() { document.getElementById('history-list').innerHTML=listeningHistory.map(id=>{const t=AURA_MAP.find(x=>x.id===id);return t?`<div onclick="playTrack('${t.id}')" class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><img src="${t.cover}" class="w-10 h-10 rounded"><div><p class="font-bold text-xs">${t.title}</p></div></div>`:'';}).join(''); }
+        function renderFullHistory() { document.getElementById('history-list').innerHTML=listeningHistory.map(id=>{const t=AURA_MAP.find(x=>x.id===id);return t?`<div onclick="playTrack('${escapeStr(t.id)}')" class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><img src="${t.cover}" class="w-10 h-10 rounded"><div><p class="font-bold text-xs">${t.title}</p></div></div>`:'';}).join(''); }
         function initVisualizer() { const cvs=document.getElementById('visualizer-canvas');const ctx=cvs.getContext('2d');let w,h;const resize=()=>{w=cvs.width=window.innerWidth;h=cvs.height=window.innerHeight;};window.addEventListener('resize',resize);resize();function loop(){ctx.clearRect(0,0,w,h);requestAnimationFrame(loop);}loop(); }
         
         // --- DATA PERSISTENCE ---
