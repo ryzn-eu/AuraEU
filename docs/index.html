@@ -51,7 +51,7 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        /* --- WIDGETS & CARDS --- */
+        /* --- WIDGETS --- */
         .yt-grid-mobile-fix { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 2rem; }
         @media (min-width: 600px) { .yt-grid-mobile-fix { grid-template-columns: repeat(3, 1fr); } }
 
@@ -67,7 +67,6 @@
         .yt-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .yt-artist { font-size: 11px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* IOS WIDGETS */
         .ios-widget-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
         .ios-card {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
@@ -107,7 +106,7 @@
         @keyframes pingPongScroll { 0%, 25% { transform: translateX(0); } 75%, 100% { transform: translateX(var(--scroll-distance)); } }
         #immersive-title-wrapper { mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); overflow: hidden; }
 
-        /* LYRICS & TRANSLATION */
+        /* LYRICS */
         #lyrics-container {
             position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
             display: flex; flex-direction: column; align-items: center; overflow-y: scroll; scroll-behavior: smooth;
@@ -174,9 +173,7 @@
 
         <main>
             <section id="music-section" class="section-page active">
-                <div id="stories-container" class="stories-scroll-container">
-                    <p class="text-xs text-gray-500 px-2">Loading stories...</p>
-                </div>
+                <div id="stories-container" class="stories-scroll-container"></div>
 
                 <h2 id="home-greeting" class="text-2xl font-bold mb-4 px-1">Good Evening</h2>
                 <div id="home-history-grid" class="yt-grid-mobile-fix mb-8"></div>
@@ -346,7 +343,6 @@
 
     <script>
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
-        // USING RAW GITHUB LINKS (NO BLOB)
         const API = { 
             tracks: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/tracks.json", 
             artists: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/artist.json",
@@ -371,56 +367,51 @@
             showSection('music');
         });
 
-        // --- ROBUST FETCH ---
-        async function fetchWithFallback(url) {
-            try {
-                // Add timestamp to prevent caching old JSON versions
-                const res = await fetch(url + '?t=' + Date.now());
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return await res.json();
-            } catch (e) {
-                console.error("Fetch failed for", url, e);
-                return null;
-            }
-        }
-
+        // --- FETCH LOGIC ---
         async function fetchData() {
-            // Load each independent of others
-            const [tData, aData, vData] = await Promise.all([
-                fetchWithFallback(API.tracks),
-                fetchWithFallback(API.artists),
-                fetchWithFallback(API.videos)
-            ]);
+            try {
+                // Fetch independently to prevent full crash if one fails
+                const tReq = fetch(API.tracks).then(r => r.ok ? r.json() : null).catch(() => null);
+                const aReq = fetch(API.artists).then(r => r.ok ? r.json() : null).catch(() => null);
+                const vReq = fetch(API.videos).then(r => r.ok ? r.json() : null).catch(() => null);
 
-            if (aData) ARTISTS_FULL_LIST = aData;
-            if (vData) USER_VIDEOS = vData;
+                const [tData, aData, vData] = await Promise.all([tReq, aReq, vReq]);
 
-            if (tData && tData.tracks) {
-                const artistMap = {};
-                ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
+                ARTISTS_FULL_LIST = aData || [];
+                USER_VIDEOS = vData || [];
 
-                AURA_MAP = tData.tracks.map((t, index) => {
-                    let coverUrl = "https://via.placeholder.com/300";
-                    if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
-                    else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
+                if (tData && tData.tracks) {
+                    const artistMap = {};
+                    ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
 
-                    const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
+                    AURA_MAP = tData.tracks.map((t, index) => {
+                        let coverUrl = "https://via.placeholder.com/300";
+                        if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
+                        else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
 
-                    return {
-                        ...t,
-                        internalId: `track_${index}_${Date.now()}`, // Generate Safe Unique ID
-                        artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
-                        audioUrl: rawAudioUrl,
-                        cover: coverUrl,
-                        lrcUrl: t.lrcUrl,
-                        status: t.Status
-                    };
-                });
+                        const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
+
+                        return {
+                            ...t,
+                            internalId: `track_${index}_${Date.now()}`, // Generated Unique ID
+                            artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
+                            audioUrl: rawAudioUrl,
+                            cover: coverUrl,
+                            lrcUrl: t.lrcUrl,
+                            status: t.Status
+                        };
+                    });
+                } else {
+                    console.error("Track data missing or invalid format");
+                }
+
+                renderStories();
+                renderHomePageWidgets();
+                renderHistoryGrid();
+
+            } catch (e) {
+                console.error("Critical Error", e);
             }
-
-            renderStories();
-            renderHomePageWidgets();
-            renderHistoryGrid();
         }
 
         function getDOMElements() {
@@ -513,6 +504,7 @@
 
         function renderHomePageWidgets() {
             let html = "";
+            // Safe access to find New Release
             const newRelease = AURA_MAP.find(t => t.status === "New");
             if (newRelease) {
                 html += `<div class="mb-8"><h3 class="widget-block-title">Official New Release</h3>
@@ -578,7 +570,6 @@
             else if(currentTrackData) artist = ARTISTS_FULL_LIST.find(a => (currentTrackData.artistId && a.id === currentTrackData.artistId) || a.name === currentTrackData.artist);
             
             if(!artist) {
-                // Fuzzy search
                 const q = document.getElementById('search-input').value.toLowerCase();
                 if(q.length > 2) artist = ARTISTS_FULL_LIST.find(a => a.name.toLowerCase().includes(q));
             }
