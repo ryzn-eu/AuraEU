@@ -51,7 +51,7 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        /* --- WIDGETS --- */
+        /* --- WIDGETS & CARDS --- */
         .yt-grid-mobile-fix { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 2rem; }
         @media (min-width: 600px) { .yt-grid-mobile-fix { grid-template-columns: repeat(3, 1fr); } }
 
@@ -67,6 +67,7 @@
         .yt-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .yt-artist { font-size: 11px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        /* IOS WIDGETS */
         .ios-widget-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
         .ios-card {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
@@ -106,7 +107,7 @@
         @keyframes pingPongScroll { 0%, 25% { transform: translateX(0); } 75%, 100% { transform: translateX(var(--scroll-distance)); } }
         #immersive-title-wrapper { mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); overflow: hidden; }
 
-        /* LYRICS */
+        /* LYRICS & TRANSLATION */
         #lyrics-container {
             position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
             display: flex; flex-direction: column; align-items: center; overflow-y: scroll; scroll-behavior: smooth;
@@ -173,7 +174,9 @@
 
         <main>
             <section id="music-section" class="section-page active">
-                <div id="stories-container" class="stories-scroll-container"></div>
+                <div id="stories-container" class="stories-scroll-container">
+                    <p class="text-xs text-gray-500 px-2">Loading stories...</p>
+                </div>
 
                 <h2 id="home-greeting" class="text-2xl font-bold mb-4 px-1">Good Evening</h2>
                 <div id="home-history-grid" class="yt-grid-mobile-fix mb-8"></div>
@@ -343,6 +346,7 @@
 
     <script>
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
+        // USING RAW GITHUB LINKS (NO BLOB)
         const API = { 
             tracks: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/tracks.json", 
             artists: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/artist.json",
@@ -367,35 +371,44 @@
             showSection('music');
         });
 
-        // --- FETCH & INIT DATA ---
-        async function fetchData() {
+        // --- ROBUST FETCH ---
+        async function fetchWithFallback(url) {
             try {
-                // Fetch all 3 JSONs in parallel
-                const [tr, ar, vr] = await Promise.all([
-                    fetch(API.tracks).then(r => r.json()),
-                    fetch(API.artists).then(r => r.json()),
-                    fetch(API.videos).then(r => r.json())
-                ]);
+                // Add timestamp to prevent caching old JSON versions
+                const res = await fetch(url + '?t=' + Date.now());
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return await res.json();
+            } catch (e) {
+                console.error("Fetch failed for", url, e);
+                return null;
+            }
+        }
 
-                ARTISTS_FULL_LIST = ar;
-                USER_VIDEOS = vr;
+        async function fetchData() {
+            // Load each independent of others
+            const [tData, aData, vData] = await Promise.all([
+                fetchWithFallback(API.tracks),
+                fetchWithFallback(API.artists),
+                fetchWithFallback(API.videos)
+            ]);
 
-                // Create a Map for quick artist lookup
+            if (aData) ARTISTS_FULL_LIST = aData;
+            if (vData) USER_VIDEOS = vData;
+
+            if (tData && tData.tracks) {
                 const artistMap = {};
                 ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
 
-                // Process Tracks: Add unique ID and raw URLs
-                AURA_MAP = tr.tracks.map((t, index) => {
+                AURA_MAP = tData.tracks.map((t, index) => {
                     let coverUrl = "https://via.placeholder.com/300";
                     if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
                     else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
 
-                    // Audio URL correction for raw github
                     const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
 
                     return {
-                        ...t, // keep all original props
-                        internalId: `track_${index}_${Date.now()}`, // UNIQUE ID
+                        ...t,
+                        internalId: `track_${index}_${Date.now()}`, // Generate Safe Unique ID
                         artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
                         audioUrl: rawAudioUrl,
                         cover: coverUrl,
@@ -403,15 +416,11 @@
                         status: t.Status
                     };
                 });
-
-                renderStories();
-                renderHomePageWidgets();
-                renderHistoryGrid();
-
-            } catch (e) {
-                console.error("Data Load Error:", e);
-                showToast("Connection Error - Using Local Fallback if available");
             }
+
+            renderStories();
+            renderHomePageWidgets();
+            renderHistoryGrid();
         }
 
         function getDOMElements() {
@@ -436,11 +445,11 @@
             audioPlayer.src = t.audioUrl;
             audioPlayer.play().catch(e => console.log("Play error", e));
             
-            // Auto-Lyrics Check
             currentLyrics = []; 
             const lyricsCont = document.getElementById('lyrics-container');
             const cover = document.getElementById('immersive-cover');
             
+            // Auto Lyrics if available
             if(t.lrcUrl) {
                 isLyricsMode = true;
                 lyricsCont.classList.remove('hidden');
@@ -454,7 +463,6 @@
             }
 
             updateUI(t);
-            // Add to history (remove duplicates)
             listeningHistory = [internalId, ...listeningHistory.filter(x => x !== internalId)].slice(0, 20);
             saveLocalData();
             renderHistoryGrid();
@@ -465,11 +473,10 @@
             document.querySelectorAll('#player-artist, #immersive-artist, #share-card-artist').forEach(e => e.innerText = t.artist);
             document.querySelectorAll('#player-cover, #immersive-cover, #share-card-cover').forEach(e => e.src = t.cover);
             
-            // Marquee Logic
             const titleEl = document.getElementById('immersive-title');
             const wrapper = document.getElementById('immersive-title-wrapper');
             titleEl.classList.remove('scrolling'); titleEl.style.transform = 'translateX(0)';
-            void titleEl.offsetWidth; // force reflow
+            void titleEl.offsetWidth;
             
             if(titleEl.scrollWidth > wrapper.clientWidth) {
                 const dist = titleEl.scrollWidth - wrapper.clientWidth + 30; 
@@ -477,7 +484,6 @@
                 titleEl.classList.add('scrolling');
             }
 
-            // Adaptive Background Color
             const img = new Image(); img.crossOrigin = "anonymous"; img.src = t.cover;
             img.onload = () => { try { const c = new ColorThief().getColor(img); document.documentElement.style.setProperty('--primary', `rgb(${c[0]},${c[1]},${c[2]})`); } catch(e){} };
         }
@@ -485,7 +491,7 @@
         // --- RENDERERS ---
         function renderStories() {
             const container = document.getElementById('stories-container');
-            if(!USER_VIDEOS.length) { container.innerHTML = ""; return; }
+            if(!USER_VIDEOS || !USER_VIDEOS.length) { container.innerHTML = ""; return; }
             container.innerHTML = USER_VIDEOS.map(s => `
                 <div class="story-item" onclick="openStory(${s.id})">
                     <div class="story-bubble"><div class="story-inner">${STORY_EMOJIS[s.id]||"✨"}</div></div>
@@ -572,7 +578,7 @@
             else if(currentTrackData) artist = ARTISTS_FULL_LIST.find(a => (currentTrackData.artistId && a.id === currentTrackData.artistId) || a.name === currentTrackData.artist);
             
             if(!artist) {
-                // Try fuzzy search
+                // Fuzzy search
                 const q = document.getElementById('search-input').value.toLowerCase();
                 if(q.length > 2) artist = ARTISTS_FULL_LIST.find(a => a.name.toLowerCase().includes(q));
             }
