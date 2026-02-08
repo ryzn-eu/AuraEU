@@ -51,7 +51,7 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        /* --- PWA INSTALL BLOCKER (STILE VECCHIO FILE) --- */
+        /* --- PWA INSTALL BLOCKER --- */
         #install-blocker { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; 
             background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(15px); 
@@ -65,7 +65,6 @@
             40% {transform: translateY(-20px);} 
             60% {transform: translateY(-10px);} 
         }
-        .accent-text { color: #38bdf8; } /* Ciano per l'icona */
 
         /* --- WIDGETS --- */
         .yt-grid-mobile-fix { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 2rem; }
@@ -241,7 +240,7 @@
                         <button id="btn-logout" onclick="handleLogout()" class="text-xs bg-red-500/10 text-red-400 px-4 py-2 rounded-lg font-bold border border-red-500/20">Logout</button>
                     </div>
                 </div>
-                <h3 id="txt-history-title" class="font-bold mb-3 px-2">History</h3>
+                <h3 class="font-bold mb-3 px-2">History</h3>
                 <div id="history-list" class="space-y-2 pb-24"></div>
             </section>
         </main>
@@ -391,31 +390,6 @@
         let gyroEnabled = false;
         let currentLang = 'en';
 
-        // --- BACKUP DATA (FOR WHEN GITHUB JSON BREAKS) ---
-        const LOCAL_BACKUP_TRACKS = [
-            { "title": "8 Days of Christmas", "file": "8 Days of Christmas .mp3", "categoryID": "CR1" },
-            { "title": "A Little Love", "file": "A Little Love .mp3", "categoryID": "CR2" },
-            { "title": "All I Want for Christmas Is You", "file": "All I Want for Christmas Is You .mp3", "categoryID": "CR1" },
-            { "title": "Baby, It's Cold Outside", "file": "Baby, It's Cold Outside.mp3", "categoryID": "CR2" },
-            { "title": "Blue Christmas", "file": "Blue Christmas .mp3", "categoryID": "CR3" },
-            { "title": "Christmas", "file": "Christmas.mp3", "categoryID": "CR3" },
-            { "title": "Jingle Bell Rock", "file": "Jingle Bell Rock .mp3", "categoryID": "CR1" },
-            { "title": "Joy to the World", "file": "Joy to the World .mp3", "categoryID": "CR3" },
-            { "title": "Last Christmas", "file": "Last Christmas.mp3", "categoryID": "CR1" },
-            { "title": "Let It Snow!", "file": "Let It Snow!.mp3", "categoryID": "CR3" },
-            { "title": "Lonely This Christmas", "file": "Lonely This Christmas .mp3", "categoryID": "CR2" },
-            { "title": "Step Into Christmas", "file": "Step Into Christmas .mp3", "categoryID": "CR2" },
-            { "title": "White Christmas", "file": "White Christmas .mp3", "categoryID": "CR3" },
-            { "title": "Winter Wonderland", "file": "Winter Wonderland .mp3", "categoryID": "CR3" },
-            { "id": "Icy.030", "title": "Mi Fai..", "file": "mi fai.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/Mi%20Fai.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura", "Status": "New" },
-            { "id": "Icy.030", "title": "Aura official song", "file": "aura.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/aura.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
-            { "id": "Icy.030", "title": "Ton Silence", "file": "tons.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/tons.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
-            { "id": "Icy.030", "title": "Klein", "file": "klein.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/klein.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
-            { "id": "Icy.030", "title": "Asco", "file": "asco.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/asco.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" }
-        ];
-        const LOCAL_BACKUP_ARTISTS = [{ "id": "Icy.030", "name": "Icy.030", "bio": "Icy (born in 2002) is an Italian music producer...", "genre": "Trap / Elettronic", "imageUrl": "https://github.com/ryzn-eu/AuraEU/blob/main/artist/Icy.030.jpg?raw=true", "socials": { "instagram": "https://instagram.com/Icy.030" } }];
-        const LOCAL_BACKUP_VIDEOS = [{ "id": 1, "userName": "Ryzn Dev", "timestamp": "Now", "text": "Backup Mode Active", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/concentrazione_vis.mp4", "trackId": 3 }];
-
         // --- TRANSLATION DATA ---
         const TRANSLATIONS = {
             en:{
@@ -499,7 +473,7 @@
             showSection('music');
         });
 
-        // --- PWA LOGIC (RESTORED FROM OLD FILE) ---
+        // --- PWA LOGIC ---
         function checkPWAStatus() {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
             const blocker = document.getElementById('install-blocker');
@@ -513,20 +487,48 @@
         }
         window.forceRecheckPWA = () => window.location.reload();
 
-        // --- FETCH LOGIC ---
+        // --- FETCH LOGIC (CLEAN - NO BACKUP) ---
         async function fetchData() {
             try {
-                const [tr, ar, vr] = await Promise.all([
-                    fetch(API.tracks).then(r => r.json()),
-                    fetch(API.artists).then(r => r.json()),
-                    fetch(API.videos).then(r => r.json())
+                // Tenta di scaricare tutti i dati in parallelo
+                const [trResponse, arResponse, vrResponse] = await Promise.all([
+                    fetch(API.tracks),
+                    fetch(API.artists),
+                    fetch(API.videos)
                 ]);
+
+                // Se uno qualsiasi dei file non esiste (es. 404) o errore server, BLOCCA TUTTO.
+                if (!trResponse.ok || !arResponse.ok || !vrResponse.ok) {
+                    throw new Error("Errore Server: Impossibile scaricare i dati JSON.");
+                }
+
+                const tr = await trResponse.json();
+                const ar = await arResponse.json();
+                const vr = await vrResponse.json();
 
                 processData(tr.tracks, ar, vr);
 
             } catch (e) {
-                console.warn("Online JSON Failed. Switching to Backup.", e);
-                processData(LOCAL_BACKUP_TRACKS, LOCAL_BACKUP_ARTISTS, LOCAL_BACKUP_VIDEOS);
+                // NESSUN BACKUP. CRASH TOTALE INTENZIONALE.
+                console.error("CRITICAL ERROR: Online JSON Failed.", e);
+                document.body.innerHTML = `
+                    <div style="
+                        display: flex; 
+                        flex-direction: column; 
+                        justify-content: center; 
+                        align-items: center; 
+                        height: 100vh; 
+                        background-color: black; 
+                        color: red; 
+                        font-family: monospace; 
+                        text-align: center;
+                    ">
+                        <h1 style="font-size: 2rem;">SYSTEM OFFLINE</h1>
+                        <p style="color: white; margin-top: 10px;">Impossibile connettersi al database musicale.</p>
+                        <p style="color: gray; font-size: 0.8rem; margin-top: 5px;">${e.message}</p>
+                        <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: white; border: none; font-weight: bold; cursor: pointer;">Riprova</button>
+                    </div>
+                `;
             }
         }
 
@@ -575,11 +577,25 @@
         }
 
         // --- PLAYBACK ---
+        window.updateMediaSession = function() {
+             if(!('mediaSession' in navigator)) return;
+             const staticImage = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/icon-192x192.png";
+             navigator.mediaSession.metadata = new MediaMetadata({
+                 title: "Aura on Live",
+                 artist: "Aura Music",
+                 album: "Streaming",
+                 artwork: [{ src: staticImage, sizes: '192x192', type: 'image/png' }, { src: staticImage, sizes: '512x512', type: 'image/png' }]
+             });
+        }
+
         window.playTrack = (internalId) => {
             const t = AURA_MAP.find(x => x.internalId === internalId);
             if(!t) return;
             currentTrackData = t;
             audioPlayer.src = t.audioUrl;
+            
+            updateMediaSession();
+
             audioPlayer.play().catch(e => console.log("Play error", e));
             
             currentLyrics = []; 
@@ -637,6 +653,8 @@
 
         function renderHistoryGrid() {
             const list = listeningHistory.map(id => AURA_MAP.find(x => x.internalId === id)).filter(Boolean);
+            // Fallback vuoto se non c'è history o dati
+            if (!list.length && AURA_MAP.length === 0) return;
             const items = list.length >= 1 ? list.slice(0,6) : AURA_MAP.filter(t=>t.categoryID==='CR1').slice(0,6);
             
             document.getElementById('home-history-grid').innerHTML = items.map(t => 
@@ -816,7 +834,7 @@
         }
 
         // --- UTILS ---
-        window.showSection=(id)=>{ document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); document.getElementById(id+'-section').classList.add('active'); if(id==='music') renderHomePageWidgets(); if(id==='playlists') renderPlaylists(); };
+        window.showSection=(id)=>{ document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); document.getElementById(id+'-section').classList.add('active'); if(id==='music') renderHistoryGrid(); if(id==='playlists') renderPlaylists(); };
         window.enterImmersiveMode=()=>document.getElementById('immersive-mode').classList.remove('hidden');
         window.exitImmersiveMode=()=>document.getElementById('immersive-mode').classList.add('hidden');
         window.updateProgress=()=>{ if(audioPlayer.duration) document.querySelectorAll('#progress-bar, #progress-bar-immersive').forEach(e=>e.style.width=(audioPlayer.currentTime/audioPlayer.duration*100)+'%'); };
@@ -859,16 +877,11 @@
             document.getElementById('home-greeting').innerText = greet;
             document.getElementById('txt-saved-tracks').innerText = t.saved_tracks;
             document.getElementById('txt-sessions').innerText = t.sessions;
-            document.getElementById('txt-history-title').innerText = t.history;
             document.getElementById('btn-logout').innerText = t.logout;
             
             const profileTxt = loggedInUser ? `${t.status_user} ${loggedInUser.name}` : t.status_guest;
             document.getElementById('profile-info').innerText = profileTxt;
 
-            document.getElementById('txt-auth-welcome').innerText = t.auth_welcome;
-            document.getElementById('txt-auth-btn').innerText = t.auth_btn;
-            document.getElementById('btn-auth-close').innerText = t.btn_cancel;
-            
             document.getElementById('txt-capsule-title').innerText = t.caps_title;
             document.getElementById('txt-capsule-desc').innerText = t.caps_desc;
             document.getElementById('btn-capsule-seal').innerText = t.btn_seal;
