@@ -4,37 +4,168 @@
             "title": "8 Days of Christmas",
             "file": "8 Days of Christmas .mp3",
             "categoryID": "CR1",
-            "videoUrl": "https://dsvplay.com/e/57rfkob1zyyj" 
+            "videoUrl": "https://dsvplay.com/e/57rfkob1zyyj",
+            "originalLang": "en"
         },
         {
             "title": "A Little Love",
             "file": "A Little Love .mp3",
             "categoryID": "CR2",
-            "videoUrl": "https://dsvplay.com/e/r65vi6hxvikz" 
+            "videoUrl": "https://dsvplay.com/e/r65vi6hxvikz",
+            "originalLang": "en"
         },
         {
             "title": "All I Want for Christmas Is You",
             "file": "All I Want for Christmas Is You .mp3",
             "categoryID": "CR1",
-            "videoUrl": "https://dsvplay.com/e/bcixya91dr4a"
+            "videoUrl": "https://dsvplay.com/e/bcixya91dr4a",
+            "originalLang": "en"
         },
         {
             "title": "Baby, It's Cold Outside",
             "file": "Baby, It's Cold Outside.mp3",
             "categoryID": "CR2",
-            "videoUrl": "https://dsvplay.com/e/afaxf65uwzhe"
+            "videoUrl": "https://dsvplay.com/e/afaxf65uwzhe",
+            "originalLang": "en"
         },
         {
             "title": "Blue Christmas",
             "file": "Blue Christmas .mp3",
             "categoryID": "CR3",
-            "videoUrl": "https://dsvplay.com/e/yi2zk7lzbgs9"
+            "videoUrl": "https://dsvplay.com/e/yi2zk7lzbgs9",
+            "originalLang": "en"
         },
         {
             "title": "Christmas",
             "file": "Christmas.mp3",
             "categoryID": "CR3",
-            "videoUrl": "https://dsvplay.com/e/ie7cdcs7rwjy"
+            "videoUrl": "https://dsvplay.com/e/ie7cdcs7rwjy",
+            "originalLang": "en"
+        },
+        {
+            "title": "Jingle Bell Rock",
+            "file": "Jingle Bell Rock .mp3",
+            "categoryID": "CR1",
+            "videoUrl": "https://dsvplay.com/e/ooo0p5xey9xh",
+            "originalLang": "en"
+        },
+        {
+            "title": "Joy to the World",
+            "file": "Joy to the World .mp3",
+            "categoryID": "CR3",
+            "videoUrl": "https://dsvplay.com/e/g9g436dy4vys",
+            "originalLang": "en"
+        },
+        {
+            "title": "Last Christmas",
+            "file": "Last Christmas.mp3",
+            "categoryID": "CR1",
+            "videoUrl": "https://dsvplay.com/e/1myk0125xufu",
+            "originalLang": "en"
+        },
+        {
+            "title": "Let It Snow!",
+            "file": "Let It Snow!.mp3",
+            "categoryID": "CR3",
+            "videoUrl": "https://dsvplay.com/e/92uoly96u6nd",
+            "originalLang": "en"
+        },
+        {
+            "title": "Lonely This Christmas",
+            "file": "Lonely This Christmas .mp3",
+            "categoryID": "CR2",
+            "videoUrl": "https://dsvplay.com/e/hdbgt0vu74rn",
+            "originalLang": "en"
+        },
+        {
+            "title": "Step Into Christmas",
+            "file": "Step Into Christmas .mp3",
+            "categoryID": "CR2",
+            "videoUrl": "https://dsvplay.com/e/n6o2x1516a2i",
+            "originalLang": "en"
+        },
+        {
+            "title": "White Christmas",
+            "file": "White Christmas .mp3",
+            "categoryID": "CR3",
+            "videoUrl": "https://dsvplay.com/e/hly4485uowp8",
+            "originalLang": "en"
+        },
+        {
+            "title": "Winter Wonderland",
+            "file": "Winter Wonderland .mp3",
+            "categoryID": "CR3",
+            "videoUrl": "https://dsvplay.com/e/x9w70r8a9fwi",
+            "originalLang": "en"
+        },
+        {
+            "id": "Icy.030",
+            "title": "Mi Fai..",
+            "file": "mi fai.mp3",
+            "categoryID": "Ryzn Best",
+            "videoUrl": "",
+            "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/Mi%20Fai.lrc",
+            "artistId": "Icy.030",
+            "artist": "Icy.030",
+            "albumId": "Aura", 
+            "albumTitle": "Aura",
+            "originalLang": "it"
+        },
+        {
+            "id": "Icy.030",
+            "title": "Aura official song",
+            "file": "aura.mp3",
+            "categoryID": "Ryzn Best",
+            "videoUrl": "",
+            "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/aura.lrc",
+            "artistId": "Icy.030",
+            "artist": "Icy.030",
+            "albumId": "Aura", 
+            "albumTitle": "Aura",
+            "Status": "New",
+            "originalLang": "en"
+        },
+        {
+            "id": "Icy.030",
+            "title": "Ton Silence",
+            "file": "tons.mp3",
+            "categoryID": "Ryzn Best",
+            "videoUrl": "",
+            "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/tons.lrc",
+            "artistId": "Icy.030",
+            "artist": "Icy.030",
+            "albumId": "Aura", 
+            "albumTitle": "Aura",
+            "originalLang": "fr"
+        },
+        {
+            "id": "Icy.030",
+            "title": "Klein",
+            "file": "klein.mp3",
+            "categoryID": "Ryzn Best",
+            "videoUrl": "",
+            "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/klein.lrc",
+            "artistId": "Icy.030",
+            "artist": "Icy.030",
+            "albumId": "Aura", 
+            "albumTitle": "Aura",
+            "originalLang": "de"
+        },
+        {
+            "id": "Icy.030",
+            "title": "Asco",
+            "file": "asco.mp3",
+            "categoryID": "Ryzn Best",
+            "videoUrl": "",
+            "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/asco.lrc",
+            "artistId": "Icy.030",
+            "artist": "Icy.030",
+            "albumId": "Aura", 
+            "albumTitle": "Aura",
+            "originalLang": "es"
+        }
+    ]
+}            "videoUrl": "https://dsvplay.com/e/ie7cdcs7rwjy"
         },
         {
             "title": "Jingle Bell Rock",
