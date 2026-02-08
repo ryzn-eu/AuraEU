@@ -51,6 +51,22 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
+        /* --- PWA INSTALL BLOCKER (STILE VECCHIO FILE) --- */
+        #install-blocker { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; 
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(15px); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            padding: 2rem; text-align: center; transition: opacity 0.3s ease; 
+        }
+        #install-blocker.hidden { display: none !important; opacity: 0; pointer-events: none; }
+        .install-arrow { animation: bounce 2s infinite; } 
+        @keyframes bounce { 
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 
+            40% {transform: translateY(-20px);} 
+            60% {transform: translateY(-10px);} 
+        }
+        .accent-text { color: #38bdf8; } /* Ciano per l'icona */
+
         /* --- WIDGETS --- */
         .yt-grid-mobile-fix { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 2rem; }
         @media (min-width: 600px) { .yt-grid-mobile-fix { grid-template-columns: repeat(3, 1fr); } }
@@ -138,7 +154,6 @@
         .section-page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #visualizer-canvas { position: fixed; bottom: 0; left: 0; width: 100%; height: 30%; z-index: -1; pointer-events: none; opacity: 0.3; mask-image: linear-gradient(to top, black, transparent); }
-        #install-blocker.hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -147,10 +162,25 @@
     <canvas id="visualizer-canvas"></canvas>
     <div id="toast-container" class="fixed top-6 right-6 z-[200] flex flex-col gap-2"></div>
 
-    <div id="install-blocker" class="hidden fixed inset-0 bg-black flex flex-col items-center justify-center p-8 text-center z-[9999]">
-        <h2 class="text-3xl font-bold mb-4">Aura App</h2>
-        <p class="text-gray-400 mb-6">Install for full experience.</p>
-        <button onclick="window.location.reload()" class="text-sm underline text-white opacity-60">Tap if installed</button>
+    <div id="install-blocker" class="hidden">
+        <div class="max-w-md w-full bg-white/10 border border-white/20 p-8 rounded-3xl shadow-2xl relative backdrop-blur-md">
+            <div onclick="forceRecheckPWA()" class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 cursor-pointer hover:bg-white/20 transition">
+                <i data-lucide="download" class="w-10 h-10 text-cyan-400 install-arrow"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-white mb-4">Installa Aura</h2>
+            <p class="text-gray-300 mb-8 leading-relaxed">Per background audio continuo e l'esperienza completa, installa l'app.</p>
+            <div class="space-y-4 text-left bg-black/30 p-4 rounded-xl mb-6">
+                <div class="flex items-start gap-3">
+                    <span class="bg-white/20 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-1">1</span>
+                    <p class="text-sm text-gray-400">Tocca <span class="font-bold text-white">Condividi</span> <i data-lucide="share" class="w-3 h-3 inline"></i></p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="bg-white/20 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-1">2</span>
+                    <p class="text-sm text-gray-400">Seleziona <span class="font-bold text-white">"Aggiungi alla Schermata Home"</span></p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 cursor-pointer hover:text-white" onclick="forceRecheckPWA()">Tocca l'icona se hai già installato.</p>
+        </div>
     </div>
 
     <div id="audio-player-container"><audio id="audioPlayer" playsinline preload="auto" crossorigin="anonymous"></audio></div>
@@ -173,7 +203,9 @@
 
         <main>
             <section id="music-section" class="section-page active">
-                <div id="stories-container" class="stories-scroll-container"></div>
+                <div id="stories-container" class="stories-scroll-container">
+                    <p class="text-xs text-gray-500 px-2">Loading stories...</p>
+                </div>
 
                 <h2 id="home-greeting" class="text-2xl font-bold mb-4 px-1">Good Evening</h2>
                 <div id="home-history-grid" class="yt-grid-mobile-fix mb-8"></div>
@@ -209,7 +241,7 @@
                         <button id="btn-logout" onclick="handleLogout()" class="text-xs bg-red-500/10 text-red-400 px-4 py-2 rounded-lg font-bold border border-red-500/20">Logout</button>
                     </div>
                 </div>
-                <h3 class="font-bold mb-3 px-2">History</h3>
+                <h3 id="txt-history-title" class="font-bold mb-3 px-2">History</h3>
                 <div id="history-list" class="space-y-2 pb-24"></div>
             </section>
         </main>
@@ -359,7 +391,107 @@
         let gyroEnabled = false;
         let currentLang = 'en';
 
+        // --- BACKUP DATA (FOR WHEN GITHUB JSON BREAKS) ---
+        const LOCAL_BACKUP_TRACKS = [
+            { "title": "8 Days of Christmas", "file": "8 Days of Christmas .mp3", "categoryID": "CR1" },
+            { "title": "A Little Love", "file": "A Little Love .mp3", "categoryID": "CR2" },
+            { "title": "All I Want for Christmas Is You", "file": "All I Want for Christmas Is You .mp3", "categoryID": "CR1" },
+            { "title": "Baby, It's Cold Outside", "file": "Baby, It's Cold Outside.mp3", "categoryID": "CR2" },
+            { "title": "Blue Christmas", "file": "Blue Christmas .mp3", "categoryID": "CR3" },
+            { "title": "Christmas", "file": "Christmas.mp3", "categoryID": "CR3" },
+            { "title": "Jingle Bell Rock", "file": "Jingle Bell Rock .mp3", "categoryID": "CR1" },
+            { "title": "Joy to the World", "file": "Joy to the World .mp3", "categoryID": "CR3" },
+            { "title": "Last Christmas", "file": "Last Christmas.mp3", "categoryID": "CR1" },
+            { "title": "Let It Snow!", "file": "Let It Snow!.mp3", "categoryID": "CR3" },
+            { "title": "Lonely This Christmas", "file": "Lonely This Christmas .mp3", "categoryID": "CR2" },
+            { "title": "Step Into Christmas", "file": "Step Into Christmas .mp3", "categoryID": "CR2" },
+            { "title": "White Christmas", "file": "White Christmas .mp3", "categoryID": "CR3" },
+            { "title": "Winter Wonderland", "file": "Winter Wonderland .mp3", "categoryID": "CR3" },
+            { "id": "Icy.030", "title": "Mi Fai..", "file": "mi fai.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/Mi%20Fai.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura", "Status": "New" },
+            { "id": "Icy.030", "title": "Aura official song", "file": "aura.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/aura.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
+            { "id": "Icy.030", "title": "Ton Silence", "file": "tons.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/tons.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
+            { "id": "Icy.030", "title": "Klein", "file": "klein.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/klein.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" },
+            { "id": "Icy.030", "title": "Asco", "file": "asco.mp3", "categoryID": "Ryzn Best", "lrcUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/lyrics/asco.lrc", "artistId": "Icy.030", "artist": "Icy.030", "albumId": "Aura", "albumTitle": "Aura" }
+        ];
+        const LOCAL_BACKUP_ARTISTS = [{ "id": "Icy.030", "name": "Icy.030", "bio": "Icy (born in 2002) is an Italian music producer...", "genre": "Trap / Elettronic", "imageUrl": "https://github.com/ryzn-eu/AuraEU/blob/main/artist/Icy.030.jpg?raw=true", "socials": { "instagram": "https://instagram.com/Icy.030" } }];
+        const LOCAL_BACKUP_VIDEOS = [{ "id": 1, "userName": "Ryzn Dev", "timestamp": "Now", "text": "Backup Mode Active", "videoUrl": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos/concentrazione_vis.mp4", "trackId": 3 }];
+
+        // --- TRANSLATION DATA ---
+        const TRANSLATIONS = {
+            en:{
+                greeting_m:"Good Morning.", greeting_a:"Good Afternoon.", greeting_e:"Good Evening.",
+                saved_tracks:"Saved Tracks", sessions:"Sessions", profile:"Guest",
+                history:"History", logout:"Logout", auth_welcome:"Welcome", auth_btn:"Login Guest",
+                caps_title:"Time Capsule", caps_desc:"Seal this track.", btn_seal:"Seal", btn_cancel:"Cancel",
+                new_session:"New Session", add_session:"Add to Session", create:"Create", cancel:"Cancel",
+                rec_title:"Recommended", trend_title:"Trending Now", chill_title:"Relax & Chill", class_title:"Classics",
+                new_release: "Official New Release",
+                status_guest:"Guest", status_user:"User:"
+            },
+            it:{
+                greeting_m:"Buongiorno.", greeting_a:"Buon Pomeriggio.", greeting_e:"Buonasera.",
+                saved_tracks:"Brani Salvati", sessions:"Sessioni", profile:"Ospite",
+                history:"Cronologia", logout:"Esci", auth_welcome:"Benvenuto", auth_btn:"Entra come Ospite",
+                caps_title:"Capsula Temporale", caps_desc:"Sigilla il brano.", btn_seal:"Sigilla", btn_cancel:"Annulla",
+                new_session:"Nuova Sessione", add_session:"Aggiungi a...", create:"Crea", cancel:"Annulla",
+                rec_title:"Consigliati", trend_title:"In Tendenza", chill_title:"Relax", class_title:"Classici",
+                new_release: "Ultima Uscita Ufficiale",
+                status_guest:"Ospite", status_user:"Utente:"
+            },
+            ro:{
+                greeting_m:"Bună Dimineața.", greeting_a:"Bună Ziua.", greeting_e:"Bună Seara.",
+                saved_tracks:"Piese Salvate", sessions:"Sesiuni", profile:"Oaspete",
+                history:"Istoric", logout:"Deconectare", auth_welcome:"Bine ai venit", auth_btn:"Intră ca Oaspete",
+                caps_title:"Capsula Timpului", caps_desc:"Sigilează piesa.", btn_seal:"Sigilează", btn_cancel:"Anulează",
+                new_session:"Sesiune Nouă", add_session:"Adaugă...", create:"Creează", cancel:"Anulează",
+                rec_title:"Recomandate", trend_title:"În Tendințe", chill_title:"Relaxare", class_title:"Clasice",
+                new_release: "Ultima Lansare",
+                status_guest:"Oaspete", status_user:"Utilizator:"
+            },
+            de:{
+                greeting_m:"Guten Morgen.", greeting_a:"Guten Tag.", greeting_e:"Guten Abend.",
+                saved_tracks:"Gespeicherte", sessions:"Sitzungen", profile:"Gast",
+                history:"Verlauf", logout:"Abmelden", auth_welcome:"Willkommen", auth_btn:"Als Gast",
+                caps_title:"Zeitkapsel", caps_desc:"Versiegeln.", btn_seal:"Versiegeln", btn_cancel:"Abbrechen",
+                new_session:"Neue Sitzung", add_session:"Hinzufügen...", create:"Erstellen", cancel:"Abbrechen",
+                rec_title:"Empfohlen", trend_title:"Im Trend", chill_title:"Entspannung", class_title:"Klassiker",
+                new_release: "Neueste Veröffentlichung",
+                status_guest:"Gast", status_user:"Benutzer:"
+            },
+            es:{
+                greeting_m:"Buenos Días.", greeting_a:"Buenas Tardes.", greeting_e:"Buenas Noches.",
+                saved_tracks:"Guardados", sessions:"Sesiones", profile:"Invitado",
+                history:"Historial", logout:"Salir", auth_welcome:"Bienvenido", auth_btn:"Entrar",
+                caps_title:"Cápsula", caps_desc:"Sellar pista.", btn_seal:"Sellar", btn_cancel:"Cancelar",
+                new_session:"Nueva Sesión", add_session:"Añadir a...", create:"Crear", cancel:"Cancelar",
+                rec_title:"Recomendados", trend_title:"Tendencias", chill_title:"Relax", class_title:"Clásicos",
+                new_release: "Último Lanzamiento",
+                status_guest:"Invitado", status_user:"Usuario:"
+            },
+            ru:{
+                greeting_m:"Доброе утро.", greeting_a:"Добрый день.", greeting_e:"Добрый вечер.",
+                saved_tracks:"Сохраненные", sessions:"Сессии", profile:"Гость",
+                history:"История", logout:"Выйти", auth_welcome:"Добро пожаловать", auth_btn:"Войти",
+                caps_title:"Капсула", caps_desc:"Запечатать.", btn_seal:"Запечатать", btn_cancel:"Отмена",
+                new_session:"Новая сессия", add_session:"Добавить...", create:"Создать", cancel:"Отмена",
+                rec_title:"Рекомендации", trend_title:"В тренде", chill_title:"Релакс", class_title:"Классика",
+                new_release: "Новый Релиз",
+                status_guest:"Гость", status_user:"Польз.:"
+            },
+            ar:{
+                greeting_m:"صباح الخير", greeting_a:"مساء الخير", greeting_e:"مساء الخير",
+                saved_tracks:"المحفوظات", sessions:"الجلسات", profile:"زائر",
+                history:"السجل", logout:"خروج", auth_welcome:"أهلاً", auth_btn:"دخول",
+                caps_title:"الكبسولة", caps_desc:"إغلاق.", btn_seal:"إغلاق", btn_cancel:"إلغاء",
+                new_session:"جلسة جديدة", add_session:"إضافة...", create:"إنشاء", cancel:"إلغاء",
+                rec_title:"موصى به", trend_title:"رائج", chill_title:"استرخاء", class_title:"كلاسيكيات",
+                new_release: "أحدث إصدار",
+                status_guest:"زائر", status_user:"مستخدم:"
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
+            checkPWAStatus();
             getDOMElements();
             loadLocalData();
             fetchData(); 
@@ -367,51 +499,65 @@
             showSection('music');
         });
 
+        // --- PWA LOGIC (RESTORED FROM OLD FILE) ---
+        function checkPWAStatus() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            const blocker = document.getElementById('install-blocker');
+            if (isStandalone) {
+                blocker.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            } else {
+                blocker.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        window.forceRecheckPWA = () => window.location.reload();
+
         // --- FETCH LOGIC ---
         async function fetchData() {
             try {
-                // Fetch independently to prevent full crash if one fails
-                const tReq = fetch(API.tracks).then(r => r.ok ? r.json() : null).catch(() => null);
-                const aReq = fetch(API.artists).then(r => r.ok ? r.json() : null).catch(() => null);
-                const vReq = fetch(API.videos).then(r => r.ok ? r.json() : null).catch(() => null);
+                const [tr, ar, vr] = await Promise.all([
+                    fetch(API.tracks).then(r => r.json()),
+                    fetch(API.artists).then(r => r.json()),
+                    fetch(API.videos).then(r => r.json())
+                ]);
 
-                const [tData, aData, vData] = await Promise.all([tReq, aReq, vReq]);
-
-                ARTISTS_FULL_LIST = aData || [];
-                USER_VIDEOS = vData || [];
-
-                if (tData && tData.tracks) {
-                    const artistMap = {};
-                    ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
-
-                    AURA_MAP = tData.tracks.map((t, index) => {
-                        let coverUrl = "https://via.placeholder.com/300";
-                        if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
-                        else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
-
-                        const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
-
-                        return {
-                            ...t,
-                            internalId: `track_${index}_${Date.now()}`, // Generated Unique ID
-                            artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
-                            audioUrl: rawAudioUrl,
-                            cover: coverUrl,
-                            lrcUrl: t.lrcUrl,
-                            status: t.Status
-                        };
-                    });
-                } else {
-                    console.error("Track data missing or invalid format");
-                }
-
-                renderStories();
-                renderHomePageWidgets();
-                renderHistoryGrid();
+                processData(tr.tracks, ar, vr);
 
             } catch (e) {
-                console.error("Critical Error", e);
+                console.warn("Online JSON Failed. Switching to Backup.", e);
+                processData(LOCAL_BACKUP_TRACKS, LOCAL_BACKUP_ARTISTS, LOCAL_BACKUP_VIDEOS);
             }
+        }
+
+        function processData(tracks, artists, videos) {
+            ARTISTS_FULL_LIST = artists || [];
+            USER_VIDEOS = videos || [];
+            
+            const artistMap = {};
+            ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
+
+            AURA_MAP = (tracks || []).map((t, index) => {
+                let coverUrl = "https://via.placeholder.com/300";
+                if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
+                else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
+
+                const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
+
+                return {
+                    ...t,
+                    internalId: `track_${index}_${Date.now()}`, 
+                    artist: artistMap[t.artistId] || t.artist || "Unknown Artist",
+                    audioUrl: rawAudioUrl,
+                    cover: coverUrl,
+                    lrcUrl: t.lrcUrl,
+                    status: t.Status
+                };
+            });
+
+            renderStories();
+            renderHomePageWidgets();
+            renderHistoryGrid();
         }
 
         function getDOMElements() {
@@ -440,7 +586,6 @@
             const lyricsCont = document.getElementById('lyrics-container');
             const cover = document.getElementById('immersive-cover');
             
-            // Auto Lyrics if available
             if(t.lrcUrl) {
                 isLyricsMode = true;
                 lyricsCont.classList.remove('hidden');
@@ -503,11 +648,11 @@
         }
 
         function renderHomePageWidgets() {
+            const t = TRANSLATIONS[currentLang];
             let html = "";
-            // Safe access to find New Release
             const newRelease = AURA_MAP.find(t => t.status === "New");
             if (newRelease) {
-                html += `<div class="mb-8"><h3 class="widget-block-title">Official New Release</h3>
+                html += `<div class="mb-8"><h3 class="widget-block-title">${t.new_release}</h3>
                 <div onclick="playTrack('${newRelease.internalId}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg">
                     <img src="${newRelease.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm">
                     <div class="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent"></div>
@@ -521,17 +666,16 @@
                  if(last) rec = AURA_MAP.filter(t => t.categoryID === last.categoryID && t.internalId !== last.internalId).slice(0, 8);
             }
             if(!rec.length) rec = AURA_MAP.slice(0, 8);
-            html += createWidgetBlock("Recommended", rec);
-            html += createWidgetBlock("Trending Now", AURA_MAP.filter(t => t.categoryID === 'CR1').slice(0, 8));
+            html += createWidgetBlock(t.rec_title, rec);
+            html += createWidgetBlock(t.trend_title, AURA_MAP.filter(t => t.categoryID === 'CR1').slice(0, 8));
             
-            // FAKE NUMBERS WIDGETS
             const visitors = Math.floor(Math.random() * 15000) + 10200; 
             const globalLikes = (2840000 + Math.floor(Date.now() / 5000)).toLocaleString();
 
             html += `<div class="ios-widget-row"><div class="ios-card"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="globe" class="w-4 h-4 text-green-400"></i></div><div><p class="text-2xl font-bold">${visitors.toLocaleString()}</p><p class="text-[10px] text-gray-400"><span class="live-dot"></span>Online</p></div></div></div><div class="ios-card" onclick="showSection('library')"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i></div><div><p class="text-2xl font-bold">${globalLikes}</p><p class="text-[10px] text-gray-400">Global Likes</p></div></div></div></div>`;
             
-            html += createWidgetBlock("Relax & Chill", AURA_MAP.filter(t => t.categoryID === 'CR2').slice(0, 8));
-            html += createWidgetBlock("Classics", AURA_MAP.filter(t => t.categoryID === 'CR3').slice(0, 8));
+            html += createWidgetBlock(t.chill_title, AURA_MAP.filter(t => t.categoryID === 'CR2').slice(0, 8));
+            html += createWidgetBlock(t.class_title, AURA_MAP.filter(t => t.categoryID === 'CR3').slice(0, 8));
             
             document.getElementById('home-widgets-container').innerHTML = html;
             lucide.createIcons();
@@ -672,7 +816,7 @@
         }
 
         // --- UTILS ---
-        window.showSection=(id)=>{ document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); document.getElementById(id+'-section').classList.add('active'); if(id==='music') renderHistoryGrid(); if(id==='playlists') renderPlaylists(); };
+        window.showSection=(id)=>{ document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); document.getElementById(id+'-section').classList.add('active'); if(id==='music') renderHomePageWidgets(); if(id==='playlists') renderPlaylists(); };
         window.enterImmersiveMode=()=>document.getElementById('immersive-mode').classList.remove('hidden');
         window.exitImmersiveMode=()=>document.getElementById('immersive-mode').classList.add('hidden');
         window.updateProgress=()=>{ if(audioPlayer.duration) document.querySelectorAll('#progress-bar, #progress-bar-immersive').forEach(e=>e.style.width=(audioPlayer.currentTime/audioPlayer.duration*100)+'%'); };
@@ -703,7 +847,38 @@
             likedTracks = new Set(likes);
             updateAuthUI(); 
         }
-        window.changeLanguage = (val) => { currentLang = val; saveLocalData(); }
+        window.changeLanguage = (val) => { currentLang = val; saveLocalData(); updateLanguageUI(); if(document.getElementById('music-section').classList.contains('active')) renderHomePageWidgets(); }
+
+        function updateLanguageUI() {
+            const t = TRANSLATIONS[currentLang];
+            const h = new Date().getHours();
+            let greet = t.greeting_e;
+            if(h >= 5 && h < 12) greet = t.greeting_m;
+            else if(h >= 12 && h < 18) greet = t.greeting_a;
+            
+            document.getElementById('home-greeting').innerText = greet;
+            document.getElementById('txt-saved-tracks').innerText = t.saved_tracks;
+            document.getElementById('txt-sessions').innerText = t.sessions;
+            document.getElementById('txt-history-title').innerText = t.history;
+            document.getElementById('btn-logout').innerText = t.logout;
+            
+            const profileTxt = loggedInUser ? `${t.status_user} ${loggedInUser.name}` : t.status_guest;
+            document.getElementById('profile-info').innerText = profileTxt;
+
+            document.getElementById('txt-auth-welcome').innerText = t.auth_welcome;
+            document.getElementById('txt-auth-btn').innerText = t.auth_btn;
+            document.getElementById('btn-auth-close').innerText = t.btn_cancel;
+            
+            document.getElementById('txt-capsule-title').innerText = t.caps_title;
+            document.getElementById('txt-capsule-desc').innerText = t.caps_desc;
+            document.getElementById('btn-capsule-seal').innerText = t.btn_seal;
+            document.getElementById('btn-capsule-cancel').innerText = t.btn_cancel;
+
+            document.getElementById('txt-new-session').innerText = t.new_session;
+            document.getElementById('txt-add-session').innerText = t.add_session;
+            document.getElementById('btn-session-create').innerText = t.create;
+            document.getElementById('btn-session-cancel').innerText = t.cancel;
+        }
 
         window.performSearch=()=>{ const q=document.getElementById('search-input').value.toLowerCase(); 
             let html = "";
