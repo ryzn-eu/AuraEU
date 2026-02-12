@@ -111,7 +111,7 @@
         }
         .story-username { font-size: 10px; color: #ccc; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* PLAYER IMMERSIVO */
+        /* PLAYER IMMERSIVO & LYRICS */
         #immersive-mode { background: radial-gradient(circle at center, #1e1b4b 0%, #000000 100%); }
         .immersive-art-container { width: 280px; height: 280px; position: relative; margin: 2rem auto; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden; }
         .art-square { width: 100%; height: 100%; border-radius: 24px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
@@ -121,7 +121,6 @@
         @keyframes pingPongScroll { 0%, 25% { transform: translateX(0); } 75%, 100% { transform: translateX(var(--scroll-distance)); } }
         #immersive-title-wrapper { mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); overflow: hidden; }
 
-        /* LYRICS */
         #lyrics-container {
             position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
             display: flex; flex-direction: column; align-items: center; overflow-y: scroll; scroll-behavior: smooth;
@@ -154,10 +153,12 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #visualizer-canvas { position: fixed; bottom: 0; left: 0; width: 100%; height: 30%; z-index: -1; pointer-events: none; opacity: 0.3; mask-image: linear-gradient(to top, black, transparent); }
 
-        /* --- SOCIAL FEED STYLES --- */
-        .social-card { background: rgba(255,255,255,0.03); border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; margin-bottom: 2rem; }
+        /* --- SOCIAL FEED & PROFILE --- */
+        .social-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; overflow: hidden; margin-bottom: 2rem; position: relative; }
         .social-media-container { position: relative; aspect-ratio: 9/16; background: #000; overflow: hidden; cursor: pointer; }
         @media (min-width: 640px) { .social-media-container { aspect-ratio: 16/9; } }
+        /* Language Modal Fix */
+        #language-modal .glass-panel { max-height: 80vh; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -173,17 +174,6 @@
             </div>
             <h2 class="text-3xl font-extrabold text-white mb-4">Install Aura</h2>
             <p class="text-gray-300 mb-8 leading-relaxed">For continuous background audio and the full experience, install the app.</p>
-            <div class="space-y-4 text-left bg-black/30 p-4 rounded-xl mb-6">
-                <div class="flex items-start gap-3">
-                    <span class="bg-white/20 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-1">1</span>
-                    <p class="text-sm text-gray-400">Tap <span class="font-bold text-white">Share</span> <i data-lucide="share" class="w-3 h-3 inline"></i></p>
-                </div>
-                <div class="flex items-start gap-3">
-                    <span class="bg-white/20 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-1">2</span>
-                    <p class="text-sm text-gray-400">Select <span class="font-bold text-white">"Add to Home Screen"</span></p>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500 cursor-pointer hover:text-white" onclick="forceRecheckPWA()">Tap the icon if already installed.</p>
         </div>
     </div>
 
@@ -201,24 +191,19 @@
                 </button>
                 <button onclick="showSection('playlists')" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="list-music" class="w-5 h-5"></i></button>
                 <button onclick="openSearchModal()" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="search" class="w-5 h-5"></i></button>
+                <button onclick="openLanguageModal()" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="globe" class="w-5 h-5"></i></button>
                 
-                <button onclick="openLanguageModal()" class="p-2.5 glass-panel rounded-full hover:bg-white/10">
-                    <i data-lucide="globe" class="w-5 h-5"></i>
-                </button>
-
                 <button onclick="handleProfileClick()" class="p-2.5 glass-panel rounded-full relative hover:bg-white/10">
                     <i data-lucide="user" class="w-5 h-5"></i>
                     <div id="auth-dot" class="hidden absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-black"></div>
                 </button>
             </div>
         </header>
-
         <main>
             <section id="music-section" class="section-page active">
                 <div id="stories-container" class="stories-scroll-container">
                     <p class="text-xs text-gray-500 px-2">Loading stories...</p>
                 </div>
-
                 <h2 id="home-greeting" class="text-2xl font-bold mb-4 px-1">Good Evening</h2>
                 <div id="home-history-grid" class="yt-grid-mobile-fix mb-8"></div>
                 <div id="home-widgets-container" class="space-y-8 pb-24"></div>
@@ -227,12 +212,11 @@
             <section id="social-section" class="section-page">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">Discovery Feed</h2>
-                    <button onclick="openUploadModal()" class="bg-violet-600 px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2">
+                    <button onclick="openUploadModal()" class="bg-violet-600 px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg hover:bg-violet-500 transition">
                         <i data-lucide="plus" class="w-4 h-4"></i> New Drop
                     </button>
                 </div>
-                <div id="social-feed-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-24">
-                    </div>
+                <div id="social-feed-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-24"></div>
             </section>
 
             <section id="playlists-section" class="section-page">
@@ -251,10 +235,9 @@
             <section id="profile-section" class="section-page">
                 <div class="glass-panel p-8 rounded-[40px] mb-6 text-center relative overflow-hidden">
                     <div id="profile-bg-blur" class="absolute inset-0 opacity-10 blur-3xl -z-10 bg-cover bg-center"></div>
-                    <img id="user-avatar-big" src="https://via.placeholder.com/150" class="w-28 h-28 rounded-full border-4 border-violet-500/30 object-cover mx-auto mb-4">
-                    
-                    <input type="text" id="edit-display-name" class="bg-transparent text-3xl font-black text-center w-full outline-none focus:text-violet-400" placeholder="Username">
-                    <textarea id="edit-bio" class="bg-transparent text-sm text-gray-400 text-center w-full mt-3 outline-none resize-none h-12" placeholder="Tell the world about your music..."></textarea>
+                    <img id="user-avatar-big" src="https://via.placeholder.com/150" class="w-28 h-28 rounded-full border-4 border-violet-500/30 object-cover mx-auto mb-4 shadow-xl">
+                    <input type="text" id="edit-display-name" class="bg-transparent text-3xl font-black text-center w-full outline-none focus:text-violet-400 placeholder-white/20" placeholder="Username">
+                    <textarea id="edit-bio" class="bg-transparent text-sm text-gray-400 text-center w-full mt-3 outline-none resize-none h-16 p-2" placeholder="Write something about your music..."></textarea>
                     
                     <div class="flex justify-center gap-8 mt-8 border-t border-white/5 pt-8">
                         <div class="text-center"><p class="font-black text-xl" id="count-followers">0</p><p class="text-[10px] uppercase tracking-tighter text-gray-500">Followers</p></div>
@@ -263,97 +246,14 @@
                     </div>
 
                     <div class="flex gap-3 mt-10">
-                        <button onclick="saveUserProfile()" class="flex-1 bg-white text-black py-4 rounded-2xl font-bold text-sm shadow-xl">Update Profile</button>
-                        <button onclick="handleLogoutReal()" class="px-8 bg-red-500/10 text-red-500 py-4 rounded-2xl font-bold text-sm border border-red-500/20">Sign Out</button>
+                        <button onclick="saveUserProfile()" class="flex-1 bg-white text-black py-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-gray-200 transition">Save Profile</button>
+                        <button onclick="handleLogoutReal()" class="px-8 bg-red-500/10 text-red-500 py-4 rounded-2xl font-bold text-sm border border-red-500/20 hover:bg-red-500/20 transition">Sign Out</button>
                     </div>
                 </div>
-                <h3 class="font-bold mb-4 px-2 flex items-center gap-2 text-gray-400"><i data-lucide="history" class="w-4 h-4"></i> Activity</h3>
+                <h3 class="font-bold mb-4 px-2 flex items-center gap-2 text-gray-400"><i data-lucide="history" class="w-4 h-4"></i> Recent Activity</h3>
                 <div id="history-list" class="space-y-2 pb-24"></div>
             </section>
         </main>
-    </div>
-
-    <div id="language-modal" class="fixed inset-0 bg-black/90 z-[220] hidden flex items-center justify-center p-6">
-        <div class="glass-panel p-6 rounded-3xl w-full max-w-sm text-center">
-            <h3 class="text-xl font-bold mb-4">Select Language</h3>
-            <select id="language-selector" onchange="changeLanguage(this.value); closeLanguageModal()" class="bg-white/10 w-full p-4 rounded-xl text-white outline-none border border-white/10">
-                <option value="en" class="bg-black">English</option>
-                <option value="it" class="bg-black">Italiano</option>
-                <option value="ro" class="bg-black">Română</option>
-                <option value="de" class="bg-black">Deutsch</option>
-                <option value="es" class="bg-black">Español</option>
-                <option value="py" class="bg-black">Русский</option>
-                <option value="ar" class="bg-black">العربية</option>
-            </select>
-            <button onclick="closeLanguageModal()" class="mt-6 text-sm text-gray-500">Close</button>
-        </div>
-    </div>
-
-    <div id="upload-modal" class="fixed inset-0 bg-black/90 z-[300] hidden flex items-center justify-center p-6 backdrop-blur-sm">
-        <div class="glass-panel p-6 rounded-3xl w-full max-w-md border border-white/10 relative">
-            <button onclick="closeUploadModal()" class="absolute top-4 right-4 p-2 opacity-70 hover:opacity-100"><i data-lucide="x"></i></button>
-            <h2 class="text-2xl font-bold mb-6 text-center">New Drop</h2>
-            <div class="space-y-4">
-                <input type="text" id="post-title" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none" placeholder="Track Title">
-                <input type="url" id="post-url" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none" placeholder="Media URL (mp3/mp4)">
-                <button onclick="createPost()" class="w-full py-3 bg-violet-600 rounded-xl font-bold mt-2">Publish</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="immersive-mode" class="fixed inset-0 z-[150] hidden flex flex-col justify-between p-6 pb-10 overflow-y-auto">
-        <div class="flex justify-between items-center mt-2">
-            <button onclick="exitImmersiveMode()" class="p-3 bg-white/5 rounded-full"><i data-lucide="chevron-down" class="w-6 h-6"></i></button>
-            <span class="text-[10px] font-bold tracking-widest uppercase opacity-50">Now Playing</span>
-            <button onclick="openShareModal()" class="p-3 bg-white/5 rounded-full"><i data-lucide="share-2" class="w-6 h-6"></i></button>
-        </div>
-
-        <div class="flex-1 flex flex-col items-center justify-center w-full">
-            <div class="immersive-art-container">
-                <img id="immersive-cover" src="" class="art-square" crossorigin="anonymous">
-                <div id="lyrics-container" class="hidden"><p class="text-gray-500 mt-20">Loading...</p></div>
-                <iframe id="immersive-video-player" class="art-square bg-black hidden" frameborder="0" allowfullscreen></iframe>
-                <button id="switch-to-video-btn" onclick="toggleImmersiveVisuals()" class="hidden absolute bottom-2 right-2 bg-black/80 p-2 rounded-full border border-white/20 z-10"><i data-lucide="video" class="w-4 h-4"></i></button>
-            </div>
-
-            <div class="text-center w-full px-4 mb-6">
-                <div id="immersive-title-wrapper" class="w-full h-10 flex justify-center items-center">
-                    <h2 id="immersive-title" class="text-2xl font-bold smart-scroller">Choose Track</h2>
-                </div>
-                <button onclick="openArtistProfile()" class="mt-1 flex items-center justify-center gap-1 mx-auto opacity-70 hover:opacity-100 transition">
-                     <p id="immersive-artist" class="text-lg text-gray-300 font-medium">Artist</p>
-                     <i data-lucide="info" class="w-3 h-3 text-cyan-400"></i>
-                </button>
-            </div>
-
-            <div class="w-full max-w-sm px-2 mb-8 group" id="progress-bar-immersive-container">
-                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden relative cursor-pointer">
-                    <div id="progress-bar-immersive" class="h-full bg-gradient-to-r from-violet-500 to-cyan-400 w-0 relative">
-                        <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full scale-0 group-hover:scale-100 transition-transform"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between w-full max-w-[280px] mb-8">
-                <button onclick="toggleLoop()" class="opacity-50"><i data-lucide="repeat" class="w-5 h-5"></i></button>
-                <button onclick="skipBackward()"><i data-lucide="skip-back" class="w-8 h-8 fill-current"></i></button>
-                <button onclick="togglePlayPause()" class="w-16 h-16 bg-white text-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition">
-                    <i id="immersive-play-icon" data-lucide="play" class="w-7 h-7 fill-current ml-1"></i>
-                </button>
-                <button onclick="skipForward()"><i data-lucide="skip-forward" class="w-8 h-8 fill-current"></i></button>
-                <div class="flex flex-col gap-1 items-center">
-                    <button onclick="toggleLike()" id="like-button-immersive" class="opacity-50 hover:text-red-500"><i data-lucide="heart" class="w-5 h-5"></i></button>
-                    <button onclick="openAddToPlaylistModal()" class="opacity-50 hover:text-white"><i data-lucide="list-plus" class="w-5 h-5"></i></button>
-                </div>
-            </div>
-
-            <div class="controls-pill">
-                <button onclick="toggleAmbientMenu()" id="btn-ambient" class="pill-btn"><i data-lucide="cloud-rain" class="w-5 h-5"></i><span>Focus</span></button>
-                <button onclick="toggleTranslation()" id="btn-translate" class="pill-btn"><i data-lucide="languages" class="w-5 h-5"></i><span>Translate</span></button>
-                <button onclick="toggleGyro()" id="btn-gyro" class="pill-btn"><i data-lucide="smartphone" class="w-5 h-5"></i><span>Gyro</span></button>
-                <button onclick="openCapsuleModal()" class="pill-btn"><i data-lucide="hourglass" class="w-5 h-5"></i><span>Capsule</span></button>
-            </div>
-        </div>
     </div>
 
     <div onclick="enterImmersiveMode()" class="player-bar-new cursor-pointer">
@@ -430,12 +330,101 @@
         </div>
     </div>
 
+    <div id="upload-modal" class="fixed inset-0 bg-black/90 z-[300] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="glass-panel p-6 rounded-3xl w-full max-w-md border border-white/10 relative">
+            <button onclick="closeUploadModal()" class="absolute top-4 right-4 p-2 opacity-70 hover:opacity-100"><i data-lucide="x"></i></button>
+            <h2 class="text-2xl font-bold mb-6 text-center">New Drop</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-400 ml-1">Track Title</label>
+                    <input type="text" id="post-title" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-violet-500 transition" placeholder="Es. Midnight Vibes">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 ml-1">Video/Audio URL (mp4/mp3)</label>
+                    <input type="url" id="post-url" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-violet-500 transition" placeholder="https://...">
+                    <p class="text-[10px] text-gray-500 mt-1 ml-1">*Incolla un link diretto al file per ora</p>
+                </div>
+                <button onclick="createPost()" class="w-full py-3 bg-white text-black rounded-xl font-bold mt-2 hover:bg-gray-200 transition">Publish</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="language-modal" class="fixed inset-0 bg-black/90 z-[220] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="glass-panel p-6 rounded-3xl w-full max-w-sm border border-white/10 relative text-center">
+            <h3 class="text-xl font-bold mb-4">Select Language</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="changeLanguage('en'); closeLanguageModal()" class="p-3 bg-white/10 rounded-xl hover:bg-white/20">English</button>
+                <button onclick="changeLanguage('it'); closeLanguageModal()" class="p-3 bg-white/10 rounded-xl hover:bg-white/20">Italiano</button>
+                <button onclick="changeLanguage('ro'); closeLanguageModal()" class="p-3 bg-white/10 rounded-xl hover:bg-white/20">Română</button>
+                <button onclick="changeLanguage('de'); closeLanguageModal()" class="p-3 bg-white/10 rounded-xl hover:bg-white/20">Deutsch</button>
+                <button onclick="changeLanguage('es'); closeLanguageModal()" class="p-3 bg-white/10 rounded-xl hover:bg-white/20">Español</button>
+                <button onclick="changeLanguage('py'); closeLanguageModal()" class="p-3 bg-white/10 rounded-xl hover:bg-white/20">Русский</button>
+                <button onclick="changeLanguage('ar'); closeLanguageModal()" class="p-3 bg-white/10 rounded-xl hover:bg-white/20">العربية</button>
+            </div>
+            <button onclick="closeLanguageModal()" class="mt-6 text-sm text-gray-500">Close</button>
+        </div>
+    </div>
+
     <div id="capsule-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-8 rounded-3xl w-full max-w-sm border border-amber-500/30 text-center"><h3 class="text-xl font-bold">Time Capsule</h3><p class="text-xs text-gray-400 mb-4">Seal this track.</p><button onclick="confirmTimeCapsule()" class="bg-amber-600 w-full py-2 rounded-lg font-bold">Seal</button><button onclick="closeCapsuleModal()" class="mt-3 text-xs opacity-50">Close</button></div></div>
     <div id="share-modal" class="fixed inset-0 bg-black/90 z-[210] hidden flex flex-col items-center justify-center p-6"><div id="share-card-content" class="w-64 bg-gray-900 rounded-xl p-4 flex flex-col items-center border border-white/10"><img id="share-card-cover" src="" class="w-32 h-32 rounded-full mb-4"><h2 id="share-card-title" class="font-bold text-center text-sm"></h2><div id="share-qr-container" class="mt-4 bg-white p-1 rounded"></div></div><button onclick="closeShareModal()" class="mt-6 text-sm opacity-50">X</button></div>
     <div id="search-modal" class="fixed inset-0 bg-black/90 z-[200] hidden flex flex-col p-4"><div class="flex gap-2 mb-4"><input type="text" id="search-input" oninput="performSearch()" placeholder="Search artist or track..." class="flex-1 bg-white/10 p-3 rounded-xl text-white outline-none"><button onclick="closeSearchModal()" class="p-3">X</button></div><div id="search-results" class="flex-1 overflow-y-auto space-y-2"></div></div>
     <div id="create-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3>New Session</h3><input type="text" id="playlist-name-input" class="w-full p-3 rounded-xl bg-white/10 mt-2 mb-4 text-white"><button onclick="createPlaylist()" class="bg-white text-black px-4 py-2 rounded-lg font-bold">Create</button><button onclick="closeCreatePlaylistModal()" class="ml-2 text-xs">Cancel</button></div></div>
     <div id="add-to-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3>Add to...</h3><div id="playlist-selection-list" class="max-h-60 overflow-y-auto space-y-2 mt-4"></div><button onclick="closeAddToPlaylistModal()" class="mt-4 w-full text-xs">Close</button></div></div>
 
+    <div id="immersive-mode" class="fixed inset-0 z-[150] hidden flex flex-col justify-between p-6 pb-10 overflow-y-auto">
+        <div class="flex justify-between items-center mt-2">
+            <button onclick="exitImmersiveMode()" class="p-3 bg-white/5 rounded-full"><i data-lucide="chevron-down" class="w-6 h-6"></i></button>
+            <span class="text-[10px] font-bold tracking-widest uppercase opacity-50">Now Playing</span>
+            <button onclick="openShareModal()" class="p-3 bg-white/5 rounded-full"><i data-lucide="share-2" class="w-6 h-6"></i></button>
+        </div>
+
+        <div class="flex-1 flex flex-col items-center justify-center w-full">
+            <div class="immersive-art-container">
+                <img id="immersive-cover" src="" class="art-square" crossorigin="anonymous">
+                <div id="lyrics-container" class="hidden"><p class="text-gray-500 mt-20">Loading...</p></div>
+                <iframe id="immersive-video-player" class="art-square bg-black hidden" frameborder="0" allowfullscreen></iframe>
+                <button id="switch-to-video-btn" onclick="toggleImmersiveVisuals()" class="hidden absolute bottom-2 right-2 bg-black/80 p-2 rounded-full border border-white/20 z-10"><i data-lucide="video" class="w-4 h-4"></i></button>
+            </div>
+
+            <div class="text-center w-full px-4 mb-6">
+                <div id="immersive-title-wrapper" class="w-full h-10 flex justify-center items-center">
+                    <h2 id="immersive-title" class="text-2xl font-bold smart-scroller">Choose Track</h2>
+                </div>
+                <button onclick="openArtistProfile()" class="mt-1 flex items-center justify-center gap-1 mx-auto opacity-70 hover:opacity-100 transition">
+                     <p id="immersive-artist" class="text-lg text-gray-300 font-medium">Artist</p>
+                     <i data-lucide="info" class="w-3 h-3 text-cyan-400"></i>
+                </button>
+            </div>
+
+            <div class="w-full max-w-sm px-2 mb-8 group" id="progress-bar-immersive-container">
+                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden relative cursor-pointer">
+                    <div id="progress-bar-immersive" class="h-full bg-gradient-to-r from-violet-500 to-cyan-400 w-0 relative">
+                        <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full scale-0 group-hover:scale-100 transition-transform"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between w-full max-w-[280px] mb-8">
+                <button onclick="toggleLoop()" class="opacity-50"><i data-lucide="repeat" class="w-5 h-5"></i></button>
+                <button onclick="skipBackward()"><i data-lucide="skip-back" class="w-8 h-8 fill-current"></i></button>
+                <button onclick="togglePlayPause()" class="w-16 h-16 bg-white text-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition">
+                    <i id="immersive-play-icon" data-lucide="play" class="w-7 h-7 fill-current ml-1"></i>
+                </button>
+                <button onclick="skipForward()"><i data-lucide="skip-forward" class="w-8 h-8 fill-current"></i></button>
+                <div class="flex flex-col gap-1 items-center">
+                    <button onclick="toggleLike()" id="like-button-immersive" class="opacity-50 hover:text-red-500"><i data-lucide="heart" class="w-5 h-5"></i></button>
+                    <button onclick="openAddToPlaylistModal()" class="opacity-50 hover:text-white"><i data-lucide="list-plus" class="w-5 h-5"></i></button>
+                </div>
+            </div>
+
+            <div class="controls-pill">
+                <button onclick="toggleAmbientMenu()" id="btn-ambient" class="pill-btn"><i data-lucide="cloud-rain" class="w-5 h-5"></i><span>Focus</span></button>
+                <button onclick="toggleTranslation()" id="btn-translate" class="pill-btn"><i data-lucide="languages" class="w-5 h-5"></i><span>Translate</span></button>
+                <button onclick="toggleGyro()" id="btn-gyro" class="pill-btn"><i data-lucide="smartphone" class="w-5 h-5"></i><span>Gyro</span></button>
+                <button onclick="openCapsuleModal()" class="pill-btn"><i data-lucide="hourglass" class="w-5 h-5"></i><span>Capsule</span></button>
+            </div>
+        </div>
+    </div>
     <script>
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
         const API = { 
@@ -588,7 +577,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, set, update, push, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // --- TUE CHIAVI FIREBASE ---
+        // --- TUE CHIAVI FIREBASE INTEGRATE ---
         const firebaseConfig = {
             apiKey: "AIzaSyBjQC2dOKySeHPEJCVjjEEHyHEUy19DRPY",
             authDomain: "auramusic-hrz.firebaseapp.com",
@@ -599,6 +588,7 @@
             appId: "1:185420108806:web:947edf581c9f7bbb661f87",
             measurementId: "G-RBJ5CPXCQS"
         };
+        // -----------------------------------------------------
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -749,26 +739,5 @@
             }
         });
     </script>
-    
-    <div id="language-modal" class="fixed inset-0 bg-black/90 z-[220] hidden flex items-center justify-center p-6">
-        <div class="glass-panel p-6 rounded-3xl w-full max-w-sm text-center">
-            <h3 class="text-xl font-bold mb-4">Select Language</h3>
-            <select id="language-selector" onchange="changeLanguage(this.value); closeLanguageModal()" class="bg-white/10 w-full p-4 rounded-xl text-white outline-none border border-white/10 text-center">
-                <option value="en" class="bg-black">English</option>
-                <option value="it" class="bg-black">Italiano</option>
-                <option value="ro" class="bg-black">Română</option>
-                <option value="de" class="bg-black">Deutsch</option>
-                <option value="es" class="bg-black">Español</option>
-                <option value="py" class="bg-black">Русский</option>
-                <option value="ar" class="bg-black">العربية</option>
-            </select>
-            <button onclick="closeLanguageModal()" class="mt-6 text-sm text-gray-500">Close</button>
-        </div>
-    </div>
-    <script>
-        window.openLanguageModal = () => document.getElementById('language-modal').classList.remove('hidden');
-        window.closeLanguageModal = () => document.getElementById('language-modal').classList.add('hidden');
-    </script>
-
 </body>
 </html>
