@@ -66,7 +66,7 @@
             60% {transform: translateY(-10px);} 
         }
 
-        /* --- WIDGETS --- */
+        /* --- WIDGETS & CARDS --- */
         .yt-grid-mobile-fix { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 2rem; }
         @media (min-width: 600px) { .yt-grid-mobile-fix { grid-template-columns: repeat(3, 1fr); } }
 
@@ -153,6 +153,12 @@
         .section-page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #visualizer-canvas { position: fixed; bottom: 0; left: 0; width: 100%; height: 30%; z-index: -1; pointer-events: none; opacity: 0.3; mask-image: linear-gradient(to top, black, transparent); }
+
+        /* SOCIAL PROFILE STYLES */
+        .profile-stat-box { text-align: center; }
+        .profile-stat-num { font-size: 1.1rem; font-weight: 700; display: block; }
+        .profile-stat-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+        .profile-header-gradient { background: linear-gradient(to bottom, rgba(139, 92, 246, 0.2), transparent); padding-bottom: 2rem; border-radius: 0 0 30px 30px; margin: -1.5rem -1rem 1rem -1rem; padding-top: 2rem; }
     </style>
 </head>
 <body>
@@ -168,16 +174,6 @@
             </div>
             <h2 class="text-3xl font-extrabold text-white mb-4">Install Aura</h2>
             <p class="text-gray-300 mb-8 leading-relaxed">For continuous background audio and the full experience, install the app.</p>
-            <div class="space-y-4 text-left bg-black/30 p-4 rounded-xl mb-6">
-                <div class="flex items-start gap-3">
-                    <span class="bg-white/20 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-1">1</span>
-                    <p class="text-sm text-gray-400">Tap <span class="font-bold text-white">Share</span> <i data-lucide="share" class="w-3 h-3 inline"></i></p>
-                </div>
-                <div class="flex items-start gap-3">
-                    <span class="bg-white/20 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-1">2</span>
-                    <p class="text-sm text-gray-400">Select <span class="font-bold text-white">"Add to Home Screen"</span></p>
-                </div>
-            </div>
             <p class="text-xs text-gray-500 cursor-pointer hover:text-white" onclick="forceRecheckPWA()">Tap the icon if already installed.</p>
         </div>
     </div>
@@ -193,7 +189,8 @@
             <div class="flex gap-2">
                 <button onclick="showSection('playlists')" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="list-music" class="w-5 h-5"></i></button>
                 <button onclick="openSearchModal()" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="search" class="w-5 h-5"></i></button>
-                <button onclick="loggedInUser ? showSection('profile') : openAuthModal()" class="p-2.5 glass-panel rounded-full relative hover:bg-white/10">
+                <button onclick="openLanguageModal()" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="globe" class="w-5 h-5"></i></button>
+                <button onclick="handleProfileClick()" class="p-2.5 glass-panel rounded-full relative hover:bg-white/10">
                     <i data-lucide="user" class="w-5 h-5"></i>
                     <div id="auth-dot" class="hidden absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-black"></div>
                 </button>
@@ -203,11 +200,9 @@
         <main>
             <section id="music-section" class="section-page active">
                 <div id="social-feed-section"></div>
-
                 <div id="stories-container" class="stories-scroll-container">
                     <p class="text-xs text-gray-500 px-2">Loading stories...</p>
                 </div>
-
                 <h2 id="home-greeting" class="text-2xl font-bold mb-4 px-1">Good Evening</h2>
                 <div id="home-history-grid" class="yt-grid-mobile-fix mb-8"></div>
                 <div id="home-widgets-container" class="space-y-8 pb-24"></div>
@@ -227,23 +222,37 @@
             </section>
 
             <section id="profile-section" class="section-page">
-                <div class="glass-panel p-6 rounded-3xl mb-6 text-center">
-                    <h3 id="profile-info" class="text-xl font-bold mt-2">Guest</h3>
-                    <div class="flex justify-center gap-3 flex-wrap mt-4">
-                        <select id="language-selector" onchange="changeLanguage(this.value)" class="bg-black/30 text-xs p-2 rounded-lg border border-white/10 text-white">
-                            <option value="en">English</option>
-                            <option value="it">Italiano</option>
-                            <option value="ro">Română</option>
-                            <option value="de">Deutsch</option>
-                            <option value="es">Español</option>
-                            <option value="py">Русский</option>
-                            <option value="ar">العربية</option>
-                        </select>
-                        <button id="btn-logout" onclick="handleLogout()" class="text-xs bg-red-500/10 text-red-400 px-4 py-2 rounded-lg font-bold border border-red-500/20">Logout</button>
+                <div class="profile-header-gradient flex flex-col items-center">
+                    <div class="relative">
+                         <img id="sp-avatar" src="https://via.placeholder.com/150" class="w-28 h-28 rounded-full border-4 border-black object-cover shadow-2xl">
+                         <div id="sp-badge" class="absolute bottom-0 right-0 bg-blue-500 text-white text-[10px] p-1 rounded-full border-2 border-black"><i data-lucide="check" class="w-3 h-3"></i></div>
+                    </div>
+                    <h2 id="sp-name" class="text-2xl font-bold mt-4">Guest User</h2>
+                    <p id="sp-handle" class="text-sm text-gray-400">@guest</p>
+                    
+                    <div class="flex gap-8 mt-6">
+                        <div class="profile-stat-box"><span id="sp-posts" class="profile-stat-num">0</span><span class="profile-stat-label">Drops</span></div>
+                        <div class="profile-stat-box"><span id="sp-followers" class="profile-stat-num">0</span><span class="profile-stat-label">Followers</span></div>
+                        <div class="profile-stat-box"><span id="sp-following" class="profile-stat-num">0</span><span class="profile-stat-label">Following</span></div>
+                    </div>
+
+                    <div class="flex gap-3 mt-6">
+                        <button onclick="openEditProfile()" class="px-6 py-2 bg-white/10 rounded-full font-bold text-sm border border-white/20">Edit Profile</button>
+                        <button onclick="handleLogout()" class="px-6 py-2 bg-red-500/10 text-red-500 rounded-full font-bold text-sm border border-red-500/20">Logout</button>
                     </div>
                 </div>
-                <h3 class="font-bold mb-3 px-2">History</h3>
-                <div id="history-list" class="space-y-2 pb-24"></div>
+
+                <div class="px-4 mt-2 mb-6">
+                    <p id="sp-bio" class="text-center text-sm text-gray-300 leading-relaxed max-w-md mx-auto">No bio yet.</p>
+                </div>
+
+                <div class="flex border-b border-white/10 mb-6">
+                    <button onclick="switchProfileTab('drops')" id="tab-drops" class="flex-1 py-3 text-center border-b-2 border-cyan-400 font-bold">My Drops</button>
+                    <button onclick="switchProfileTab('likes')" id="tab-likes" class="flex-1 py-3 text-center border-b-2 border-transparent text-gray-500">Liked</button>
+                </div>
+
+                <div id="profile-content-area" class="pb-24 grid grid-cols-2 gap-3">
+                    </div>
             </section>
         </main>
     </div>
@@ -251,6 +260,39 @@
     <button onclick="openUploadModal()" class="fixed bottom-24 right-6 w-14 h-14 bg-gradient-to-r from-violet-600 to-cyan-500 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition z-50">
         <i data-lucide="plus" class="w-8 h-8 text-white"></i>
     </button>
+
+    <div id="edit-profile-modal" class="fixed inset-0 bg-black/90 z-[300] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="glass-panel p-6 rounded-3xl w-full max-w-md border border-white/10 relative">
+            <button onclick="closeEditProfile()" class="absolute top-4 right-4 p-2 opacity-70 hover:opacity-100"><i data-lucide="x"></i></button>
+            <h2 class="text-xl font-bold mb-6">Edit Profile</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-400 ml-1">Display Name</label>
+                    <input type="text" id="edit-name" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 ml-1">Bio</label>
+                    <textarea id="edit-bio" rows="3" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none"></textarea>
+                </div>
+                <button onclick="saveProfileChanges()" class="w-full py-3 bg-white text-black rounded-xl font-bold mt-2">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="language-modal" class="fixed inset-0 bg-black/80 z-[250] hidden flex items-center justify-center p-6 backdrop-blur-md">
+        <div class="glass-panel p-6 rounded-3xl w-full max-w-sm text-center">
+            <h3 class="text-xl font-bold mb-4">Select Language</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="changeLanguage('en'); closeLanguageModal()" class="p-3 bg-white/10 rounded-lg hover:bg-white/20">English</button>
+                <button onclick="changeLanguage('it'); closeLanguageModal()" class="p-3 bg-white/10 rounded-lg hover:bg-white/20">Italiano</button>
+                <button onclick="changeLanguage('es'); closeLanguageModal()" class="p-3 bg-white/10 rounded-lg hover:bg-white/20">Español</button>
+                <button onclick="changeLanguage('de'); closeLanguageModal()" class="p-3 bg-white/10 rounded-lg hover:bg-white/20">Deutsch</button>
+                <button onclick="changeLanguage('ro'); closeLanguageModal()" class="p-3 bg-white/10 rounded-lg hover:bg-white/20">Română</button>
+                <button onclick="changeLanguage('ar'); closeLanguageModal()" class="p-3 bg-white/10 rounded-lg hover:bg-white/20">العربية</button>
+            </div>
+            <button onclick="closeLanguageModal()" class="mt-6 text-xs opacity-50">Close</button>
+        </div>
+    </div>
 
     <div id="upload-modal" class="fixed inset-0 bg-black/90 z-[300] hidden flex items-center justify-center p-6 backdrop-blur-sm">
         <div class="glass-panel p-6 rounded-3xl w-full max-w-md border border-white/10 relative">
@@ -277,7 +319,6 @@
             <span class="text-[10px] font-bold tracking-widest uppercase opacity-50">Now Playing</span>
             <button onclick="openShareModal()" class="p-3 bg-white/5 rounded-full"><i data-lucide="share-2" class="w-6 h-6"></i></button>
         </div>
-
         <div class="flex-1 flex flex-col items-center justify-center w-full">
             <div class="immersive-art-container">
                 <img id="immersive-cover" src="" class="art-square" crossorigin="anonymous">
@@ -285,7 +326,6 @@
                 <iframe id="immersive-video-player" class="art-square bg-black hidden" frameborder="0" allowfullscreen></iframe>
                 <button id="switch-to-video-btn" onclick="toggleImmersiveVisuals()" class="hidden absolute bottom-2 right-2 bg-black/80 p-2 rounded-full border border-white/20 z-10"><i data-lucide="video" class="w-4 h-4"></i></button>
             </div>
-
             <div class="text-center w-full px-4 mb-6">
                 <div id="immersive-title-wrapper" class="w-full h-10 flex justify-center items-center">
                     <h2 id="immersive-title" class="text-2xl font-bold smart-scroller">Choose Track</h2>
@@ -295,7 +335,6 @@
                      <i data-lucide="info" class="w-3 h-3 text-cyan-400"></i>
                 </button>
             </div>
-
             <div class="w-full max-w-sm px-2 mb-8 group" id="progress-bar-immersive-container">
                 <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden relative cursor-pointer">
                     <div id="progress-bar-immersive" class="h-full bg-gradient-to-r from-violet-500 to-cyan-400 w-0 relative">
@@ -303,7 +342,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="flex items-center justify-between w-full max-w-[280px] mb-8">
                 <button onclick="toggleLoop()" class="opacity-50"><i data-lucide="repeat" class="w-5 h-5"></i></button>
                 <button onclick="skipBackward()"><i data-lucide="skip-back" class="w-8 h-8 fill-current"></i></button>
@@ -316,7 +354,6 @@
                     <button onclick="openAddToPlaylistModal()" class="opacity-50 hover:text-white"><i data-lucide="list-plus" class="w-5 h-5"></i></button>
                 </div>
             </div>
-
             <div class="controls-pill">
                 <button onclick="toggleAmbientMenu()" id="btn-ambient" class="pill-btn"><i data-lucide="cloud-rain" class="w-5 h-5"></i><span>Focus</span></button>
                 <button onclick="toggleTranslation()" id="btn-translate" class="pill-btn"><i data-lucide="languages" class="w-5 h-5"></i><span>Translate</span></button>
@@ -390,12 +427,13 @@
         </div>
     </div>
 
-    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-8 rounded-3xl w-full max-w-sm text-center"><h2 class="text-2xl font-bold mb-2">Welcome</h2><button onclick="loginWithGoogle()" class="w-full py-3 bg-white text-black rounded-xl font-bold mt-4 flex items-center justify-center gap-2"><i data-lucide="chrome" class="w-5 h-5 text-red-500"></i> Login with Google</button><button onclick="closeAuthModal()" class="mt-4 text-xs opacity-50">Close</button></div></div>
-    <div id="capsule-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-8 rounded-3xl w-full max-w-sm border border-amber-500/30 text-center"><h3 class="text-xl font-bold">Time Capsule</h3><p class="text-xs text-gray-400 mb-4">Seal this track.</p><button onclick="confirmTimeCapsule()" class="bg-amber-600 w-full py-2 rounded-lg font-bold">Seal</button><button onclick="closeCapsuleModal()" class="mt-3 text-xs opacity-50">Close</button></div></div>
+    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-8 rounded-3xl w-full max-w-sm text-center"><h2 class="text-2xl font-bold mb-2">Welcome</h2><p class="text-xs text-gray-400 mb-6">Sign in to access your profile.</p><button onclick="loginWithGoogle()" class="w-full py-3 bg-white text-black rounded-xl font-bold mt-4 flex items-center justify-center gap-2"><i data-lucide="chrome" class="w-5 h-5 text-red-500"></i> Login with Google</button><button onclick="closeAuthModal()" class="mt-4 text-xs opacity-50">Close</button></div></div>
+    
+    <div id="capsule-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-8 rounded-3xl w-full max-w-sm border border-amber-500/30 text-center"><h3 id="txt-capsule-title" class="text-xl font-bold">Time Capsule</h3><p id="txt-capsule-desc" class="text-xs text-gray-400 mb-4">Seal this track.</p><button onclick="confirmTimeCapsule()" id="btn-capsule-seal" class="bg-amber-600 w-full py-2 rounded-lg font-bold">Seal</button><button onclick="closeCapsuleModal()" id="btn-capsule-cancel" class="mt-3 text-xs opacity-50">Close</button></div></div>
     <div id="share-modal" class="fixed inset-0 bg-black/90 z-[210] hidden flex flex-col items-center justify-center p-6"><div id="share-card-content" class="w-64 bg-gray-900 rounded-xl p-4 flex flex-col items-center border border-white/10"><img id="share-card-cover" src="" class="w-32 h-32 rounded-full mb-4"><h2 id="share-card-title" class="font-bold text-center text-sm"></h2><div id="share-qr-container" class="mt-4 bg-white p-1 rounded"></div></div><button onclick="closeShareModal()" class="mt-6 text-sm opacity-50">X</button></div>
     <div id="search-modal" class="fixed inset-0 bg-black/90 z-[200] hidden flex flex-col p-4"><div class="flex gap-2 mb-4"><input type="text" id="search-input" oninput="performSearch()" placeholder="Search artist or track..." class="flex-1 bg-white/10 p-3 rounded-xl text-white outline-none"><button onclick="closeSearchModal()" class="p-3">X</button></div><div id="search-results" class="flex-1 overflow-y-auto space-y-2"></div></div>
-    <div id="create-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3>New Session</h3><input type="text" id="playlist-name-input" class="w-full p-3 rounded-xl bg-white/10 mt-2 mb-4 text-white"><button onclick="createPlaylist()" class="bg-white text-black px-4 py-2 rounded-lg font-bold">Create</button><button onclick="closeCreatePlaylistModal()" class="ml-2 text-xs">Cancel</button></div></div>
-    <div id="add-to-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3>Add to...</h3><div id="playlist-selection-list" class="max-h-60 overflow-y-auto space-y-2 mt-4"></div><button onclick="closeAddToPlaylistModal()" class="mt-4 w-full text-xs">Close</button></div></div>
+    <div id="create-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3 id="txt-new-session">New Session</h3><input type="text" id="playlist-name-input" class="w-full p-3 rounded-xl bg-white/10 mt-2 mb-4 text-white"><button id="btn-session-create" onclick="createPlaylist()" class="bg-white text-black px-4 py-2 rounded-lg font-bold">Create</button><button id="btn-session-cancel" onclick="closeCreatePlaylistModal()" class="ml-2 text-xs">Cancel</button></div></div>
+    <div id="add-to-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3 id="txt-add-session">Add to...</h3><div id="playlist-selection-list" class="max-h-60 overflow-y-auto space-y-2 mt-4"></div><button onclick="closeAddToPlaylistModal()" class="mt-4 w-full text-xs">Close</button></div></div>
 
     <script>
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
@@ -419,25 +457,52 @@
         const TRANSLATIONS = {
             en:{
                 greeting_m:"Good Morning.", greeting_a:"Good Afternoon.", greeting_e:"Good Evening.",
-                saved_tracks:"Saved Tracks", sessions:"Sessions", profile:"Guest",
-                history:"History", logout:"Logout", auth_welcome:"Welcome", auth_btn:"Login Guest",
+                saved_tracks:"Saved Tracks", sessions:"Sessions", 
                 caps_title:"Time Capsule", caps_desc:"Seal this track.", btn_seal:"Seal", btn_cancel:"Cancel",
                 new_session:"New Session", add_session:"Add to Session", create:"Create", cancel:"Cancel",
                 rec_title:"Recommended", trend_title:"Trending Now", chill_title:"Relax & Chill", class_title:"Classics",
-                new_release: "Official New Release",
-                status_guest:"Guest", status_user:"User:"
+                new_release: "Official New Release"
             },
             it:{
                 greeting_m:"Buongiorno.", greeting_a:"Buon Pomeriggio.", greeting_e:"Buonasera.",
-                saved_tracks:"Brani Salvati", sessions:"Sessioni", profile:"Ospite",
-                history:"Cronologia", logout:"Esci", auth_welcome:"Benvenuto", auth_btn:"Entra come Ospite",
+                saved_tracks:"Brani Salvati", sessions:"Sessioni", 
                 caps_title:"Capsula Temporale", caps_desc:"Sigilla il brano.", btn_seal:"Sigilla", btn_cancel:"Annulla",
                 new_session:"Nuova Sessione", add_session:"Aggiungi a...", create:"Crea", cancel:"Annulla",
                 rec_title:"Consigliati", trend_title:"In Tendenza", chill_title:"Relax", class_title:"Classici",
-                new_release: "Ultima Uscita Ufficiale",
-                status_guest:"Ospite", status_user:"Utente:"
+                new_release: "Ultima Uscita Ufficiale"
             },
-            // ... altre lingue come da tuo file originale ...
+             es:{
+                greeting_m:"Buenos Días.", greeting_a:"Buenas Tardes.", greeting_e:"Buenas Noches.",
+                saved_tracks:"Canciones Guardadas", sessions:"Sesiones", 
+                caps_title:"Cápsula del Tiempo", caps_desc:"Sellar esta pista.", btn_seal:"Sellar", btn_cancel:"Cancelar",
+                new_session:"Nueva Sesión", add_session:"Añadir a...", create:"Crear", cancel:"Cancelar",
+                rec_title:"Recomendados", trend_title:"Tendencias", chill_title:"Relax", class_title:"Clásicos",
+                new_release: "Nuevo Lanzamiento Oficial"
+            },
+            de:{
+                greeting_m:"Guten Morgen.", greeting_a:"Guten Tag.", greeting_e:"Guten Abend.",
+                saved_tracks:"Gespeicherte Titel", sessions:"Sitzungen", 
+                caps_title:"Zeitkapsel", caps_desc:"Diesen Titel versiegeln.", btn_seal:"Versiegeln", btn_cancel:"Abbrechen",
+                new_session:"Neue Sitzung", add_session:"Hinzufügen zu...", create:"Erstellen", cancel:"Abbrechen",
+                rec_title:"Empfohlen", trend_title:"Im Trend", chill_title:"Entspannung", class_title:"Klassiker",
+                new_release: "Offizielle Neuerscheinung"
+            },
+            ro:{
+                greeting_m:"Bună Dimineața.", greeting_a:"Bună Ziua.", greeting_e:"Bună Seara.",
+                saved_tracks:"Piese Salvate", sessions:"Sesiuni", 
+                caps_title:"Capsula Timpului", caps_desc:"Sigilează această piesă.", btn_seal:"Sigilează", btn_cancel:"Anulează",
+                new_session:"Sesiune Nouă", add_session:"Adaugă la...", create:"Creează", cancel:"Anulează",
+                rec_title:"Recomandate", trend_title:"În Tendințe", chill_title:"Relaxare", class_title:"Clasice",
+                new_release: "Lansare Oficială Nouă"
+            },
+            ar:{
+                greeting_m:"صباح الخير", greeting_a:"مساء الخير", greeting_e:"مساء النور",
+                saved_tracks:"الأغاني المحفوظة", sessions:"جلسات", 
+                caps_title:"كبسولة الزمن", caps_desc:"ختم هذا المسار", btn_seal:"ختم", btn_cancel:"إلغاء",
+                new_session:"جلسة جديدة", add_session:"إضافة إلى...", create:"إنشاء", cancel:"إلغاء",
+                rec_title:"موصى به", trend_title:"رائج الآن", chill_title:"استرخاء", class_title:"كلاسيكيات",
+                new_release: "إصدار رسمي جديد"
+            }
         };
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -463,29 +528,22 @@
         }
         window.forceRecheckPWA = () => window.location.reload();
 
-        // --- FETCH LOGIC (CLEAN - NO BACKUP) ---
+        // --- FETCH LOGIC ---
         async function fetchData() {
             try {
-                // Tenta di scaricare tutti i dati in parallelo
                 const [trResponse, arResponse, vrResponse] = await Promise.all([
                     fetch(API.tracks),
                     fetch(API.artists),
                     fetch(API.videos)
                 ]);
 
-                // Se uno qualsiasi dei file non esiste (es. 404) o errore server, BLOCCA TUTTO.
-                if (!trResponse.ok || !arResponse.ok || !vrResponse.ok) {
-                    throw new Error("Errore Server: Impossibile scaricare i dati JSON.");
-                }
+                if (!trResponse.ok || !arResponse.ok || !vrResponse.ok) throw new Error("Errore Server.");
 
                 const tr = await trResponse.json();
                 const ar = await arResponse.json();
                 const vr = await vrResponse.json();
-
                 processData(tr.tracks, ar, vr);
-
             } catch (e) {
-                // NESSUN BACKUP. CRASH TOTALE INTENZIONALE.
                 console.error("CRITICAL ERROR: Online JSON Failed.", e);
             }
         }
@@ -501,9 +559,7 @@
                 let coverUrl = "https://via.placeholder.com/300";
                 if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
                 else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
-
                 const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
-
                 return {
                     ...t,
                     internalId: `track_${index}_${Date.now()}`, 
@@ -511,7 +567,7 @@
                     audioUrl: rawAudioUrl,
                     cover: coverUrl,
                     lrcUrl: t.lrcUrl,
-                    originalLang: t.originalLang, // Mappiamo la lingua originale dal JSON
+                    originalLang: t.originalLang,
                     status: t.Status
                 };
             });
@@ -538,15 +594,12 @@
         // --- PLAYBACK ---
         window.updateMediaSession = function() {
              if(!('mediaSession' in navigator)) return;
-             // RIPRISTINATO: MEDIA SESSION COMPLETA (MAI PIÙ VUOTA)
              navigator.mediaSession.metadata = new MediaMetadata({
                  title: currentTrackData.title,
                  artist: currentTrackData.artist,
                  album: "Aura Music",
                  artwork: [{ src: currentTrackData.cover, sizes: '512x512', type: 'image/png' }]
              });
-             
-             // Handler minimi per evitare blocchi su iOS se mancano
              navigator.mediaSession.setActionHandler('play', togglePlayPause);
              navigator.mediaSession.setActionHandler('pause', togglePlayPause);
              navigator.mediaSession.setActionHandler('previoustrack', skipBackward);
@@ -558,10 +611,7 @@
             if(!t) return;
             currentTrackData = t;
             audioPlayer.src = t.audioUrl;
-            
-            // Aggiorna Media Session SUBITO
             updateMediaSession();
-
             audioPlayer.play().catch(e => console.log("Play error", e));
             
             currentLyrics = []; 
@@ -573,7 +623,6 @@
                 lyricsCont.classList.remove('hidden');
                 cover.classList.add('hidden');
                 document.getElementById('immersive-video-player').classList.add('hidden');
-                // USIAMO LA NUOVA LOGICA INTELLIGENTE
                 fetchSmartLyrics(t);
             } else {
                 isLyricsMode = false;
@@ -596,7 +645,6 @@
             const wrapper = document.getElementById('immersive-title-wrapper');
             titleEl.classList.remove('scrolling'); titleEl.style.transform = 'translateX(0)';
             void titleEl.offsetWidth;
-            
             if(titleEl.scrollWidth > wrapper.clientWidth) {
                 const dist = titleEl.scrollWidth - wrapper.clientWidth + 30; 
                 titleEl.style.setProperty('--scroll-distance', `-${dist}px`);
@@ -620,20 +668,15 @@
 
         function renderHistoryGrid() {
             const list = listeningHistory.map(id => AURA_MAP.find(x => x.internalId === id)).filter(Boolean);
-            // Fallback vuoto se non c'è history o dati
             if (!list.length && AURA_MAP.length === 0) return;
             const items = list.length >= 1 ? list.slice(0,6) : AURA_MAP.filter(t=>t.categoryID==='CR1').slice(0,6);
-            
             document.getElementById('home-history-grid').innerHTML = items.map(t => 
-                `<div onclick="playTrack('${t.internalId}')" class="yt-card">
-                    <img src="${t.cover}" class="yt-img">
-                    <div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div>
-                </div>`
+                `<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`
             ).join('');
         }
 
         function renderHomePageWidgets() {
-            const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en']; // Fallback sicuro
+            const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en']; 
             let html = "";
             const newRelease = AURA_MAP.find(t => t.status === "New");
             if (newRelease) {
@@ -702,7 +745,6 @@
                 const q = document.getElementById('search-input').value.toLowerCase();
                 if(q.length > 2) artist = ARTISTS_FULL_LIST.find(a => a.name.toLowerCase().includes(q));
             }
-
             if(!artist) return showToast("Artist info unavailable");
             
             document.getElementById('artist-modal-name').innerText = artist.name;
@@ -731,7 +773,7 @@
         };
         window.closeArtistModal = () => document.getElementById('artist-modal').classList.add('hidden');
 
-        // --- PARSER LRC HELPER ---
+        // --- LYRICS ---
         function parseLrc(txt) {
             const regex = /\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
             return txt.split('\n').map(l => { 
@@ -740,19 +782,14 @@
             }).filter(Boolean);
         }
 
-        // --- FETCH SMART LYRICS (ORIGINALE + TRADUZIONE) ---
         async function fetchSmartLyrics(track) {
-            currentLyrics = [];
-            currentTranslationLyrics = [];
-            
+            currentLyrics = []; currentTranslationLyrics = [];
             try {
-                // 1. SCARICA L'ORIGINALE (SEMPRE)
                 const originalRes = await fetch(track.lrcUrl);
                 if (!originalRes.ok) throw new Error("No lyric");
                 const originalTxt = await originalRes.text();
                 currentLyrics = parseLrc(originalTxt); 
 
-                // 2. SCARICA LA TRADUZIONE (SENZA HEAD CHECK CHE BLOCCA GITHUB)
                 const userLang = currentLang; 
                 const songLang = track.originalLang || 'en';
 
@@ -761,18 +798,12 @@
                     if (extIndex > -1) {
                         const translationUrl = track.lrcUrl.substring(0, extIndex) + '_' + userLang + '.lrc';
                         try {
-                            // Fetch diretto (se fallisce va nel catch e non rompe nulla)
                             const transRes = await fetch(translationUrl);
                             if (transRes.ok) {
                                 const transTxt = await transRes.text();
                                 currentTranslationLyrics = parseLrc(transTxt); 
-                                console.log("Traduzione caricata:", userLang);
-                            } else {
-                                console.warn("Traduzione non trovata (404), uso solo originale.");
                             }
-                        } catch (e) { 
-                            console.log("Errore download traduzione:", e); 
-                        }
+                        } catch (e) {}
                     }
                 }
                 renderLyrics(); 
@@ -781,18 +812,13 @@
             }
         }
 
-        // --- RENDER LYRICS (ORIGINALE + SUBTITLE) ---
         function renderLyrics() {
             const html = '<div style="height:50%"></div>' + currentLyrics.map((l,i) => {
                 let transHTML = "";
-                // Se la traduzione è attiva E esiste una riga corrispondente
                 if(isTranslationEnabled && currentTranslationLyrics[i]) {
                     transHTML = `<br><span class="lyric-translation" style="display:block; font-size: 14px; font-weight: normal; opacity: 0.6; margin-top: 4px;">${currentTranslationLyrics[i].text}</span>`; 
                 }
-                return `<p id="lyric-${i}" class="lyric-line" onclick="audioPlayer.currentTime=${l.time}">
-                            ${l.text}
-                            ${transHTML}
-                        </p>`;
+                return `<p id="lyric-${i}" class="lyric-line" onclick="audioPlayer.currentTime=${l.time}">${l.text}${transHTML}</p>`;
             }).join('') + '<div style="height:50%"></div>';
             document.getElementById('lyrics-container').innerHTML = html;
         }
@@ -814,7 +840,7 @@
         window.toggleTranslation = () => {
             isTranslationEnabled = !isTranslationEnabled;
             document.getElementById('btn-translate').classList.toggle('active', isTranslationEnabled);
-            renderLyrics(); // Ridisegna per mostrare/nascondere i sottotitoli
+            renderLyrics();
         };
 
         // --- AMBIENT & GYRO ---
@@ -846,8 +872,13 @@
             }
         }
 
-        // --- UTILS ---
-        window.showSection=(id)=>{ document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); document.getElementById(id+'-section').classList.add('active'); if(id==='music') renderHistoryGrid(); if(id==='playlists') renderPlaylists(); };
+        // --- CORE NAVIGATION & UTILS ---
+        window.showSection=(id)=>{ 
+            document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); 
+            document.getElementById(id+'-section').classList.add('active'); 
+            if(id==='music') renderHistoryGrid(); 
+            if(id==='playlists') renderPlaylists(); 
+        };
         window.enterImmersiveMode=()=>document.getElementById('immersive-mode').classList.remove('hidden');
         window.exitImmersiveMode=()=>document.getElementById('immersive-mode').classList.add('hidden');
         window.updateProgress=()=>{ if(audioPlayer.duration) document.querySelectorAll('#progress-bar, #progress-bar-immersive').forEach(e=>e.style.width=(audioPlayer.currentTime/audioPlayer.duration*100)+'%'); };
@@ -866,7 +897,7 @@
         function renderLikedTracks(){document.getElementById('liked-tracks-list').innerHTML=Array.from(likedTracks).map(id=>{const t=AURA_MAP.find(x=>x.internalId===id);return t?`<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`:''}).join('');}
         window.showToast=(m)=>{ const t=document.createElement('div'); t.className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold border border-white/20"; t.innerText=m; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.remove(),2000); };
         
-        // --- DATA & SEARCH ---
+        // --- DATA SAVING ---
         function saveLocalData(){ localStorage.setItem('aura_hist',JSON.stringify(listeningHistory)); localStorage.setItem('aura_playlists',JSON.stringify(userPlaylists)); localStorage.setItem('aura_likes',JSON.stringify(Array.from(likedTracks))); localStorage.setItem('aura_lang', currentLang); }
         function loadLocalData(){ 
             listeningHistory=JSON.parse(localStorage.getItem('aura_hist')||'[]'); 
@@ -874,10 +905,16 @@
             loggedInUser=JSON.parse(localStorage.getItem('aura_user')||'null'); 
             const likes = JSON.parse(localStorage.getItem('aura_likes')||'[]');
             currentLang = localStorage.getItem('aura_lang') || 'en';
-            document.getElementById('language-selector').value = currentLang;
             likedTracks = new Set(likes);
-            updateAuthUI(); 
+            updateLanguageUI();
+            if(loggedInUser) {
+                 document.getElementById('auth-dot').classList.remove('hidden');
+            }
         }
+
+        // --- NEW LANGUAGE MODAL LOGIC ---
+        window.openLanguageModal = () => document.getElementById('language-modal').classList.remove('hidden');
+        window.closeLanguageModal = () => document.getElementById('language-modal').classList.add('hidden');
         window.changeLanguage = (val) => { currentLang = val; saveLocalData(); updateLanguageUI(); if(document.getElementById('music-section').classList.contains('active')) renderHomePageWidgets(); }
 
         function updateLanguageUI() {
@@ -890,10 +927,6 @@
             document.getElementById('home-greeting').innerText = greet;
             document.getElementById('txt-saved-tracks').innerText = t.saved_tracks;
             document.getElementById('txt-sessions').innerText = t.sessions;
-            document.getElementById('btn-logout').innerText = t.logout;
-            
-            const profileTxt = loggedInUser ? `${t.status_user} ${loggedInUser.name}` : t.status_guest;
-            document.getElementById('profile-info').innerText = profileTxt;
 
             document.getElementById('txt-capsule-title').innerText = t.caps_title;
             document.getElementById('txt-capsule-desc').innerText = t.caps_desc;
@@ -906,6 +939,7 @@
             document.getElementById('btn-session-cancel').innerText = t.cancel;
         }
 
+        // --- SEARCH & MODALS ---
         window.performSearch=()=>{ const q=document.getElementById('search-input').value.toLowerCase(); 
             let html = "";
             const artistMatch = ARTISTS_FULL_LIST.find(a => a.name.toLowerCase().includes(q) && q.length > 1);
@@ -918,9 +952,24 @@
         window.openCapsuleModal=()=>document.getElementById('capsule-modal').classList.remove('hidden'); window.closeCapsuleModal=()=>document.getElementById('capsule-modal').classList.add('hidden');
         window.confirmTimeCapsule=()=>{ showToast("Sealed"); closeCapsuleModal(); };
         window.openAuthModal=()=>document.getElementById('auth-modal').classList.remove('hidden'); window.closeAuthModal=()=>document.getElementById('auth-modal').classList.add('hidden');
-        window.handleAuthAction=()=>{ loggedInUser={name:"Guest"}; saveLocalData(); updateAuthUI(); closeAuthModal(); showSection('profile'); };
-        window.handleLogout=()=>{ loggedInUser=null; saveLocalData(); updateAuthUI(); showToast("Logged out"); };
         
+        // --- SOCIAL PROFILE CLICK LOGIC ---
+        window.handleProfileClick = () => {
+            if(loggedInUser) {
+                showSection('profile');
+            } else {
+                openAuthModal();
+            }
+        };
+
+        window.openEditProfile = () => {
+            document.getElementById('edit-name').value = loggedInUser.displayName;
+            document.getElementById('edit-bio').value = loggedInUser.bio || "";
+            document.getElementById('edit-profile-modal').classList.remove('hidden');
+        }
+        window.closeEditProfile = () => document.getElementById('edit-profile-modal').classList.add('hidden');
+
+        // --- PLAYLIST LOGIC ---
         window.openCreatePlaylistModal=()=>document.getElementById('create-playlist-modal').classList.remove('hidden'); window.closeCreatePlaylistModal=()=>document.getElementById('create-playlist-modal').classList.add('hidden');
         window.openAddToPlaylistModal=()=>{ 
             if(!currentTrackData) return; 
@@ -930,41 +979,56 @@
         };
         window.closeAddToPlaylistModal=()=>document.getElementById('add-to-playlist-modal').classList.add('hidden');
         window.createPlaylist=()=>{ const n=document.getElementById('playlist-name-input').value; if(n){ userPlaylists.push({id:Date.now(),name:n,tracks:[]}); saveLocalData(); closeCreatePlaylistModal(); renderPlaylists(); } };
-        
         window.renderPlaylists=()=>{ 
-            let html = "";
-            // Automatic "Liked Songs" playlist card
-            html += `<div onclick="showSection('library')" class="p-4 glass-panel rounded-xl cursor-pointer relative bg-gradient-to-br from-pink-900/40 to-purple-900/40 border-pink-500/30"><h3 class="font-bold flex items-center gap-2"><i data-lucide="heart" class="w-4 h-4 fill-pink-500 text-pink-500"></i> Liked Songs</h3><p class="text-xs text-gray-400">${likedTracks.size} tracks</p></div>`;
-            
+            let html = `<div onclick="showSection('library')" class="p-4 glass-panel rounded-xl cursor-pointer relative bg-gradient-to-br from-pink-900/40 to-purple-900/40 border-pink-500/30"><h3 class="font-bold flex items-center gap-2"><i data-lucide="heart" class="w-4 h-4 fill-pink-500 text-pink-500"></i> Liked Songs</h3><p class="text-xs text-gray-400">${likedTracks.size} tracks</p></div>`;
             html += userPlaylists.map(p=>`<div onclick="playPlaylist(${p.id})" class="p-4 glass-panel rounded-xl cursor-pointer relative"><h3 class="font-bold">${p.name}</h3><p class="text-xs text-gray-400">${p.tracks.length} tracks</p><button onclick="event.stopPropagation();deletePlaylist(${p.id})" class="absolute top-2 right-2 p-1 text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`).join(''); 
-            
-            document.getElementById('playlists-list').innerHTML = html; 
-            lucide.createIcons(); 
+            document.getElementById('playlists-list').innerHTML = html; lucide.createIcons(); 
         };
         window.playPlaylist=(id)=>{ const p=userPlaylists.find(x=>x.id===id); if(p&&p.tracks.length) playTrack(p.tracks[0]); };
         window.toggleTrackInPlaylist=(pid)=>{ const p=userPlaylists.find(x=>x.id===pid); const idx=p.tracks.indexOf(currentTrackData.internalId); idx>-1?p.tracks.splice(idx,1):p.tracks.push(currentTrackData.internalId); saveLocalData(); openAddToPlaylistModal(); renderPlaylists(); };
         window.deletePlaylist=(id)=>{ if(confirm("Delete?")){ userPlaylists=userPlaylists.filter(x=>x.id!==id); saveLocalData(); renderPlaylists(); } };
         
-        function updateAuthUI() { 
-            if(loggedInUser) { document.getElementById('auth-dot').classList.remove('hidden'); document.getElementById('profile-info').innerText = "User: Guest"; } 
-            else { document.getElementById('auth-dot').classList.add('hidden'); document.getElementById('profile-info').innerText = "Guest"; }
+        // --- BRIDGE FUNZIONI FIREBASE -> MAIN ---
+        window.handleUserLogin = (user, extraData) => {
+            loggedInUser = { ...user, ...extraData };
+            document.getElementById('auth-dot').classList.remove('hidden');
+            
+            // Populate Profile UI
+            document.getElementById('sp-name').innerText = loggedInUser.displayName;
+            document.getElementById('sp-handle').innerText = "@" + (loggedInUser.displayName.replace(/\s+/g, '').toLowerCase());
+            document.getElementById('sp-avatar').src = loggedInUser.photoURL;
+            document.getElementById('sp-bio').innerText = loggedInUser.bio || "Music Lover. Aura Explorer.";
+            document.getElementById('sp-followers').innerText = (loggedInUser.followers || 0);
+            document.getElementById('sp-following').innerText = (loggedInUser.following || 0);
+            
+            closeAuthModal();
+            // Don't auto-switch section to be non-intrusive, 
+            // but if we were on the login page, maybe? No, let user stay where they are.
+        };
+
+        window.switchProfileTab = (tab) => {
+            const container = document.getElementById('profile-content-area');
+            document.getElementById('tab-drops').style.borderColor = tab==='drops'?'#06b6d4':'transparent';
+            document.getElementById('tab-likes').style.borderColor = tab==='likes'?'#06b6d4':'transparent';
+            
+            if(tab === 'likes') {
+                container.innerHTML = Array.from(likedTracks).map(id=>{const t=AURA_MAP.find(x=>x.internalId===id);return t?`<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`:''}).join('');
+            } else {
+                 // My Drops (Filtered from User Videos where authorId matches)
+                 const myDrops = USER_VIDEOS.filter(v => v.authorId === loggedInUser?.uid);
+                 if(myDrops.length === 0) container.innerHTML = '<p class="col-span-2 text-center text-xs text-gray-500 mt-4">No drops yet.</p>';
+                 else container.innerHTML = myDrops.map(t => `<div onclick="playSocialTrack('${t.videoUrl}','${t.text}','${t.userName}','${loggedInUser.photoURL}')" class="bg-white/5 rounded-xl p-2 cursor-pointer"><div class="relative"><img src="${loggedInUser.photoURL}" class="w-full h-32 object-cover rounded-lg mb-2 opacity-80"><div class="absolute inset-0 flex items-center justify-center"><i data-lucide="play" class="w-8 h-8"></i></div></div><p class="text-xs font-bold truncate">${t.text}</p></div>`).join('');
+            }
+            lucide.createIcons();
         }
 
-        // --- BRIDGE FUNZIONI FIREBASE (Così lo script sotto può parlare con questo) ---
-        window.updateAuthUI_Real = (user) => {
-            const dot = document.getElementById('auth-dot');
-            const info = document.getElementById('profile-info');
-            if(dot) dot.classList.remove('hidden');
-            if(info) info.innerText = user.displayName;
-        };
     </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, update, push, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, update, push, onValue, query, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // --- TUE CHIAVI FIREBASE INTEGRATE ---
         const firebaseConfig = {
             apiKey: "AIzaSyBjQC2dOKySeHPEJCVjjEEHyHEUy19DRPY",
             authDomain: "auramusic-hrz.firebaseapp.com",
@@ -975,7 +1039,6 @@
             appId: "1:185420108806:web:947edf581c9f7bbb661f87",
             measurementId: "G-RBJ5CPXCQS"
         };
-        // -----------------------------------------------------
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -983,28 +1046,92 @@
         const providerGoogle = new GoogleAuthProvider();
         let currentUserData = null;
 
-        // --- FUNZIONI EXPORTATE (Window) ---
+        // --- AUTH LOGIC ---
         window.loginWithGoogle = async () => {
             try {
                 const result = await signInWithPopup(auth, providerGoogle);
-                const user = result.user;
-                // Profilazione
-                const userRef = ref(db, 'users/' + user.uid);
-                await update(userRef, {
-                    uid: user.uid, name: user.displayName, email: user.email, photoURL: user.photoURL,
-                    lastLogin: new Date().toISOString(), role: "artist"
-                });
-                if(typeof closeAuthModal === 'function') closeAuthModal();
-                showToast("Welcome " + user.displayName);
+                // Auth state listener handles the rest
             } catch (error) { console.error(error); alert("Login Error: " + error.message); }
         };
 
-        window.handleLogoutReal = () => {
-            signOut(auth).then(() => location.reload()).catch((e) => console.error(e));
+        window.handleLogout = () => {
+            signOut(auth).then(() => {
+                window.loggedInUser = null;
+                document.getElementById('auth-dot').classList.add('hidden');
+                document.getElementById('sp-name').innerText = "Guest";
+                window.showSection('music'); // Redirect home
+                window.showToast("Logged out");
+            });
         };
 
+        window.saveProfileChanges = async () => {
+            if(!auth.currentUser) return;
+            const newName = document.getElementById('edit-name').value;
+            const newBio = document.getElementById('edit-bio').value;
+            
+            try {
+                await update(ref(db, 'users/' + auth.currentUser.uid), {
+                    name: newName,
+                    bio: newBio
+                });
+                // Force update UI locally
+                window.loggedInUser.displayName = newName;
+                window.loggedInUser.bio = newBio;
+                document.getElementById('sp-name').innerText = newName;
+                document.getElementById('sp-bio').innerText = newBio;
+                window.closeEditProfile();
+                window.showToast("Profile updated!");
+            } catch(e) { window.showToast("Error updating profile"); }
+        };
+
+        // --- REALTIME SYNC ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // 1. Get Extra Data from DB
+                const userRef = ref(db, 'users/' + user.uid);
+                const snapshot = await get(userRef);
+                let extraData = snapshot.val();
+
+                if (!extraData) {
+                    // First time setup
+                    extraData = { 
+                        name: user.displayName, 
+                        email: user.email, 
+                        photoURL: user.photoURL, 
+                        bio: "New to Aura.",
+                        followers: 0,
+                        following: 0,
+                        role: "user"
+                    };
+                    await set(userRef, { uid: user.uid, ...extraData });
+                }
+
+                // 2. TRIGGER MAIN SCRIPT UPDATE
+                window.handleUserLogin(user, extraData);
+                currentUserData = user;
+
+                // 3. Start Social Feed
+                startSocialFeed();
+                
+                // 4. Update Drop count in profile
+                const postsRef = query(ref(db, 'posts')); // Should filter by user really, but simplification
+                onValue(postsRef, (snap) => {
+                     const all = snap.val();
+                     if(all) {
+                         const count = Object.values(all).filter(p => p.authorId === user.uid).length;
+                         document.getElementById('sp-posts').innerText = count;
+                     }
+                });
+
+            } else {
+                currentUserData = null;
+                startSocialFeed(); // Feed works even for guests
+            }
+        });
+
+        // --- SOCIAL POSTING ---
         window.openUploadModal = () => {
-            if (!currentUserData) { showToast("Login required to post!"); window.openAuthModal(); return; }
+            if (!auth.currentUser) { window.showToast("Login required to post!"); window.openAuthModal(); return; }
             document.getElementById('upload-modal').classList.remove('hidden');
         };
         window.closeUploadModal = () => document.getElementById('upload-modal').classList.add('hidden');
@@ -1012,18 +1139,18 @@
         window.createPost = async () => {
             const title = document.getElementById('post-title').value.trim();
             const url = document.getElementById('post-url').value.trim();
-            if (!title || !url) return showToast("Fill all fields!");
+            if (!title || !url) return window.showToast("Fill all fields!");
             try {
                 const postsRef = ref(db, 'posts');
                 const newPostRef = push(postsRef);
                 await set(newPostRef, {
-                    id: newPostRef.key, title: title, file: url, authorId: currentUserData.uid,
-                    artist: currentUserData.displayName, cover: currentUserData.photoURL,
+                    id: newPostRef.key, title: title, file: url, authorId: auth.currentUser.uid,
+                    artist: window.loggedInUser.displayName, cover: window.loggedInUser.photoURL,
                     timestamp: Date.now(), categoryID: "Social", likes: 0
                 });
-                showToast("Published! 🚀"); window.closeUploadModal();
+                window.showToast("Published! 🚀"); window.closeUploadModal();
                 document.getElementById('post-title').value = ""; document.getElementById('post-url').value = "";
-            } catch (e) { showToast("Error: " + e.message); }
+            } catch (e) { window.showToast("Error: " + e.message); }
         };
 
         function startSocialFeed() {
@@ -1042,7 +1169,6 @@
             if (!container) return;
             let socialSection = document.getElementById('social-feed-section');
             if (!socialSection) {
-                // Se non esiste il div (ma l'ho messo nell'HTML), cerchiamolo o creiamolo
                 socialSection = document.createElement('div'); socialSection.id = 'social-feed-section';
                 socialSection.className = 'mb-8 animate-fadeIn'; container.prepend(socialSection);
             }
@@ -1065,20 +1191,8 @@
             document.querySelectorAll('#player-cover, #immersive-cover').forEach(e => e.src = cover);
             document.querySelector('.player-bar-new').classList.add('active');
             window.currentTrackData = fakeTrack;
+            window.updateMediaSession();
         };
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUserData = user; window.loggedInUser = { name: user.displayName, id: user.uid };
-                if(window.updateAuthUI_Real) window.updateAuthUI_Real(user);
-                // Aggiorna bottone logout
-                const btn = document.getElementById('btn-logout');
-                if(btn) { btn.innerText = "Esci"; btn.onclick = window.handleLogoutReal; }
-                startSocialFeed();
-            } else {
-                currentUserData = null; startSocialFeed();
-            }
-        });
     </script>
 </body>
 </html>
