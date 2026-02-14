@@ -81,7 +81,7 @@
         .yt-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .yt-artist { font-size: 11px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .ios-widget-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
+        .ios-widget-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 24px 0; }
         .ios-card {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
             border-radius: 18px; padding: 16px;
@@ -94,7 +94,7 @@
         .widget-block-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; padding-left: 4px; }
 
         /* STORIES */
-        .stories-scroll-container { display: flex; overflow-x: auto; gap: 16px; padding: 10px 4px; scrollbar-width: none; margin-bottom: 1.5rem; justify-content: flex-start; }
+        .stories-scroll-container { display: flex; overflow-x: auto; gap: 16px; padding: 10px 4px; scrollbar-width: none; margin-bottom: 1.5rem; justify-content: flex-start; min-height: 90px; }
         .stories-scroll-container::-webkit-scrollbar { display: none; }
         .story-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0; }
         .story-bubble {
@@ -105,7 +105,7 @@
             overflow: hidden;
         }
         .story-bubble:active { transform: scale(0.95); }
-        .story-inner { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-deep); }
+        .story-inner { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-deep); background: #000; }
         .story-username { font-size: 10px; color: #ccc; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         /* SOCIAL FEED STYLE */
@@ -118,11 +118,10 @@
         }
         .social-header { padding: 12px; display: flex; align-items: center; gap: 10px; }
         .social-user-img { width: 32px; height: 32px; rounded: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); }
-        .social-media-container { width: 100%; background: #000; position: relative; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+        .social-media-container { width: 100%; background: transparent; position: relative; min-height: 200px; display: flex; align-items: center; justify-content: center; }
         .social-img { width: 100%; height: auto; max-height: 450px; object-fit: contain; }
         .social-actions { padding: 12px; display: flex; gap: 16px; }
         .social-caption { padding: 0 12px 12px 12px; font-size: 13px; color: #ddd; }
-        .social-timestamp { font-size: 10px; color: #777; padding: 0 12px 12px 12px; }
         
         .upload-area { border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; }
         .upload-area:hover { border-color: var(--primary); background: rgba(139, 92, 246, 0.1); }
@@ -190,7 +189,6 @@
             </div>
             <h2 class="text-3xl font-extrabold text-white mb-4">Install Aura</h2>
             <p class="text-gray-300 mb-8 leading-relaxed">For continuous background audio and the full experience, install the app.</p>
-            <p class="text-xs text-gray-500 cursor-pointer hover:text-white" onclick="forceRecheckPWA()">Tap the icon if already installed.</p>
         </div>
     </div>
 
@@ -220,8 +218,7 @@
         <main>
             <section id="music-section" class="section-page active">
                 <div id="stories-container" class="stories-scroll-container">
-                    <p class="text-xs text-gray-500 px-2">Loading stories...</p>
-                </div>
+                    </div>
                 <h2 id="home-greeting" class="text-2xl font-bold mb-4 px-1">Good Evening</h2>
                 <div id="home-history-grid" class="yt-grid-mobile-fix mb-8"></div>
                 <div id="home-widgets-container" class="space-y-8 pb-24">
@@ -476,39 +473,19 @@
                 const [trResponse, arResponse] = await Promise.all([ fetch(API.tracks), fetch(API.artists) ]);
                 const tr = await trResponse.json();
                 const ar = await arResponse.json();
-                
-                // CORRECT MAPPING RESTORED FROM INDEX 2
                 ARTISTS_FULL_LIST = ar || [];
-                const artistMap = {}; 
-                ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
-
-                // Check if tr has 'tracks' key or is array
+                const artistMap = {}; ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
                 const rawTracks = tr.tracks || tr || [];
-
                 AURA_MAP = rawTracks.map((t, index) => {
                     let coverUrl = "https://via.placeholder.com/300";
                     if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
                     else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
-                    
                     const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
-                    
-                    return { 
-                        ...t, 
-                        internalId: `track_${index}_${Date.now()}`, 
-                        artist: artistMap[t.artistId] || t.artist || "Unknown", 
-                        audioUrl: rawAudioUrl, 
-                        cover: coverUrl,
-                        // Crucial Fix: Map Status from JSON (Capital S) to status (lowercase s)
-                        status: t.Status 
-                    };
+                    return { ...t, internalId: `track_${index}_${Date.now()}`, artist: artistMap[t.artistId] || t.artist || "Unknown", audioUrl: rawAudioUrl, cover: coverUrl, status: t.Status };
                 });
-
                 renderHomePageWidgets();
                 renderHistoryGrid();
-            } catch (e) { 
-                console.error("Data Load Error", e); 
-                document.getElementById('home-widgets-container').innerHTML = `<p class="text-center text-red-500">Error loading music data. Check connection.</p>`;
-            }
+            } catch (e) { console.error("Data Load Error", e); }
         }
 
         function getDOMElements() {
@@ -614,6 +591,12 @@
             let html = "";
             const newRelease = AURA_MAP.find(t => t.status === "New");
             if (newRelease) html += `<div class="mb-8"><h3 class="widget-block-title">${t.new_release}</h3><div onclick="playTrack('${newRelease.internalId}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg"><img src="${newRelease.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm"><div class="absolute inset-0 p-5 flex items-center gap-5"><img src="${newRelease.cover}" class="w-32 h-32 rounded-xl shadow-2xl z-10"><div class="z-10"><h4 class="text-2xl font-bold text-white mb-1">${newRelease.title}</h4><p class="text-gray-300">${newRelease.artist}</p></div></div></div></div>`;
+            
+            // WIDGETS ONLINE / LIKES RESTORED
+            const visitors = Math.floor(Math.random() * 15000) + 10200; 
+            const globalLikes = (2840000 + Math.floor(Date.now() / 5000)).toLocaleString();
+            html += `<div class="ios-widget-row"><div class="ios-card"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="globe" class="w-4 h-4 text-green-400"></i></div><div><p class="text-2xl font-bold">${visitors.toLocaleString()}</p><p class="text-[10px] text-gray-400"><span class="live-dot"></span>Online</p></div></div></div><div class="ios-card" onclick="showSection('library')"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i></div><div><p class="text-2xl font-bold">${globalLikes}</p><p class="text-[10px] text-gray-400">Global Likes</p></div></div></div></div>`;
+
             html += createWidgetBlock(t.rec_title, AURA_MAP.slice(0,8));
             html += createWidgetBlock(t.chill_title, AURA_MAP.filter(t => t.categoryID === 'CR2').slice(0, 8));
             document.getElementById('home-widgets-container').innerHTML = html;
@@ -745,6 +728,7 @@
             onValue(ref(db, `users/${uid}/likes`), (s) => {
                 window.likedTracks = new Set(Object.keys(s.val()||{}));
                 renderLikedTracks();
+                renderPlaylists(); // Re-render playlists to update Liked count
             });
             onValue(ref(db, `users/${uid}/playlists`), (s) => {
                 window.userPlaylists = Object.values(s.val()||{});
@@ -773,9 +757,18 @@
             const name = document.getElementById('playlist-name-input').value;
             if(name) { const r = push(ref(db, `users/${auth.currentUser.uid}/playlists`)); set(r, { id: r.key, name: name, tracks: [] }); closeCreatePlaylistModal(); }
         };
+
+        // FIXED RENDER PLAYLISTS: Includes "Liked Songs" Card
         window.renderPlaylists = () => {
-            document.getElementById('playlists-list').innerHTML = window.userPlaylists.map(p=>`<div class="p-4 glass-panel rounded-xl cursor-pointer relative"><h3 class="font-bold">${p.name}</h3><p class="text-xs text-gray-400">${(p.tracks||[]).length} tracks</p></div>`).join('');
+            let html = `<div onclick="showSection('library')" class="p-4 glass-panel rounded-xl cursor-pointer relative bg-gradient-to-br from-violet-900/40 to-fuchsia-900/40 border-violet-500/30">
+                            <h3 class="font-bold flex items-center gap-2"><i data-lucide="heart" class="w-4 h-4 fill-pink-500 text-pink-500"></i> Liked Songs</h3>
+                            <p class="text-xs text-gray-400">${likedTracks.size} tracks</p>
+                        </div>`;
+            html += window.userPlaylists.map(p=>`<div class="p-4 glass-panel rounded-xl cursor-pointer relative"><h3 class="font-bold">${p.name}</h3><p class="text-xs text-gray-400">${(p.tracks||[]).length} tracks</p></div>`).join('');
+            document.getElementById('playlists-list').innerHTML = html;
+            lucide.createIcons();
         };
+
         window.openAddToPlaylistModal=()=>{ 
             if(!currentTrackData) return; 
             const list=document.getElementById('playlist-selection-list'); 
@@ -783,12 +776,22 @@
             document.getElementById('add-to-playlist-modal').classList.remove('hidden'); lucide.createIcons();
         };
         window.closeAddToPlaylistModal=()=>document.getElementById('add-to-playlist-modal').classList.add('hidden');
+        
+        // FIXED PLAYLIST ADDING: Comparison of IDs
         window.toggleTrackInPlaylist=(pid)=>{
-            const p = window.userPlaylists.find(x=>x.id===pid);
+            const p = window.userPlaylists.find(x => String(x.id) === String(pid));
+            if(!p) return;
             if(!p.tracks) p.tracks = [];
-            p.tracks.push(currentTrackData.internalId);
-            update(ref(db, `users/${auth.currentUser.uid}/playlists/${pid}`), { tracks: p.tracks });
-            showToast("Added to Session"); closeAddToPlaylistModal();
+            
+            // Check if track exists
+            if(!p.tracks.includes(currentTrackData.internalId)) {
+                 p.tracks.push(currentTrackData.internalId);
+                 update(ref(db, `users/${auth.currentUser.uid}/playlists/${pid}`), { tracks: p.tracks });
+                 showToast("Added to Session"); 
+            } else {
+                 showToast("Already in Session");
+            }
+            closeAddToPlaylistModal();
         };
 
         window.openUploadModal = () => { if(!auth.currentUser) { showToast("Login Required"); return openAuthModal(); } document.getElementById('upload-modal').classList.remove('hidden'); }
@@ -829,6 +832,7 @@
                 if(!data) { document.getElementById('social-feed-container').innerHTML = '<p class="text-center text-gray-500">No posts.</p>'; return; }
                 const posts = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
                 
+                // Stories Injection in HOME
                 const authors = [...new Map(posts.map(p => [p.authorId, p])).values()].slice(0, 10);
                 document.getElementById('stories-container').innerHTML = authors.map(p => `<div class="story-item"><div class="story-bubble"><img src="${p.authorPic}" class="story-inner"></div><span class="story-username">${p.authorName}</span></div>`).join('');
                 
