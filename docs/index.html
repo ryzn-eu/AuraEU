@@ -15,6 +15,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         /* --- DESIGN SYSTEM --- */
@@ -105,7 +106,10 @@
             overflow: hidden;
         }
         .story-bubble:active { transform: scale(0.95); }
-        .story-inner { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-deep); background: #000; }
+        .story-inner {
+            width: 100%; height: 100%; background: #111; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 26px; border: 3px solid var(--bg-deep);
+        }
         .story-username { font-size: 10px; color: #ccc; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         /* SOCIAL FEED STYLE */
@@ -218,7 +222,8 @@
         <main>
             <section id="music-section" class="section-page active">
                 <div id="stories-container" class="stories-scroll-container">
-                    </div>
+                    <p class="text-xs text-gray-500 px-2">Loading stories...</p>
+                </div>
                 <h2 id="home-greeting" class="text-2xl font-bold mb-4 px-1">Good Evening</h2>
                 <div id="home-history-grid" class="yt-grid-mobile-fix mb-8"></div>
                 <div id="home-widgets-container" class="space-y-8 pb-24">
@@ -284,6 +289,27 @@
                 <div id="profile-content-area" class="pb-24 grid grid-cols-2 gap-3"></div>
             </section>
         </main>
+    </div>
+
+    <div id="story-modal" class="fixed inset-0 bg-black z-[250] hidden flex flex-col animate-fadeIn">
+        <div class="absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 p-[1px]">
+                     <div class="w-full h-full bg-black rounded-full flex items-center justify-center text-lg" id="story-viewer-emoji"></div>
+                </div>
+                <div>
+                    <h3 id="story-viewer-username" class="font-bold text-sm">Username</h3>
+                    <p id="story-viewer-time" class="text-[10px] opacity-60">Just now</p>
+                </div>
+            </div>
+            <button onclick="closeStory()" class="p-2 bg-white/10 rounded-full backdrop-blur"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <div class="flex-1 relative bg-gray-900 flex items-center justify-center">
+            <video id="story-video" class="w-full h-full object-cover" playsinline loop></video>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 z-20 p-6 pb-12 bg-gradient-to-t from-black via-black/80 to-transparent">
+             <p id="story-viewer-text" class="text-sm font-medium mb-4 leading-relaxed"></p>
+        </div>
     </div>
 
     <div id="upload-modal" class="fixed inset-0 bg-black/90 z-[300] hidden flex items-center justify-center p-6 backdrop-blur-sm">
@@ -443,10 +469,12 @@
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
         const API = { 
             tracks: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/tracks.json", 
-            artists: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/artist.json"
+            artists: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/artist.json",
+            videos: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos.json"
         };
         
-        let AURA_MAP = [], ARTISTS_FULL_LIST = [];
+        const STORY_EMOJIS = {1: "💻", 2: "🎬", 3: "🚀", 4: "🪐", 5: "🧘"};
+        let AURA_MAP = [], ARTISTS_FULL_LIST = [], USER_VIDEOS = [];
         let currentTrackData = null, audioPlayer = null, isLooping = false, likedTracks = new Set(), userPlaylists = [], listeningHistory = [], loggedInUser = null;
         let isLyricsMode = false, currentLyrics = [], currentTranslationLyrics = [];
         let isTranslationEnabled = false, currentAmbientMode = null, gyroEnabled = false, currentLang = 'en';
@@ -470,9 +498,12 @@
 
         async function fetchData() {
             try {
-                const [trResponse, arResponse] = await Promise.all([ fetch(API.tracks), fetch(API.artists) ]);
+                const [trResponse, arResponse, vrResponse] = await Promise.all([ fetch(API.tracks), fetch(API.artists), fetch(API.videos) ]);
                 const tr = await trResponse.json();
                 const ar = await arResponse.json();
+                const vr = await vrResponse.json();
+                
+                USER_VIDEOS = vr || [];
                 ARTISTS_FULL_LIST = ar || [];
                 const artistMap = {}; ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
                 const rawTracks = tr.tracks || tr || [];
@@ -483,6 +514,7 @@
                     const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
                     return { ...t, internalId: `track_${index}_${Date.now()}`, artist: artistMap[t.artistId] || t.artist || "Unknown", audioUrl: rawAudioUrl, cover: coverUrl, status: t.Status };
                 });
+                renderStories();
                 renderHomePageWidgets();
                 renderHistoryGrid();
             } catch (e) { console.error("Data Load Error", e); }
@@ -580,6 +612,37 @@
             currentLang = localStorage.getItem('aura_lang') || 'en';
             updateLanguageUI();
         }
+
+        // --- RENDERERS ---
+
+        function renderStories() {
+            const container = document.getElementById('stories-container');
+            if(!USER_VIDEOS || !USER_VIDEOS.length) { container.innerHTML = ""; return; }
+            container.innerHTML = USER_VIDEOS.map(s => `
+                <div class="story-item" onclick="openStory(${s.id})">
+                    <div class="story-bubble"><div class="story-inner">${STORY_EMOJIS[s.id]||"✨"}</div></div>
+                    <span class="story-username">${s.userName}</span>
+                </div>`).join('');
+        }
+        
+        window.openStory = (id) => {
+            const s = USER_VIDEOS.find(x => x.id === id);
+            if(!s) return;
+            const modal = document.getElementById('story-modal');
+            const v = document.getElementById('story-video');
+            document.getElementById('story-viewer-username').innerText = s.userName;
+            document.getElementById('story-viewer-time').innerText = s.timestamp;
+            document.getElementById('story-viewer-text').innerText = s.text;
+            document.getElementById('story-viewer-emoji').innerText = STORY_EMOJIS[s.id] || "✨";
+            v.src = s.videoUrl;
+            modal.classList.remove('hidden');
+            v.play().catch(e => console.log(e));
+        };
+        window.closeStory = () => {
+            const v = document.getElementById('story-video');
+            v.pause(); v.currentTime = 0;
+            document.getElementById('story-modal').classList.add('hidden');
+        };
 
         function renderHistoryGrid() {
             const list = listeningHistory.map(id => AURA_MAP.find(x => x.internalId === id)).filter(Boolean);
@@ -831,10 +894,6 @@
                 const data = snap.val();
                 if(!data) { document.getElementById('social-feed-container').innerHTML = '<p class="text-center text-gray-500">No posts.</p>'; return; }
                 const posts = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
-                
-                // Stories Injection in HOME
-                const authors = [...new Map(posts.map(p => [p.authorId, p])).values()].slice(0, 10);
-                document.getElementById('stories-container').innerHTML = authors.map(p => `<div class="story-item"><div class="story-bubble"><img src="${p.authorPic}" class="story-inner"></div><span class="story-username">${p.authorName}</span></div>`).join('');
                 
                 document.getElementById('social-feed-container').innerHTML = posts.map(p => {
                     const isLiked = auth.currentUser && p.likes && p.likes[auth.currentUser.uid];
