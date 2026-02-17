@@ -548,7 +548,7 @@
         let isLyricsMode = false, currentLyrics = [], currentTranslationLyrics = [];
         let isTranslationEnabled = false, currentAmbientMode = null, gyroEnabled = false, currentLang = 'en';
         let viewer360 = null; 
-        let pendingTrackAttachment = null; // Per i post con canzone
+        let pendingTrackAttachment = null; // For posting songs
 
         const TRANSLATIONS = {
             en:{ greeting_m:"Good Morning.", greeting_a:"Good Afternoon.", greeting_e:"Good Evening.", saved_tracks:"Saved Tracks", sessions:"Sessions", caps_title:"Time Capsule", caps_desc:"Seal this track.", btn_seal:"Seal", btn_cancel:"Cancel", new_session:"New Session", add_session:"Add to Session", create:"Create", cancel:"Cancel", rec_title:"Recommended", trend_title:"Trending Now", chill_title:"Relax & Chill", class_title:"Classics", new_release: "Official New Release" },
@@ -604,11 +604,45 @@
             });
         }
 
+        // --- MEDIA SESSION NON-INTERACTIVE ---
+        window.updateMediaSession = function() {
+            if (!('mediaSession' in navigator)) return;
+
+            // 1. SET METADATA (Visible Info)
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: currentTrackData.title,
+                artist: currentTrackData.artist,
+                album: "Aura Music",
+                artwork: [
+                    { src: currentTrackData.cover, sizes: '96x96', type: 'image/png' },
+                    { src: currentTrackData.cover, sizes: '128x128', type: 'image/png' },
+                    { src: currentTrackData.cover, sizes: '192x192', type: 'image/png' },
+                    { src: currentTrackData.cover, sizes: '256x256', type: 'image/png' },
+                    { src: currentTrackData.cover, sizes: '384x384', type: 'image/png' },
+                    { src: currentTrackData.cover, sizes: '512x512', type: 'image/png' },
+                ]
+            });
+
+            // 2. DISABLE INTERACTIONS (iOS/Android)
+            // Setting handlers to NULL hides/disables the buttons in Control Center
+            // Playback continues because 'ended' event in <audio> tag handles flow.
+            navigator.mediaSession.setActionHandler('play', null);
+            navigator.mediaSession.setActionHandler('pause', null);
+            navigator.mediaSession.setActionHandler('seekbackward', null);
+            navigator.mediaSession.setActionHandler('seekforward', null);
+            navigator.mediaSession.setActionHandler('previoustrack', null);
+            navigator.mediaSession.setActionHandler('nexttrack', null);
+        };
+
         window.playTrack = (internalId) => {
             const t = AURA_MAP.find(x => x.internalId === internalId);
             if(!t) return;
             currentTrackData = t;
             audioPlayer.src = t.audioUrl;
+            
+            // UPDATE MEDIA SESSION (With new logic)
+            window.updateMediaSession();
+
             audioPlayer.play().catch(e => console.log("Play error", e));
             
             // RESET
