@@ -123,7 +123,8 @@
             "albumId": "Aura", 
             "albumTitle": "Aura",
             "Status": "New",
-            "originalLang": "en"
+            "originalLang": "en",
+            "image360": "https://pannellum.org/images/alma.jpg"
         },
         {
             "id": "Icy.030",
