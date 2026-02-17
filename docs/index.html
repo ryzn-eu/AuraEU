@@ -17,6 +17,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    
     <style>
         /* --- DESIGN SYSTEM --- */
         :root { 
@@ -130,27 +133,57 @@
         .upload-area { border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; }
         .upload-area:hover { border-color: var(--primary); background: rgba(139, 92, 246, 0.1); }
 
-        /* PLAYER IMMERSIVO */
+        /* PLAYER IMMERSIVO & 360 */
         #immersive-mode { background: radial-gradient(circle at center, #1e1b4b 0%, #000000 100%); }
-        .immersive-art-container { width: 280px; height: 280px; position: relative; margin: 2rem auto; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden; }
-        .art-square { width: 100%; height: 100%; border-radius: 24px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
+        .immersive-art-container { width: 280px; height: 280px; position: relative; margin: 2rem auto; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden; background: #000; }
+        .art-square { width: 100%; height: 100%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
         
+        /* 360 PANORAMA STYLE */
+        #panorama { width: 100%; height: 100%; border-radius: 24px; }
+        .pnlm-container { background: #000 !important; }
+
         .smart-scroller { white-space: nowrap; display: inline-block; transition: transform 1s ease; }
         .smart-scroller.scrolling { animation: pingPongScroll 12s linear infinite alternate; }
         @keyframes pingPongScroll { 0%, 25% { transform: translateX(0); } 75%, 100% { transform: translateX(var(--scroll-distance)); } }
         #immersive-title-wrapper { mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%); overflow: hidden; }
 
-        /* LYRICS */
-        #lyrics-container {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
-            display: flex; flex-direction: column; align-items: center; overflow-y: scroll; scroll-behavior: smooth;
-            padding: 20px; text-align: center; border-radius: 24px;
-            mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+        /* SPOTIFY STYLE LYRICS CARD (Spostato sotto i controlli) */
+        #spotify-lyrics-card {
+            width: 100%;
+            max-width: 340px;
+            margin: 20px auto 40px auto;
+            background-color: var(--primary); /* Fallback */
+            border-radius: 12px;
+            padding: 16px;
+            height: 300px; /* Altezza fissa */
+            overflow: hidden;
+            position: relative;
+            display: none; /* Nascosto di default */
+            transition: background-color 0.5s ease;
         }
-        #lyrics-container::-webkit-scrollbar { display: none; }
-        .lyric-line { font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.4); margin: 16px 0; cursor: pointer; transition: all 0.3s; line-height: 1.2; }
-        .lyric-line.active { color: #fff; transform: scale(1.05); text-shadow: 0 0 20px rgba(255,255,255,0.3); }
-        .lyric-translation { display: block; font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.6); margin-top: 4px; }
+        #spotify-lyrics-card.active { display: block; }
+
+        .lyrics-header-label {
+            font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 12px;
+            text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9;
+        }
+
+        #lyrics-content-scroll {
+            height: 240px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+            padding: 10px 0;
+        }
+        #lyrics-content-scroll::-webkit-scrollbar { display: none; }
+
+        .lyric-line { 
+            font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.4); 
+            margin: 12px 0; cursor: pointer; transition: all 0.2s; line-height: 1.3; text-align: left;
+        }
+        .lyric-line.active { color: #fff; transform: scale(1.02); text-shadow: 0 0 10px rgba(0,0,0,0.3); padding-left: 4px; border-left: 3px solid #fff; }
+        .lyric-translation { display: block; font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.7); margin-top: 4px; }
 
         .controls-pill { background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(20px); border-radius: 50px; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 320px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1); }
         .pill-btn { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #aaa; gap: 4px; }
@@ -380,11 +413,14 @@
             <span class="text-[10px] font-bold tracking-widest uppercase opacity-50">Now Playing</span>
             <button onclick="openShareModal()" class="p-3 bg-white/5 rounded-full"><i data-lucide="share-2" class="w-6 h-6"></i></button>
         </div>
-        <div class="flex-1 flex flex-col items-center justify-center w-full">
+        
+        <div class="flex-1 flex flex-col items-center justify-start w-full mt-4">
+            
             <div class="immersive-art-container">
                 <img id="immersive-cover" src="" class="art-square" crossorigin="anonymous">
-                <div id="lyrics-container" class="hidden"><p class="text-gray-500 mt-20">Loading...</p></div>
+                <div id="panorama" class="hidden"></div>
             </div>
+
             <div class="text-center w-full px-4 mb-6">
                 <div id="immersive-title-wrapper" class="w-full h-10 flex justify-center items-center">
                     <h2 id="immersive-title" class="text-2xl font-bold smart-scroller">Choose Track</h2>
@@ -394,6 +430,7 @@
                      <i data-lucide="info" class="w-3 h-3 text-cyan-400"></i>
                 </button>
             </div>
+            
             <div class="w-full max-w-sm px-2 mb-8 group" id="progress-bar-immersive-container">
                 <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden relative cursor-pointer">
                     <div id="progress-bar-immersive" class="h-full bg-gradient-to-r from-violet-500 to-cyan-400 w-0 relative">
@@ -401,6 +438,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="flex items-center justify-between w-full max-w-[280px] mb-8">
                 <button onclick="toggleLoop()" class="opacity-50"><i data-lucide="repeat" class="w-5 h-5"></i></button>
                 <button onclick="skipBackward()"><i data-lucide="skip-back" class="w-8 h-8 fill-current"></i></button>
@@ -413,11 +451,19 @@
                     <button onclick="openAddToPlaylistModal()" class="opacity-50 hover:text-white"><i data-lucide="list-plus" class="w-5 h-5"></i></button>
                 </div>
             </div>
+
             <div class="controls-pill">
                 <button onclick="toggleAmbientMenu()" id="btn-ambient" class="pill-btn"><i data-lucide="cloud-rain" class="w-5 h-5"></i><span>Focus</span></button>
                 <button onclick="toggleTranslation()" id="btn-translate" class="pill-btn"><i data-lucide="languages" class="w-5 h-5"></i><span>Translate</span></button>
                 <button onclick="toggleGyro()" id="btn-gyro" class="pill-btn"><i data-lucide="smartphone" class="w-5 h-5"></i><span>Gyro</span></button>
                 <button onclick="openCapsuleModal()" class="pill-btn"><i data-lucide="hourglass" class="w-5 h-5"></i><span>Capsule</span></button>
+            </div>
+
+            <div id="spotify-lyrics-card">
+                <div class="lyrics-header-label">Lyrics</div>
+                <div id="lyrics-content-scroll">
+                    <p class="text-sm text-white/50">Loading lyrics...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -478,6 +524,7 @@
         let currentTrackData = null, audioPlayer = null, isLooping = false, likedTracks = new Set(), userPlaylists = [], listeningHistory = [], loggedInUser = null;
         let isLyricsMode = false, currentLyrics = [], currentTranslationLyrics = [];
         let isTranslationEnabled = false, currentAmbientMode = null, gyroEnabled = false, currentLang = 'en';
+        let viewer360 = null; // Pannellum Instance
 
         const TRANSLATIONS = {
             en:{ greeting_m:"Good Morning.", greeting_a:"Good Afternoon.", greeting_e:"Good Evening.", saved_tracks:"Saved Tracks", sessions:"Sessions", caps_title:"Time Capsule", caps_desc:"Seal this track.", btn_seal:"Seal", btn_cancel:"Cancel", new_session:"New Session", add_session:"Add to Session", create:"Create", cancel:"Cancel", rec_title:"Recommended", trend_title:"Trending Now", chill_title:"Relax & Chill", class_title:"Classics", new_release: "Official New Release" },
@@ -540,9 +587,47 @@
             currentTrackData = t;
             audioPlayer.src = t.audioUrl;
             audioPlayer.play().catch(e => console.log("Play error", e));
-            currentLyrics = []; document.getElementById('lyrics-container').innerHTML = '<p class="text-gray-500 mt-20">Loading...</p>';
-            if(t.lrcUrl) { isLyricsMode = true; document.getElementById('lyrics-container').classList.remove('hidden'); document.getElementById('immersive-cover').classList.add('hidden'); fetchSmartLyrics(t); } 
-            else { isLyricsMode = false; document.getElementById('lyrics-container').classList.add('hidden'); document.getElementById('immersive-cover').classList.remove('hidden'); }
+            
+            // RESET
+            currentLyrics = []; 
+            document.getElementById('lyrics-content-scroll').innerHTML = '<p class="text-sm text-white/50 text-center mt-10">Loading lyrics...</p>';
+            document.getElementById('spotify-lyrics-card').classList.remove('active');
+            
+            // 360 LOGIC
+            const artImg = document.getElementById('immersive-cover');
+            const panoContainer = document.getElementById('panorama');
+
+            // Reset previous 360 viewer
+            if(window.viewer360) { window.viewer360.destroy(); window.viewer360 = null; }
+
+            if(t.image360) {
+                // Activate 360
+                artImg.classList.add('hidden');
+                panoContainer.classList.remove('hidden');
+                setTimeout(() => {
+                    window.viewer360 = pannellum.viewer('panorama', {
+                        "type": "equirectangular",
+                        "panorama": t.image360,
+                        "autoLoad": true,
+                        "autoRotate": -2,
+                        "showControls": false
+                    });
+                }, 100);
+            } else {
+                // Normal Cover
+                artImg.classList.remove('hidden');
+                panoContainer.classList.add('hidden');
+            }
+
+            if(t.lrcUrl) { 
+                isLyricsMode = true; 
+                fetchSmartLyrics(t); 
+            } else { 
+                isLyricsMode = false; 
+                // Hide lyrics card if no lyrics
+                document.getElementById('spotify-lyrics-card').style.display = 'none';
+            }
+            
             updateUI(t);
             listeningHistory = [internalId, ...listeningHistory.filter(x => x !== internalId)].slice(0, 20);
             saveLocalData();
@@ -553,6 +638,10 @@
             const fakeTrack = { internalId: "social_" + Date.now(), title: title, artist: artist, audioUrl: url, cover: "https://via.placeholder.com/300?text=Audio", lrcUrl: null };
             currentTrackData = fakeTrack;
             audioPlayer.src = url; audioPlayer.play();
+            // Reset visuals
+            document.getElementById('immersive-cover').classList.remove('hidden');
+            document.getElementById('panorama').classList.add('hidden');
+            document.getElementById('spotify-lyrics-card').classList.remove('active');
             updateUI(fakeTrack);
         };
 
@@ -560,8 +649,18 @@
             document.querySelectorAll('#player-title, #immersive-title').forEach(e => e.innerText = t.title);
             document.querySelectorAll('#player-artist, #immersive-artist').forEach(e => e.innerText = t.artist);
             document.querySelectorAll('#player-cover, #immersive-cover').forEach(e => e.src = t.cover);
+            
             const img = new Image(); img.crossOrigin = "anonymous"; img.src = t.cover;
-            img.onload = () => { try { const c = new ColorThief().getColor(img); document.documentElement.style.setProperty('--primary', `rgb(${c[0]},${c[1]},${c[2]})`); } catch(e){} };
+            img.onload = () => { 
+                try { 
+                    const c = new ColorThief().getColor(img); 
+                    const rgb = `rgb(${c[0]},${c[1]},${c[2]})`;
+                    const rgba = `rgba(${c[0]},${c[1]},${c[2]}, 0.5)`;
+                    document.documentElement.style.setProperty('--primary', rgb); 
+                    // Update Lyrics Card Background
+                    document.getElementById('spotify-lyrics-card').style.backgroundColor = rgba;
+                } catch(e){} 
+            };
         }
 
         function parseLrc(txt) {
@@ -578,14 +677,22 @@
                     if(transRes.ok) currentTranslationLyrics = parseLrc(await transRes.text());
                 }
                 renderLyrics(); 
-            } catch(e) { document.getElementById('lyrics-container').innerHTML = '<p class="text-red-500 mt-20">No Lyrics</p>'; }
+            } catch(e) { document.getElementById('spotify-lyrics-card').style.display = 'none'; }
         }
+        
         function renderLyrics() {
-            document.getElementById('lyrics-container').innerHTML = '<div style="height:50%"></div>' + currentLyrics.map((l,i) => {
+            if(!currentLyrics.length) return;
+            // Show the card
+            const card = document.getElementById('spotify-lyrics-card');
+            card.style.display = 'block';
+            card.classList.add('active');
+
+            document.getElementById('lyrics-content-scroll').innerHTML = '<div style="height:30%"></div>' + currentLyrics.map((l,i) => {
                 let transHTML = (isTranslationEnabled && currentTranslationLyrics[i]) ? `<br><span class="lyric-translation">${currentTranslationLyrics[i].text}</span>` : "";
                 return `<p id="lyric-${i}" class="lyric-line" onclick="audioPlayer.currentTime=${l.time}">${l.text}${transHTML}</p>`;
             }).join('') + '<div style="height:50%"></div>';
         }
+
         function syncLyrics() {
             if(!isLyricsMode || !currentLyrics.length) return;
             const t = audioPlayer.currentTime;
@@ -593,7 +700,10 @@
             if(idx < 0) idx = currentLyrics.length - 1; 
             document.querySelectorAll('.lyric-line').forEach(e => e.classList.remove('active'));
             const el = document.getElementById(`lyric-${idx}`);
-            if(el) { el.classList.add('active'); el.scrollIntoView({behavior:"smooth", block:"center"}); }
+            if(el) { 
+                el.classList.add('active'); 
+                el.scrollIntoView({behavior:"smooth", block:"center", inline: "nearest"}); 
+            }
         }
 
         window.showSection=(id)=>{ document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); document.getElementById(id+'-section').classList.add('active'); if(id==='music') renderHistoryGrid(); };
