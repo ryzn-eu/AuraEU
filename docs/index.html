@@ -159,8 +159,8 @@
         .art-square { width: 100%; height: 100%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
         
         /* 360 PANORAMA STYLE */
-        #panorama { width: 100%; height: 100%; border-radius: 24px; }
-        .pnlm-container { background: #000 !important; }
+        #panorama { width: 100%; height: 100%; border-radius: 24px; position: absolute; inset: 0; z-index: 10; background: #000; }
+        .pnlm-container { background: #000 !important; width: 100% !important; height: 100% !important; }
 
         .smart-scroller { white-space: nowrap; display: inline-block; transition: transform 1s ease; }
         .smart-scroller.scrolling { animation: pingPongScroll 12s linear infinite alternate; }
@@ -548,7 +548,7 @@
         let isLyricsMode = false, currentLyrics = [], currentTranslationLyrics = [];
         let isTranslationEnabled = false, currentAmbientMode = null, gyroEnabled = false, currentLang = 'en';
         let viewer360 = null; 
-        let pendingTrackAttachment = null; // For posting songs
+        let pendingTrackAttachment = null; // Per i post con canzone
 
         const TRANSLATIONS = {
             en:{ greeting_m:"Good Morning.", greeting_a:"Good Afternoon.", greeting_e:"Good Evening.", saved_tracks:"Saved Tracks", sessions:"Sessions", caps_title:"Time Capsule", caps_desc:"Seal this track.", btn_seal:"Seal", btn_cancel:"Cancel", new_session:"New Session", add_session:"Add to Session", create:"Create", cancel:"Cancel", rec_title:"Recommended", trend_title:"Trending Now", chill_title:"Relax & Chill", class_title:"Classics", new_release: "Official New Release" },
@@ -616,7 +616,7 @@
             document.getElementById('lyrics-content-scroll').innerHTML = '<p class="text-sm text-white/50 text-center mt-10">Loading lyrics...</p>';
             document.getElementById('spotify-lyrics-card').classList.remove('active');
             
-            // 360 LOGIC
+            // 360 LOGIC - FIXATO: Timeout per rendering corretto
             const artImg = document.getElementById('immersive-cover');
             const panoContainer = document.getElementById('panorama');
 
@@ -626,10 +626,12 @@
                 artImg.classList.add('hidden');
                 panoContainer.classList.remove('hidden');
                 setTimeout(() => {
-                    window.viewer360 = pannellum.viewer('panorama', {
-                        "type": "equirectangular", "panorama": t.image360, "autoLoad": true, "autoRotate": -2, "showControls": false
-                    });
-                }, 100);
+                    try {
+                        window.viewer360 = pannellum.viewer('panorama', {
+                            "type": "equirectangular", "panorama": t.image360, "autoLoad": true, "autoRotate": -2, "showControls": false
+                        });
+                    } catch(e) { console.log("360 Error", e); }
+                }, 50); // Ritardo fondamentale per il rendering
             } else {
                 artImg.classList.remove('hidden');
                 panoContainer.classList.add('hidden');
@@ -687,6 +689,7 @@
             }).join('') + '<div style="height:50%"></div>';
         }
 
+        // FIX: Scroll interno al div senza muovere la pagina intera
         function syncLyrics() {
             if(!isLyricsMode || !currentLyrics.length) return;
             const t = audioPlayer.currentTime;
@@ -694,10 +697,10 @@
             if(idx < 0) idx = currentLyrics.length - 1; 
             document.querySelectorAll('.lyric-line').forEach(e => e.classList.remove('active'));
             const el = document.getElementById(`lyric-${idx}`);
-            // Fix: Scroll INSIDE the container, don't move the window
             const container = document.getElementById('lyrics-content-scroll');
             if(el && container) {
                 el.classList.add('active');
+                // Calcola l'offset relativo al contenitore per centrare la linea
                 const offset = el.offsetTop - container.offsetTop - (container.clientHeight / 2) + (el.clientHeight / 2);
                 container.scrollTo({ top: offset, behavior: 'smooth' });
             }
@@ -947,6 +950,8 @@
             window.pendingTrackAttachment = null;
             updateAttachmentPreview();
         };
+        
+        // FUNZIONE PER CONDIVIDERE DAL PLAYER
         window.openComposeWithTrack = () => {
              if(!currentTrackData) return;
              closeShareModal();
