@@ -273,9 +273,13 @@
                 </div>
             </section>
 
-            <section id="library-section" class="section-page">
+            <section id="library-section" class="section-page relative">
                 <h2 id="txt-saved-tracks" class="text-2xl font-bold mb-4">Saved Tracks</h2>
-                <div id="liked-tracks-list" class="grid grid-cols-2 gap-3"></div>
+                <div id="liked-tracks-list" class="grid grid-cols-2 gap-3 pb-24"></div>
+                
+                <button id="fab-play-list" onclick="playCurrentList()" class="hidden fixed bottom-[100px] right-6 w-14 h-14 bg-gradient-to-tr from-violet-600 to-cyan-500 text-white rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(139,92,246,0.6)] z-[110] hover:scale-105 transition-transform">
+                    <i data-lucide="play" class="w-6 h-6 fill-current ml-1"></i>
+                </button>
             </section>
 
             <section id="playlists-section" class="section-page">
@@ -561,6 +565,10 @@
         var isTranslationEnabled = false, currentAmbientMode = null, gyroEnabled = false, currentLang = 'en';
         var viewer360 = null; 
         var pendingTrackAttachment = null; 
+        
+        // VARIABILI PER LA CODA DI RIPRODUZIONE
+        var currentViewList = [];     // I brani che sto guardando ora (nella playlist aperta)
+        var activePlaybackQueue = []; // La coda che sta suonando effettivamente
 
         const TRANSLATIONS = {
             en:{ greeting_m:"Good Morning.", greeting_a:"Good Afternoon.", greeting_e:"Good Evening.", saved_tracks:"Saved Tracks", sessions:"Sessions", caps_title:"Time Capsule", caps_desc:"Seal this track.", btn_seal:"Seal", btn_cancel:"Cancel", new_session:"New Session", add_session:"Add to Session", create:"Create", cancel:"Cancel", rec_title:"Recommended", trend_title:"Trending Now", chill_title:"Relax & Chill", class_title:"Classics", new_release: "Official New Release" },
@@ -574,11 +582,52 @@
         document.addEventListener('DOMContentLoaded', () => {
             checkPWAStatus();
             getDOMElements();
-            init360Joystick(); // Avvia il sistema custom per il touch 360
+            init360Joystick(); 
             loadLocalData();
             fetchData(); 
             showSection('music');
         });
+
+        // --- GESTIONE APERTURA PLAYLIST E LIKES ---
+        window.openLikedSongs = () => {
+            const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
+            document.getElementById('txt-saved-tracks').innerText = t.saved_tracks;
+            window.currentViewList = Array.from(window.likedTracks);
+            window.showSection('library');
+            window.renderGenericList(window.currentViewList);
+        };
+
+        window.openPlaylist = (pid) => {
+            const p = window.userPlaylists.find(x => String(x.id) === String(pid));
+            if(!p) return;
+            document.getElementById('txt-saved-tracks').innerText = p.name;
+            window.currentViewList = p.tracks || [];
+            window.showSection('library');
+            window.renderGenericList(window.currentViewList);
+        };
+
+        window.renderGenericList = (idList) => {
+            const list = idList.map(id => window.AURA_MAP.find(t=>t.internalId === id)).filter(Boolean);
+            document.getElementById('liked-tracks-list').innerHTML = list.length ? list.map(t => `<div onclick="playTrackFromList('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('') : '<p class="text-xs text-gray-500 col-span-2 mt-4">No tracks found.</p>';
+            
+            const fab = document.getElementById('fab-play-list');
+            if(list.length > 0 && document.getElementById('library-section').classList.contains('active')) { 
+                fab.classList.remove('hidden'); 
+            } else { 
+                fab.classList.add('hidden'); 
+            }
+        };
+
+        window.playTrackFromList = (internalId) => {
+            window.activePlaybackQueue = [...window.currentViewList]; // Fissa la coda alla cartella aperta
+            window.playTrack(internalId, true);
+        };
+
+        window.playCurrentList = () => {
+            if(!window.currentViewList || !window.currentViewList.length) return;
+            window.activePlaybackQueue = [...window.currentViewList]; // Fissa la coda
+            window.playTrack(window.activePlaybackQueue[0], true);
+        };
 
         // --- SISTEMA JOYSTICK CUSTOM PER IL 360 ---
         function init360Joystick() {
@@ -590,7 +639,6 @@
             let initialPitch = 0;
             let autoRotateTimeout = null;
 
-            // Su mobile: tocco con le dita
             artWrapper.addEventListener('touchstart', (e) => {
                 if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return;
                 startX = e.touches[0].clientX;
@@ -611,22 +659,18 @@
                 let deltaX = currentX - startX;
                 let deltaY = currentY - startY;
 
-                // Determiniamo l'intenzione nei primi pixel di scorrimento
                 if(!isDragging360 && !isScrollingPage) {
                     if(Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
                         if(Math.abs(deltaX) > Math.abs(deltaY)) {
-                            // Swype laterale: l'utente vuole ruotare il 360
                             isDragging360 = true; 
                         } else {
-                            // Swype verticale: l'utente vuole scorrere la pagina
                             isScrollingPage = true; 
                         }
                     }
                 }
 
-                // Se ha ingaggiato il 360, blocchiamo lo scroll di pagina e giriamo la foto
                 if(isDragging360) {
-                    e.preventDefault(); // Blocca lo scroll in basso nativo del browser
+                    e.preventDefault(); 
                     let fov = window.viewer360.getHfov();
                     let yawFactor = fov / artWrapper.clientWidth;
                     let pitchFactor = fov / artWrapper.clientHeight;
@@ -638,10 +682,9 @@
 
             artWrapper.addEventListener('touchend', () => {
                 if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return;
-                // Riprende a ruotare da solo dopo 3 secondi
                 clearTimeout(autoRotateTimeout);
                 autoRotateTimeout = setTimeout(() => {
-                    if(window.viewer360) window.viewer360.setPitch(0); // Optional: resetta orizzonte
+                    if(window.viewer360) window.viewer360.setPitch(0);
                 }, 3000);
             });
         }
@@ -710,7 +753,10 @@
             navigator.mediaSession.setActionHandler('nexttrack', null);
         };
 
-        window.playTrack = (internalId) => {
+        window.playTrack = (internalId, keepQueue = false) => {
+            // Se clicco su un brano a caso dalla home, la coda si resetta a tutti i brani globali
+            if (!keepQueue) window.activePlaybackQueue = []; 
+
             const t = AURA_MAP.find(x => x.internalId === internalId);
             if(!t) return;
             currentTrackData = t;
@@ -750,7 +796,7 @@
                                 "autoLoad": true, 
                                 "autoRotate": -2, 
                                 "showControls": false,
-                                "draggable": false, // Disabilitato il drag nativo, ci pensa il nostro joystick!
+                                "draggable": false, 
                                 "mouseZoom": false,
                                 "disableKeyboardCtrl": true
                             });
@@ -786,7 +832,7 @@
                             "autoLoad": true, 
                             "autoRotate": -2, 
                             "showControls": false,
-                            "draggable": false, // Disabilitato drag nativo
+                            "draggable": false,
                             "mouseZoom": false,
                             "disableKeyboardCtrl": true
                         });
@@ -856,11 +902,47 @@
             }
         }
 
-        window.showSection=(id)=>{ document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); document.getElementById(id+'-section').classList.add('active'); if(id==='music') renderHistoryGrid(); };
+        window.showSection=(id)=>{ 
+            document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); 
+            document.getElementById(id+'-section').classList.add('active'); 
+            if(id==='music') renderHistoryGrid(); 
+
+            // Controllo del Floating Action Button per Play
+            const fab = document.getElementById('fab-play-list');
+            if(id === 'library' && window.currentViewList && window.currentViewList.length > 0) {
+                fab.classList.remove('hidden');
+            } else {
+                fab.classList.add('hidden');
+            }
+        };
+
         window.exitImmersiveMode=()=>document.getElementById('immersive-mode').classList.add('hidden');
         window.updateProgress=()=>{ if(audioPlayer.duration) document.querySelectorAll('#progress-bar, #progress-bar-immersive').forEach(e=>e.style.width=(audioPlayer.currentTime/audioPlayer.duration*100)+'%'); };
-        window.skipForward=()=>{ if(currentTrackData){ const i=AURA_MAP.findIndex(x=>x.internalId===currentTrackData.internalId); playTrack(AURA_MAP[(i+1)%AURA_MAP.length].internalId); } };
-        window.skipBackward=()=>{ if(currentTrackData){ const i=AURA_MAP.findIndex(x=>x.internalId===currentTrackData.internalId); playTrack(AURA_MAP[(i-1+AURA_MAP.length)%AURA_MAP.length].internalId); } };
+        
+        // --- CODA DI RIPRODUZIONE (Avanti e Indietro Intelligente) ---
+        window.skipForward=()=>{ 
+            if(currentTrackData){ 
+                let list = window.activePlaybackQueue && window.activePlaybackQueue.length > 0 ? window.activePlaybackQueue : AURA_MAP.map(t=>t.internalId);
+                const i = list.indexOf(currentTrackData.internalId); 
+                if (i !== -1) {
+                    window.playTrack(list[(i+1) % list.length], true); 
+                } else {
+                    window.playTrack(AURA_MAP[0].internalId, true);
+                }
+            } 
+        };
+        window.skipBackward=()=>{ 
+            if(currentTrackData){ 
+                let list = window.activePlaybackQueue && window.activePlaybackQueue.length > 0 ? window.activePlaybackQueue : AURA_MAP.map(t=>t.internalId);
+                const i = list.indexOf(currentTrackData.internalId); 
+                if (i !== -1) {
+                    window.playTrack(list[(i-1+list.length) % list.length], true); 
+                } else {
+                    window.playTrack(AURA_MAP[0].internalId, true);
+                }
+            } 
+        };
+
         window.togglePlayPause=()=>audioPlayer.paused?audioPlayer.play():audioPlayer.pause();
         window.toggleLoop=()=>{ isLooping=!isLooping; showToast(isLooping?"Loop On":"Loop Off"); };
         window.showToast=(m)=>{ const t=document.createElement('div'); t.className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold border border-white/20"; t.innerText=m; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.remove(),2000); };
@@ -897,7 +979,7 @@
             document.getElementById('home-history-grid').innerHTML = items.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('');
         }
         function renderHomePageWidgets() {
-            const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en'];
+            const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
             let html = "";
             const newRelease = AURA_MAP.find(t => t.status === "New");
             if (newRelease) html += `<div class="mb-8"><h3 class="widget-block-title">${t.new_release}</h3><div onclick="playTrack('${newRelease.internalId}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg"><img src="${newRelease.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm"><div class="absolute inset-0 p-5 flex items-center gap-5"><img src="${newRelease.cover}" class="w-32 h-32 rounded-xl shadow-2xl z-10"><div class="z-10"><h4 class="text-2xl font-bold text-white mb-1">${newRelease.title}</h4><p class="text-gray-300">${newRelease.artist}</p></div></div></div></div>`;
@@ -907,7 +989,7 @@
             html += `<div class="ios-widget-row">
                         <div class="ios-card community-card-big cursor-pointer" onclick="showSection('social')"><div class="ios-content"><div class="p-2 bg-white/20 rounded-full w-max"><i data-lucide="users" class="w-5 h-5 text-white"></i></div><div><p class="text-2xl font-bold text-white">Community & Friends</p><p class="text-xs text-white/80">Join the conversation</p></div></div></div>
                         <div class="ios-card"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="globe" class="w-4 h-4 text-green-400"></i></div><div><p class="text-2xl font-bold">${visitors.toLocaleString()}</p><p class="text-[10px] text-gray-400"><span class="live-dot"></span>Online</p></div></div></div>
-                        <div class="ios-card" onclick="showSection('library')"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i></div><div><p class="text-2xl font-bold">${globalLikes}</p><p class="text-[10px] text-gray-400">Global Likes</p></div></div></div>
+                        <div class="ios-card" onclick="openLikedSongs()"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i></div><div><p class="text-2xl font-bold">${globalLikes}</p><p class="text-[10px] text-gray-400">Global Likes</p></div></div></div>
                      </div>`;
 
             html += createWidgetBlock(t.rec_title, AURA_MAP.slice(0,8));
@@ -932,10 +1014,16 @@
         window.openLanguageModal=()=>document.getElementById('language-modal').classList.remove('hidden'); window.closeLanguageModal=()=>document.getElementById('language-modal').classList.add('hidden');
         window.changeLanguage = (val) => { currentLang = val; saveLocalData(); updateLanguageUI(); renderHomePageWidgets(); }
         window.updateLanguageUI = () => {
-            const t = TRANSLATIONS[currentLang] || TRANSLATIONS['en'];
+            const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
             const h = new Date().getHours();
             document.getElementById('home-greeting').innerText = h < 12 ? t.greeting_m : h < 18 ? t.greeting_a : t.greeting_e;
-            document.getElementById('txt-saved-tracks').innerText = t.saved_tracks;
+            
+            const savedTitle = document.getElementById('txt-saved-tracks').innerText;
+            const knownSavedTitles = Object.values(TRANSLATIONS).map(x => x.saved_tracks);
+            if(savedTitle === "Saved Tracks" || knownSavedTitles.includes(savedTitle)) {
+                document.getElementById('txt-saved-tracks').innerText = t.saved_tracks;
+            }
+            
             document.getElementById('txt-sessions').innerText = t.sessions;
         };
 
@@ -1034,10 +1122,26 @@
         function syncUserLibrary(uid) {
             onValue(ref(db, `users/${uid}/likes`), (s) => {
                 window.likedTracks = new Set(Object.keys(s.val()||{}));
-                renderLikedTracks();
-                renderPlaylists();
+                window.renderPlaylists();
+                
+                if (document.getElementById('library-section').classList.contains('active')) {
+                    const savedTitle = document.getElementById('txt-saved-tracks').innerText;
+                    const knownSavedTitles = Object.values(TRANSLATIONS).map(x => x.saved_tracks);
+                    if (savedTitle === "Saved Tracks" || knownSavedTitles.includes(savedTitle)) {
+                        window.openLikedSongs();
+                    }
+                }
             });
-            onValue(ref(db, `users/${uid}/playlists`), (s) => { window.userPlaylists = Object.values(s.val()||{}); renderPlaylists(); });
+            onValue(ref(db, `users/${uid}/playlists`), (s) => { 
+                window.userPlaylists = Object.values(s.val()||{}); 
+                window.renderPlaylists(); 
+                
+                if (document.getElementById('library-section').classList.contains('active')) {
+                    const currentName = document.getElementById('txt-saved-tracks').innerText;
+                    const p = window.userPlaylists.find(x => x.name === currentName);
+                    if(p) window.openPlaylist(p.id);
+                }
+            });
             onValue(ref(db, `users/${uid}`), (s)=>{ if(s.val()?.bio) document.getElementById('sp-bio').innerText = s.val().bio; });
         }
         
@@ -1049,11 +1153,6 @@
             else { set(ref(db, refStr), true); showToast("Saved"); }
         };
 
-        window.renderLikedTracks = () => {
-             const list = Array.from(window.likedTracks).map(id => window.AURA_MAP.find(t=>t.internalId === id)).filter(Boolean);
-             document.getElementById('liked-tracks-list').innerHTML = list.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('');
-        };
-
         window.openCreatePlaylistModal=()=>document.getElementById('create-playlist-modal').classList.remove('hidden'); 
         window.closeCreatePlaylistModal=()=>document.getElementById('create-playlist-modal').classList.add('hidden');
         window.createPlaylist = () => {
@@ -1063,11 +1162,11 @@
         };
 
         window.renderPlaylists = () => {
-            let html = `<div onclick="showSection('library')" class="p-4 glass-panel rounded-xl cursor-pointer relative bg-gradient-to-br from-violet-900/40 to-fuchsia-900/40 border-violet-500/30">
+            let html = `<div onclick="openLikedSongs()" class="p-4 glass-panel rounded-xl cursor-pointer relative bg-gradient-to-br from-violet-900/40 to-fuchsia-900/40 border-violet-500/30">
                             <h3 class="font-bold flex items-center gap-2"><i data-lucide="heart" class="w-4 h-4 fill-pink-500 text-pink-500"></i> Liked Songs</h3>
                             <p class="text-xs text-gray-400">${window.likedTracks.size} tracks</p>
                         </div>`;
-            html += window.userPlaylists.map(p=>`<div class="p-4 glass-panel rounded-xl cursor-pointer relative"><h3 class="font-bold">${p.name}</h3><p class="text-xs text-gray-400">${(p.tracks||[]).length} tracks</p></div>`).join('');
+            html += window.userPlaylists.map(p=>`<div onclick="openPlaylist('${p.id}')" class="p-4 glass-panel rounded-xl cursor-pointer relative"><h3 class="font-bold">${p.name}</h3><p class="text-xs text-gray-400">${(p.tracks||[]).length} tracks</p></div>`).join('');
             document.getElementById('playlists-list').innerHTML = html;
             lucide.createIcons();
         };
@@ -1234,8 +1333,11 @@
             const c = document.getElementById('profile-content-area');
             document.getElementById('tab-drops').style.borderColor = tab==='drops'?'#06b6d4':'transparent';
             document.getElementById('tab-likes').style.borderColor = tab==='likes'?'#06b6d4':'transparent';
-            if(tab === 'likes') { renderLikedTracks(); }
-            else {
+            
+            if(tab === 'likes') { 
+                const list = Array.from(window.likedTracks).map(id => window.AURA_MAP.find(t=>t.internalId === id)).filter(Boolean);
+                c.innerHTML = list.length ? list.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card mb-2 bg-white/5 border border-white/10"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('') : '<p class="text-center text-gray-500 mt-4">No liked tracks.</p>';
+            } else {
                 get(ref(db, 'posts')).then(s => {
                     const d = s.val();
                     if(!d) { c.innerHTML = '<p class="text-center text-gray-500 mt-4">No threads yet.</p>'; return; }
