@@ -553,12 +553,15 @@
         };
         
         const STORY_EMOJIS = {1: "💻", 2: "🎬", 3: "🚀", 4: "🪐", 5: "🧘"};
-        let AURA_MAP = [], ARTISTS_FULL_LIST = [], USER_VIDEOS = [];
-        let currentTrackData = null, audioPlayer = null, isLooping = false, likedTracks = new Set(), userPlaylists = [], listeningHistory = [], loggedInUser = null;
-        let isLyricsMode = false, currentLyrics = [], currentTranslationLyrics = [];
-        let isTranslationEnabled = false, currentAmbientMode = null, gyroEnabled = false, currentLang = 'en';
-        let viewer360 = null; 
-        let pendingTrackAttachment = null; 
+        
+        // FIX VAR GLOBAL SCOPE: 
+        // Convertiamo in `var` per permetterne l'aggancio diretto a window (accessibile dal modulo Firebase giu)
+        var AURA_MAP = [], ARTISTS_FULL_LIST = [], USER_VIDEOS = [];
+        var currentTrackData = null, audioPlayer = null, isLooping = false, likedTracks = new Set(), userPlaylists = [], listeningHistory = [], loggedInUser = null;
+        var isLyricsMode = false, currentLyrics = [], currentTranslationLyrics = [];
+        var isTranslationEnabled = false, currentAmbientMode = null, gyroEnabled = false, currentLang = 'en';
+        var viewer360 = null; 
+        var pendingTrackAttachment = null; 
 
         const TRANSLATIONS = {
             en:{ greeting_m:"Good Morning.", greeting_a:"Good Afternoon.", greeting_e:"Good Evening.", saved_tracks:"Saved Tracks", sessions:"Sessions", caps_title:"Time Capsule", caps_desc:"Seal this track.", btn_seal:"Seal", btn_cancel:"Cancel", new_session:"New Session", add_session:"Add to Session", create:"Create", cancel:"Cancel", rec_title:"Recommended", trend_title:"Trending Now", chill_title:"Relax & Chill", class_title:"Classics", new_release: "Official New Release" },
@@ -653,7 +656,6 @@
             document.getElementById('lyrics-content-scroll').innerHTML = '<p class="text-sm text-white/50 text-center mt-10">Loading lyrics...</p>';
             document.getElementById('spotify-lyrics-card').classList.remove('active');
             
-            // FIX 360: Utilizzo dello 'spacer-mode' per la finestra trasparente
             const artWrapper = document.getElementById('immersive-art-wrapper');
             const panoContainer = document.getElementById('panorama');
             const panoOverlay = document.getElementById('panorama-overlay');
@@ -666,7 +668,6 @@
             panoContainer.innerHTML = ''; 
 
             if(t.image360) {
-                // Diventa una "finestra trasparente" che mantiene i 280px di altezza
                 artWrapper.classList.add('spacer-mode');
                 coverImg.classList.add('hidden');
                 
@@ -687,7 +688,6 @@
                     }, 150);
                 }
             } else {
-                // Ripristina la copertina solida
                 artWrapper.classList.remove('spacer-mode');
                 coverImg.classList.remove('hidden');
                 
@@ -706,7 +706,6 @@
         window.enterImmersiveMode = () => {
             document.getElementById('immersive-mode').classList.remove('hidden');
             
-            // Inizializza il 360 se la canzone corrente lo ha e non è già stato caricato
             if (currentTrackData && currentTrackData.image360 && !window.viewer360) {
                 setTimeout(() => {
                     try {
@@ -971,9 +970,9 @@
         
         window.toggleLike = () => {
             if(!auth.currentUser) return showToast("Login required");
-            if(!currentTrackData) return;
-            const refStr = `users/${auth.currentUser.uid}/likes/${currentTrackData.internalId}`;
-            if(window.likedTracks.has(currentTrackData.internalId)) { remove(ref(db, refStr)); showToast("Removed"); }
+            if(!window.currentTrackData) return;
+            const refStr = `users/${auth.currentUser.uid}/likes/${window.currentTrackData.internalId}`;
+            if(window.likedTracks.has(window.currentTrackData.internalId)) { remove(ref(db, refStr)); showToast("Removed"); }
             else { set(ref(db, refStr), true); showToast("Saved"); }
         };
 
@@ -993,7 +992,7 @@
         window.renderPlaylists = () => {
             let html = `<div onclick="showSection('library')" class="p-4 glass-panel rounded-xl cursor-pointer relative bg-gradient-to-br from-violet-900/40 to-fuchsia-900/40 border-violet-500/30">
                             <h3 class="font-bold flex items-center gap-2"><i data-lucide="heart" class="w-4 h-4 fill-pink-500 text-pink-500"></i> Liked Songs</h3>
-                            <p class="text-xs text-gray-400">${likedTracks.size} tracks</p>
+                            <p class="text-xs text-gray-400">${window.likedTracks.size} tracks</p>
                         </div>`;
             html += window.userPlaylists.map(p=>`<div class="p-4 glass-panel rounded-xl cursor-pointer relative"><h3 class="font-bold">${p.name}</h3><p class="text-xs text-gray-400">${(p.tracks||[]).length} tracks</p></div>`).join('');
             document.getElementById('playlists-list').innerHTML = html;
@@ -1001,9 +1000,9 @@
         };
 
         window.openAddToPlaylistModal=()=>{ 
-            if(!currentTrackData) return; 
+            if(!window.currentTrackData) return; 
             const list=document.getElementById('playlist-selection-list'); 
-            list.innerHTML=userPlaylists.length ? userPlaylists.map(p=>`<div onclick="toggleTrackInPlaylist('${p.id}')" class="p-3 mb-2 rounded-lg cursor-pointer flex justify-between bg-white/5"><span class="text-sm">${p.name}</span><i data-lucide="plus"></i></div>`).join('') : '<p class="text-xs text-center text-gray-500">No sessions.</p>';
+            list.innerHTML=window.userPlaylists.length ? window.userPlaylists.map(p=>`<div onclick="toggleTrackInPlaylist('${p.id}')" class="p-3 mb-2 rounded-lg cursor-pointer flex justify-between bg-white/5"><span class="text-sm">${p.name}</span><i data-lucide="plus"></i></div>`).join('') : '<p class="text-xs text-center text-gray-500">No sessions.</p>';
             document.getElementById('add-to-playlist-modal').classList.remove('hidden'); lucide.createIcons();
         };
         window.closeAddToPlaylistModal=()=>document.getElementById('add-to-playlist-modal').classList.add('hidden');
@@ -1012,7 +1011,7 @@
             const p = window.userPlaylists.find(x => String(x.id) === String(pid));
             if(!p) return;
             if(!p.tracks) p.tracks = [];
-            if(!p.tracks.includes(currentTrackData.internalId)) { p.tracks.push(currentTrackData.internalId); update(ref(db, `users/${auth.currentUser.uid}/playlists/${pid}`), { tracks: p.tracks }); showToast("Added to Session"); } 
+            if(!p.tracks.includes(window.currentTrackData.internalId)) { p.tracks.push(window.currentTrackData.internalId); update(ref(db, `users/${auth.currentUser.uid}/playlists/${pid}`), { tracks: p.tracks }); showToast("Added to Session"); } 
             else { showToast("Already in Session"); }
             closeAddToPlaylistModal();
         };
@@ -1029,9 +1028,9 @@
         };
         
         window.openComposeWithTrack = () => {
-             if(!currentTrackData) return;
+             if(!window.currentTrackData) return;
              closeShareModal();
-             window.pendingTrackAttachment = currentTrackData;
+             window.pendingTrackAttachment = window.currentTrackData;
              openComposeModal(true);
         };
         
