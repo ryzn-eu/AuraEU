@@ -587,7 +587,6 @@
                     else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
                     const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
                     
-                    // FIX LIKES: Removed Date.now() from ID to ensure stability across reloads
                     const safeId = t.id ? String(t.id) : `track_${index}_${(t.title||'').replace(/[^a-zA-Z0-9]/g, '')}`;
                     return { ...t, internalId: safeId, artist: artistMap[t.artistId] || t.artist || "Unknown", audioUrl: rawAudioUrl, cover: coverUrl, status: t.Status };
                 });
@@ -642,29 +641,41 @@
             window.updateMediaSession();
             audioPlayer.play().catch(e => console.log("Play error", e));
             
-            // RESET
             currentLyrics = []; 
             document.getElementById('lyrics-content-scroll').innerHTML = '<p class="text-sm text-white/50 text-center mt-10">Loading lyrics...</p>';
             document.getElementById('spotify-lyrics-card').classList.remove('active');
             
-            // FIX 360: Immersive full screen + hide cover
+            // FIX 360: Distruggi e pulisci subito se esiste
             const artWrapper = document.getElementById('immersive-art-wrapper');
             const panoContainer = document.getElementById('panorama');
             const panoOverlay = document.getElementById('panorama-overlay');
 
-            if(window.viewer360) { window.viewer360.destroy(); window.viewer360 = null; }
+            if(window.viewer360) { 
+                window.viewer360.destroy(); 
+                window.viewer360 = null; 
+            }
+            panoContainer.innerHTML = ''; // Importante: resetta il div completamente
 
             if(t.image360) {
                 artWrapper.classList.add('hidden');
                 panoContainer.classList.remove('hidden');
                 panoOverlay.classList.remove('hidden');
-                setTimeout(() => {
-                    try {
-                        window.viewer360 = pannellum.viewer('panorama', {
-                            "type": "equirectangular", "panorama": t.image360, "autoLoad": true, "autoRotate": -2, "showControls": false
-                        });
-                    } catch(e) { console.log("360 Error", e); }
-                }, 100);
+                
+                // INIZIALIZZA IL 360 SOLO SE IL PLAYER IMMERSIVO E' GIA' VISIBILE. 
+                // Altrimenti verrà inizializzato dalla funzione enterImmersiveMode().
+                if (!document.getElementById('immersive-mode').classList.contains('hidden')) {
+                    setTimeout(() => {
+                        try {
+                            window.viewer360 = pannellum.viewer('panorama', {
+                                "type": "equirectangular", 
+                                "panorama": t.image360, 
+                                "autoLoad": true, 
+                                "autoRotate": -2, 
+                                "showControls": false
+                            });
+                        } catch(e) { console.log("360 Error", e); }
+                    }, 150);
+                }
             } else {
                 artWrapper.classList.remove('hidden');
                 panoContainer.classList.add('hidden');
@@ -677,6 +688,29 @@
             listeningHistory = [internalId, ...listeningHistory.filter(x => x !== internalId)].slice(0, 20);
             saveLocalData();
             renderHistoryGrid();
+        };
+
+        window.enterImmersiveMode = () => {
+            document.getElementById('immersive-mode').classList.remove('hidden');
+            
+            // FIX 360: Inizializza Pannellum QUI, quando il div è visibile e ha dimensioni
+            if (currentTrackData && currentTrackData.image360 && !window.viewer360) {
+                setTimeout(() => {
+                    try {
+                        document.getElementById('panorama').innerHTML = '';
+                        window.viewer360 = pannellum.viewer('panorama', {
+                            "type": "equirectangular", 
+                            "panorama": currentTrackData.image360, 
+                            "autoLoad": true, 
+                            "autoRotate": -2, 
+                            "showControls": false
+                        });
+                    } catch(e) { console.log("360 Error", e); }
+                }, 150);
+            } else if (window.viewer360) {
+                // Se è già aperto e sta suonando la stessa canzone, ridimensionalo per sicurezza
+                window.viewer360.resize();
+            }
         };
 
         function updateUI(t) {
@@ -739,7 +773,6 @@
         }
 
         window.showSection=(id)=>{ document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); document.getElementById(id+'-section').classList.add('active'); if(id==='music') renderHistoryGrid(); };
-        window.enterImmersiveMode=()=>document.getElementById('immersive-mode').classList.remove('hidden');
         window.exitImmersiveMode=()=>document.getElementById('immersive-mode').classList.add('hidden');
         window.updateProgress=()=>{ if(audioPlayer.duration) document.querySelectorAll('#progress-bar, #progress-bar-immersive').forEach(e=>e.style.width=(audioPlayer.currentTime/audioPlayer.duration*100)+'%'); };
         window.skipForward=()=>{ if(currentTrackData){ const i=AURA_MAP.findIndex(x=>x.internalId===currentTrackData.internalId); playTrack(AURA_MAP[(i+1)%AURA_MAP.length].internalId); } };
@@ -972,7 +1005,6 @@
             closeAddToPlaylistModal();
         };
 
-        // FIX THREAD: Accettare il parametro preserveAttachment
         window.openComposeModal = (preserveAttachment = false) => {
             if(!auth.currentUser) return window.openAuthModal();
             document.getElementById('compose-modal').classList.remove('hidden');
@@ -988,7 +1020,7 @@
              if(!currentTrackData) return;
              closeShareModal();
              window.pendingTrackAttachment = currentTrackData;
-             openComposeModal(true); // Evita la cancellazione dell'allegato
+             openComposeModal(true);
         };
         
         window.closeComposeModal = () => document.getElementById('compose-modal').classList.add('hidden');
@@ -1018,7 +1050,7 @@
                     authorName: auth.currentUser.displayName,
                     authorPic: auth.currentUser.photoURL,
                     text: txt,
-                    timestamp: Date.now(), // FIX LIKES/SORTING: Data certa e fissa in locale
+                    timestamp: Date.now(),
                     type: window.pendingTrackAttachment ? 'share' : 'text'
                 };
                 
