@@ -158,16 +158,16 @@
         .immersive-art-container { width: 280px; height: 280px; position: relative; margin: 2rem auto; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden; background: #000; transition: all 0.3s ease; }
         .art-square { width: 100%; height: 100%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
         
-        /* 360 PANORAMA STYLE FIXED */
-        #panorama { width: 100%; height: 100%; position: absolute; inset: 0; z-index: 0; background: #000; }
-        .pnlm-container { background: #000 !important; width: 100% !important; height: 100% !important; }
+        /* 360 PANORAMA STYLE: Isoliamo gli eventi nativi per gestirli col nostro Joystick */
+        #panorama { width: 100%; height: 100%; position: absolute; inset: 0; z-index: 0; background: #000; pointer-events: none; }
+        .pnlm-container { background: #000 !important; width: 100% !important; height: 100% !important; pointer-events: none !important; }
 
-        /* CLASSE SPACER PER CREARE LA "FINESTRA" SUL 360 */
+        /* CLASSE SPACER / JOYSTICK PER IL 360 */
         .immersive-art-container.spacer-mode {
             background: transparent !important;
             box-shadow: none !important;
             border: none !important;
-            pointer-events: none !important; /* Fondamentale: permette di toccare il 360 dietro! */
+            touch-action: pan-y; /* Lascia lo scroll verticale nativo ma blocca zoom */
         }
 
         .smart-scroller { white-space: nowrap; display: inline-block; transition: transform 1s ease; }
@@ -434,6 +434,7 @@
     </div>
 
     <div id="immersive-mode" class="fixed inset-0 z-[150] hidden flex flex-col justify-between p-6 pb-10 overflow-y-auto">
+        
         <div id="panorama" class="hidden"></div>
         <div id="panorama-overlay" class="hidden absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-black/90 pointer-events-none"></div>
         
@@ -554,8 +555,6 @@
         
         const STORY_EMOJIS = {1: "💻", 2: "🎬", 3: "🚀", 4: "🪐", 5: "🧘"};
         
-        // FIX VAR GLOBAL SCOPE: 
-        // Convertiamo in `var` per permetterne l'aggancio diretto a window (accessibile dal modulo Firebase giu)
         var AURA_MAP = [], ARTISTS_FULL_LIST = [], USER_VIDEOS = [];
         var currentTrackData = null, audioPlayer = null, isLooping = false, likedTracks = new Set(), userPlaylists = [], listeningHistory = [], loggedInUser = null;
         var isLyricsMode = false, currentLyrics = [], currentTranslationLyrics = [];
@@ -575,10 +574,78 @@
         document.addEventListener('DOMContentLoaded', () => {
             checkPWAStatus();
             getDOMElements();
+            init360Joystick(); // Avvia il sistema custom per il touch 360
             loadLocalData();
             fetchData(); 
             showSection('music');
         });
+
+        // --- SISTEMA JOYSTICK CUSTOM PER IL 360 ---
+        function init360Joystick() {
+            const artWrapper = document.getElementById('immersive-art-wrapper');
+            let startX = 0, startY = 0;
+            let isDragging360 = false;
+            let isScrollingPage = false;
+            let initialYaw = 0;
+            let initialPitch = 0;
+            let autoRotateTimeout = null;
+
+            // Su mobile: tocco con le dita
+            artWrapper.addEventListener('touchstart', (e) => {
+                if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isDragging360 = false;
+                isScrollingPage = false;
+                initialYaw = window.viewer360.getYaw();
+                initialPitch = window.viewer360.getPitch();
+                
+                clearTimeout(autoRotateTimeout);
+            }, {passive: true});
+
+            artWrapper.addEventListener('touchmove', (e) => {
+                if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return;
+                
+                let currentX = e.touches[0].clientX;
+                let currentY = e.touches[0].clientY;
+                let deltaX = currentX - startX;
+                let deltaY = currentY - startY;
+
+                // Determiniamo l'intenzione nei primi pixel di scorrimento
+                if(!isDragging360 && !isScrollingPage) {
+                    if(Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                        if(Math.abs(deltaX) > Math.abs(deltaY)) {
+                            // Swype laterale: l'utente vuole ruotare il 360
+                            isDragging360 = true; 
+                        } else {
+                            // Swype verticale: l'utente vuole scorrere la pagina
+                            isScrollingPage = true; 
+                        }
+                    }
+                }
+
+                // Se ha ingaggiato il 360, blocchiamo lo scroll di pagina e giriamo la foto
+                if(isDragging360) {
+                    e.preventDefault(); // Blocca lo scroll in basso nativo del browser
+                    let fov = window.viewer360.getHfov();
+                    let yawFactor = fov / artWrapper.clientWidth;
+                    let pitchFactor = fov / artWrapper.clientHeight;
+                    
+                    window.viewer360.setYaw(initialYaw - (deltaX * yawFactor));
+                    window.viewer360.setPitch(initialPitch + (deltaY * pitchFactor));
+                }
+            }, {passive: false});
+
+            artWrapper.addEventListener('touchend', () => {
+                if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return;
+                // Riprende a ruotare da solo dopo 3 secondi
+                clearTimeout(autoRotateTimeout);
+                autoRotateTimeout = setTimeout(() => {
+                    if(window.viewer360) window.viewer360.setPitch(0); // Optional: resetta orizzonte
+                }, 3000);
+            });
+        }
+        // ------------------------------------------
 
         async function fetchData() {
             try {
@@ -682,7 +749,10 @@
                                 "panorama": t.image360, 
                                 "autoLoad": true, 
                                 "autoRotate": -2, 
-                                "showControls": false
+                                "showControls": false,
+                                "draggable": false, // Disabilitato il drag nativo, ci pensa il nostro joystick!
+                                "mouseZoom": false,
+                                "disableKeyboardCtrl": true
                             });
                         } catch(e) { console.log("360 Error", e); }
                     }, 150);
@@ -715,7 +785,10 @@
                             "panorama": currentTrackData.image360, 
                             "autoLoad": true, 
                             "autoRotate": -2, 
-                            "showControls": false
+                            "showControls": false,
+                            "draggable": false, // Disabilitato drag nativo
+                            "mouseZoom": false,
+                            "disableKeyboardCtrl": true
                         });
                     } catch(e) { console.log("360 Error", e); }
                 }, 150);
