@@ -124,7 +124,7 @@
 
         /* THREADS / SOCIAL STYLE */
         .thread-card {
-            background: rgba(255,255,255,0.03); /* Pure dark, no blue */
+            background: rgba(255,255,255,0.03); 
             border-bottom: 1px solid var(--glass-border);
             padding: 16px;
             margin-bottom: 0;
@@ -158,8 +158,8 @@
         .immersive-art-container { width: 280px; height: 280px; position: relative; margin: 2rem auto; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden; background: #000; }
         .art-square { width: 100%; height: 100%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
         
-        /* 360 PANORAMA STYLE */
-        #panorama { width: 100%; height: 100%; border-radius: 24px; position: absolute; inset: 0; z-index: 10; background: #000; }
+        /* 360 PANORAMA STYLE FIXED */
+        #panorama { width: 100%; height: 100%; position: absolute; inset: 0; z-index: 0; background: #000; }
         .pnlm-container { background: #000 !important; width: 100% !important; height: 100% !important; }
 
         .smart-scroller { white-space: nowrap; display: inline-block; transition: transform 1s ease; }
@@ -426,58 +426,60 @@
     </div>
 
     <div id="immersive-mode" class="fixed inset-0 z-[150] hidden flex flex-col justify-between p-6 pb-10 overflow-y-auto">
-        <div class="flex justify-between items-center mt-2">
+        <div id="panorama" class="hidden"></div>
+        <div id="panorama-overlay" class="hidden absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-black/90 pointer-events-none"></div>
+        
+        <div class="flex justify-between items-center mt-2 relative z-10">
             <button onclick="exitImmersiveMode()" class="p-3 bg-white/5 rounded-full"><i data-lucide="chevron-down" class="w-6 h-6"></i></button>
-            <span class="text-[10px] font-bold tracking-widest uppercase opacity-50">Now Playing</span>
+            <span class="text-[10px] font-bold tracking-widest uppercase opacity-50 drop-shadow-md">Now Playing</span>
             <button onclick="openShareModal()" class="p-3 bg-white/5 rounded-full"><i data-lucide="share-2" class="w-6 h-6"></i></button>
         </div>
         
-        <div class="flex-1 flex flex-col items-center justify-start w-full mt-4">
+        <div class="flex-1 flex flex-col items-center justify-start w-full mt-4 relative z-10">
             
-            <div class="immersive-art-container">
+            <div id="immersive-art-wrapper" class="immersive-art-container">
                 <img id="immersive-cover" src="" class="art-square" crossorigin="anonymous">
-                <div id="panorama" class="hidden"></div>
             </div>
 
-            <div class="text-center w-full px-4 mb-6">
+            <div class="text-center w-full px-4 mb-6 mt-4">
                 <div id="immersive-title-wrapper" class="w-full h-10 flex justify-center items-center">
-                    <h2 id="immersive-title" class="text-2xl font-bold smart-scroller">Choose Track</h2>
+                    <h2 id="immersive-title" class="text-2xl font-bold smart-scroller drop-shadow-lg">Choose Track</h2>
                 </div>
-                <button onclick="openArtistProfile()" class="mt-1 flex items-center justify-center gap-1 mx-auto opacity-70 hover:opacity-100 transition">
-                     <p id="immersive-artist" class="text-lg text-gray-300 font-medium">Artist</p>
+                <button onclick="openArtistProfile()" class="mt-1 flex items-center justify-center gap-1 mx-auto opacity-80 hover:opacity-100 transition drop-shadow-md">
+                     <p id="immersive-artist" class="text-lg text-gray-200 font-medium">Artist</p>
                      <i data-lucide="info" class="w-3 h-3 text-cyan-400"></i>
                 </button>
             </div>
             
-            <div class="w-full max-w-sm px-2 mb-8 group" id="progress-bar-immersive-container">
-                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden relative cursor-pointer">
+            <div class="w-full max-w-sm px-2 mb-8 group drop-shadow-md" id="progress-bar-immersive-container">
+                <div class="w-full h-1.5 bg-white/20 rounded-full overflow-hidden relative cursor-pointer">
                     <div id="progress-bar-immersive" class="h-full bg-gradient-to-r from-violet-500 to-cyan-400 w-0 relative">
                         <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full scale-0 group-hover:scale-100 transition-transform"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center justify-between w-full max-w-[280px] mb-8">
-                <button onclick="toggleLoop()" class="opacity-50"><i data-lucide="repeat" class="w-5 h-5"></i></button>
+            <div class="flex items-center justify-between w-full max-w-[280px] mb-8 drop-shadow-lg">
+                <button onclick="toggleLoop()" class="opacity-70 hover:opacity-100"><i data-lucide="repeat" class="w-5 h-5"></i></button>
                 <button onclick="skipBackward()"><i data-lucide="skip-back" class="w-8 h-8 fill-current"></i></button>
                 <button onclick="togglePlayPause()" class="w-16 h-16 bg-white text-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition">
                     <i id="immersive-play-icon" data-lucide="play" class="w-7 h-7 fill-current ml-1"></i>
                 </button>
                 <button onclick="skipForward()"><i data-lucide="skip-forward" class="w-8 h-8 fill-current"></i></button>
                 <div class="flex flex-col gap-1 items-center">
-                    <button onclick="toggleLike()" id="like-button-immersive" class="opacity-50 hover:text-red-500"><i data-lucide="heart" class="w-5 h-5"></i></button>
-                    <button onclick="openAddToPlaylistModal()" class="opacity-50 hover:text-white"><i data-lucide="list-plus" class="w-5 h-5"></i></button>
+                    <button onclick="toggleLike()" id="like-button-immersive" class="opacity-70 hover:text-red-500"><i data-lucide="heart" class="w-5 h-5"></i></button>
+                    <button onclick="openAddToPlaylistModal()" class="opacity-70 hover:text-white"><i data-lucide="list-plus" class="w-5 h-5"></i></button>
                 </div>
             </div>
 
-            <div class="controls-pill">
+            <div class="controls-pill drop-shadow-lg">
                 <button onclick="toggleAmbientMenu()" id="btn-ambient" class="pill-btn"><i data-lucide="cloud-rain" class="w-5 h-5"></i><span>Focus</span></button>
                 <button onclick="toggleTranslation()" id="btn-translate" class="pill-btn"><i data-lucide="languages" class="w-5 h-5"></i><span>Translate</span></button>
                 <button onclick="toggleGyro()" id="btn-gyro" class="pill-btn"><i data-lucide="smartphone" class="w-5 h-5"></i><span>Gyro</span></button>
                 <button onclick="openCapsuleModal()" class="pill-btn"><i data-lucide="hourglass" class="w-5 h-5"></i><span>Capsule</span></button>
             </div>
 
-            <div id="spotify-lyrics-card">
+            <div id="spotify-lyrics-card" class="drop-shadow-lg mt-6">
                 <div class="lyrics-header-label">Lyrics</div>
                 <div id="lyrics-content-scroll">
                     <p class="text-sm text-white/50">Loading lyrics...</p>
@@ -548,7 +550,7 @@
         let isLyricsMode = false, currentLyrics = [], currentTranslationLyrics = [];
         let isTranslationEnabled = false, currentAmbientMode = null, gyroEnabled = false, currentLang = 'en';
         let viewer360 = null; 
-        let pendingTrackAttachment = null; // For posting songs
+        let pendingTrackAttachment = null; 
 
         const TRANSLATIONS = {
             en:{ greeting_m:"Good Morning.", greeting_a:"Good Afternoon.", greeting_e:"Good Evening.", saved_tracks:"Saved Tracks", sessions:"Sessions", caps_title:"Time Capsule", caps_desc:"Seal this track.", btn_seal:"Seal", btn_cancel:"Cancel", new_session:"New Session", add_session:"Add to Session", create:"Create", cancel:"Cancel", rec_title:"Recommended", trend_title:"Trending Now", chill_title:"Relax & Chill", class_title:"Classics", new_release: "Official New Release" },
@@ -578,12 +580,16 @@
                 ARTISTS_FULL_LIST = ar || [];
                 const artistMap = {}; ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
                 const rawTracks = tr.tracks || tr || [];
+                
                 AURA_MAP = rawTracks.map((t, index) => {
                     let coverUrl = "https://via.placeholder.com/300";
                     if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
                     else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
                     const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
-                    return { ...t, internalId: `track_${index}_${Date.now()}`, artist: artistMap[t.artistId] || t.artist || "Unknown", audioUrl: rawAudioUrl, cover: coverUrl, status: t.Status };
+                    
+                    // FIX LIKES: Removed Date.now() from ID to ensure stability across reloads
+                    const safeId = t.id ? String(t.id) : `track_${index}_${(t.title||'').replace(/[^a-zA-Z0-9]/g, '')}`;
+                    return { ...t, internalId: safeId, artist: artistMap[t.artistId] || t.artist || "Unknown", audioUrl: rawAudioUrl, cover: coverUrl, status: t.Status };
                 });
                 renderStories();
                 renderHomePageWidgets();
@@ -604,11 +610,8 @@
             });
         }
 
-        // --- MEDIA SESSION NON-INTERACTIVE ---
         window.updateMediaSession = function() {
             if (!('mediaSession' in navigator)) return;
-
-            // 1. SET METADATA (Visible Info)
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: currentTrackData.title,
                 artist: currentTrackData.artist,
@@ -622,10 +625,6 @@
                     { src: currentTrackData.cover, sizes: '512x512', type: 'image/png' },
                 ]
             });
-
-            // 2. DISABLE INTERACTIONS (iOS/Android)
-            // Setting handlers to NULL hides/disables the buttons in Control Center
-            // Playback continues because 'ended' event in <audio> tag handles flow.
             navigator.mediaSession.setActionHandler('play', null);
             navigator.mediaSession.setActionHandler('pause', null);
             navigator.mediaSession.setActionHandler('seekbackward', null);
@@ -640,9 +639,7 @@
             currentTrackData = t;
             audioPlayer.src = t.audioUrl;
             
-            // UPDATE MEDIA SESSION (With new logic)
             window.updateMediaSession();
-
             audioPlayer.play().catch(e => console.log("Play error", e));
             
             // RESET
@@ -650,25 +647,28 @@
             document.getElementById('lyrics-content-scroll').innerHTML = '<p class="text-sm text-white/50 text-center mt-10">Loading lyrics...</p>';
             document.getElementById('spotify-lyrics-card').classList.remove('active');
             
-            // 360 LOGIC - FIXATO: Timeout per rendering corretto
-            const artImg = document.getElementById('immersive-cover');
+            // FIX 360: Immersive full screen + hide cover
+            const artWrapper = document.getElementById('immersive-art-wrapper');
             const panoContainer = document.getElementById('panorama');
+            const panoOverlay = document.getElementById('panorama-overlay');
 
             if(window.viewer360) { window.viewer360.destroy(); window.viewer360 = null; }
 
             if(t.image360) {
-                artImg.classList.add('hidden');
+                artWrapper.classList.add('hidden');
                 panoContainer.classList.remove('hidden');
+                panoOverlay.classList.remove('hidden');
                 setTimeout(() => {
                     try {
                         window.viewer360 = pannellum.viewer('panorama', {
                             "type": "equirectangular", "panorama": t.image360, "autoLoad": true, "autoRotate": -2, "showControls": false
                         });
                     } catch(e) { console.log("360 Error", e); }
-                }, 50); // Ritardo fondamentale per il rendering
+                }, 100);
             } else {
-                artImg.classList.remove('hidden');
+                artWrapper.classList.remove('hidden');
                 panoContainer.classList.add('hidden');
+                panoOverlay.classList.add('hidden');
             }
 
             if(t.lrcUrl) { isLyricsMode = true; fetchSmartLyrics(t); } else { isLyricsMode = false; document.getElementById('spotify-lyrics-card').style.display = 'none'; }
@@ -723,7 +723,6 @@
             }).join('') + '<div style="height:50%"></div>';
         }
 
-        // FIX: Scroll interno al div senza muovere la pagina intera
         function syncLyrics() {
             if(!isLyricsMode || !currentLyrics.length) return;
             const t = audioPlayer.currentTime;
@@ -734,7 +733,6 @@
             const container = document.getElementById('lyrics-content-scroll');
             if(el && container) {
                 el.classList.add('active');
-                // Calcola l'offset relativo al contenitore per centrare la linea
                 const offset = el.offsetTop - container.offsetTop - (container.clientHeight / 2) + (el.clientHeight / 2);
                 container.scrollTo({ top: offset, behavior: 'smooth' });
             }
@@ -787,7 +785,6 @@
             const newRelease = AURA_MAP.find(t => t.status === "New");
             if (newRelease) html += `<div class="mb-8"><h3 class="widget-block-title">${t.new_release}</h3><div onclick="playTrack('${newRelease.internalId}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg"><img src="${newRelease.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm"><div class="absolute inset-0 p-5 flex items-center gap-5"><img src="${newRelease.cover}" class="w-32 h-32 rounded-xl shadow-2xl z-10"><div class="z-10"><h4 class="text-2xl font-bold text-white mb-1">${newRelease.title}</h4><p class="text-gray-300">${newRelease.artist}</p></div></div></div></div>`;
             
-            // WIDGETS ONLINE / LIKES RESTORED + COMMUNITY WIDGET
             const visitors = Math.floor(Math.random() * 15000) + 10200; 
             const globalLikes = (2840000 + Math.floor(Date.now() / 5000)).toLocaleString();
             html += `<div class="ios-widget-row">
@@ -866,7 +863,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, update, push, onValue, get, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, update, push, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBjQC2dOKySeHPEJCVjjEEHyHEUy19DRPY",
@@ -975,24 +972,25 @@
             closeAddToPlaylistModal();
         };
 
-        // NEW POST SYSTEM (Text + Song Share)
-        window.openComposeModal = () => {
+        // FIX THREAD: Accettare il parametro preserveAttachment
+        window.openComposeModal = (preserveAttachment = false) => {
             if(!auth.currentUser) return window.openAuthModal();
             document.getElementById('compose-modal').classList.remove('hidden');
             document.getElementById('compose-avatar').src = auth.currentUser.photoURL;
             document.getElementById('compose-text').value = "";
-            window.pendingTrackAttachment = null;
+            if (!preserveAttachment) {
+                window.pendingTrackAttachment = null;
+            }
             updateAttachmentPreview();
         };
         
-        // FUNZIONE PER CONDIVIDERE DAL PLAYER
         window.openComposeWithTrack = () => {
              if(!currentTrackData) return;
              closeShareModal();
-             openComposeModal();
              window.pendingTrackAttachment = currentTrackData;
-             updateAttachmentPreview();
+             openComposeModal(true); // Evita la cancellazione dell'allegato
         };
+        
         window.closeComposeModal = () => document.getElementById('compose-modal').classList.add('hidden');
         
         function updateAttachmentPreview() {
@@ -1020,7 +1018,7 @@
                     authorName: auth.currentUser.displayName,
                     authorPic: auth.currentUser.photoURL,
                     text: txt,
-                    timestamp: serverTimestamp(),
+                    timestamp: Date.now(), // FIX LIKES/SORTING: Data certa e fissa in locale
                     type: window.pendingTrackAttachment ? 'share' : 'text'
                 };
                 
@@ -1059,9 +1057,9 @@
                              </div>
                              <div class="p-2 bg-white rounded-full"><i data-lucide="play" class="w-3 h-3 text-black fill-current"></i></div>
                         </div>`;
-                    } else if (p.fileType === 'audio') { // Legacy support
+                    } else if (p.fileType === 'audio') { 
                          attachmentHTML = `<div class="p-4 bg-white/5 rounded-xl mt-2 flex items-center gap-3 cursor-pointer" onclick="playSocialAudio('${p.fileUrl}','Audio','${p.authorName}')"><div class="p-3 bg-white text-black rounded-full"><i data-lucide="play" class="fill-current w-4 h-4"></i></div><span class="text-xs">Play Audio Clip</span></div>`;
-                    } else if (p.fileType === 'image') { // Legacy support
+                    } else if (p.fileType === 'image') { 
                          attachmentHTML = `<img src="${p.fileUrl}" class="rounded-xl mt-2 w-full max-h-60 object-cover">`;
                     }
                     
