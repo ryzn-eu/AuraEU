@@ -113,7 +113,7 @@
         },
         {
             "id": "icy_aura",
-            "title": "Aura official song",
+            "title": "Aura",
             "file": "aura.mp3",
             "categoryID": "Ryzn Best",
             "videoUrl": "",
@@ -124,7 +124,7 @@
             "albumTitle": "Aura",
             "Status": "New",
             "originalLang": "en",
-            "image360": "https://pannellum.org/images/alma.jpg"
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/eso0932a.jpg"
         },
         {
             "id": "icy_tons",
