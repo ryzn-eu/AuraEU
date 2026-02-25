@@ -760,8 +760,15 @@
                 
                 AURA_MAP = rawTracks.map((t, index) => {
                     let coverUrl = "https://via.placeholder.com/300";
-                    if(t.albumId) coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
-                    else if (t.categoryID) coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
+                    
+                    if(t.cover) {
+                        coverUrl = t.cover;
+                    } else if(t.albumId) {
+                        coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
+                    } else if (t.categoryID) {
+                        coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
+                    }
+                    
                     const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
                     
                     const safeId = t.id ? String(t.id) : `track_${index}_${(t.title||'').replace(/[^a-zA-Z0-9]/g, '')}`;
