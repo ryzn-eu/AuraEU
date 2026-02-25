@@ -1,102 +1,276 @@
 {
     "tracks": [
         {
-            "title": "8 Days of Christmas",
-            "file": "8 Days of Christmas .mp3",
-            "categoryID": "CR1",
-            "videoUrl": "https://dsvplay.com/e/57rfkob1zyyj",
-            "originalLang": "en"
+            "id": "trk_neimieidm",
+            "title": "Nei miei DM",
+            "file": "Nei miei DM.mp3",
+            "categoryID": "Pop",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "A Little Love",
-            "file": "A Little Love .mp3",
-            "categoryID": "CR2",
-            "videoUrl": "https://dsvplay.com/e/r65vi6hxvikz",
-            "originalLang": "en"
+            "id": "trk_manifestazione",
+            "title": "MANIFESTAZIONE D'AMORE",
+            "file": "MANIFESTAZIONE D'AMORE.mp3",
+            "categoryID": "Pop",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "All I Want for Christmas Is You",
-            "file": "All I Want for Christmas Is You .mp3",
-            "categoryID": "CR1",
-            "videoUrl": "https://dsvplay.com/e/bcixya91dr4a",
-            "originalLang": "en"
+            "id": "trk_laguna",
+            "title": "Laguna",
+            "file": "Laguna.mp3",
+            "categoryID": "Pop",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "Baby, It's Cold Outside",
-            "file": "Baby, It's Cold Outside.mp3",
-            "categoryID": "CR2",
-            "videoUrl": "https://dsvplay.com/e/afaxf65uwzhe",
-            "originalLang": "en"
+            "id": "trk_mattone",
+            "title": "Mattone",
+            "file": "Mattone.mp3",
+            "categoryID": "Rap",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "Blue Christmas",
-            "file": "Blue Christmas .mp3",
-            "categoryID": "CR3",
-            "videoUrl": "https://dsvplay.com/e/yi2zk7lzbgs9",
-            "originalLang": "en"
+            "id": "trk_avvoltoi",
+            "title": "Avvoltoi",
+            "file": "Avvoltoi.mp3",
+            "categoryID": "Rap",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "Christmas",
-            "file": "Christmas.mp3",
-            "categoryID": "CR3",
-            "videoUrl": "https://dsvplay.com/e/ie7cdcs7rwjy",
-            "originalLang": "en"
+            "id": "trk_oraepersempre",
+            "title": "Ora e per sempre",
+            "file": "Ora e per sempre.mp3",
+            "categoryID": "Festival San Remo",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "Jingle Bell Rock",
-            "file": "Jingle Bell Rock .mp3",
-            "categoryID": "CR1",
-            "videoUrl": "https://dsvplay.com/e/ooo0p5xey9xh",
-            "originalLang": "en"
+            "id": "trk_naturale",
+            "title": "NATURALE",
+            "file": "NATURALE.mp3",
+            "categoryID": "Pop",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "Joy to the World",
-            "file": "Joy to the World .mp3",
-            "categoryID": "CR3",
-            "videoUrl": "https://dsvplay.com/e/g9g436dy4vys",
-            "originalLang": "en"
+            "id": "trk_ilmegliodime",
+            "title": "Il meglio di me",
+            "file": "Il meglio di me.mp3",
+            "categoryID": "Festival San Remo",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "Last Christmas",
-            "file": "Last Christmas.mp3",
-            "categoryID": "CR1",
-            "videoUrl": "https://dsvplay.com/e/1myk0125xufu",
-            "originalLang": "en"
+            "id": "trk_voila",
+            "title": "Voilà",
+            "file": "Voilà.mp3",
+            "categoryID": "Pop",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "Let It Snow!",
-            "file": "Let It Snow!.mp3",
-            "categoryID": "CR3",
-            "videoUrl": "https://dsvplay.com/e/92uoly96u6nd",
-            "originalLang": "en"
+            "id": "trk_opera",
+            "title": "Opera",
+            "file": "Opera.mp3",
+            "categoryID": "Rap",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "Lonely This Christmas",
-            "file": "Lonely This Christmas .mp3",
-            "categoryID": "CR2",
-            "videoUrl": "https://dsvplay.com/e/hdbgt0vu74rn",
-            "originalLang": "en"
+            "id": "trk_ognivolta",
+            "title": "Ogni volta che non so volare",
+            "file": "Ogni volta che non so volare.mp3",
+            "categoryID": "Festival San Remo",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "Step Into Christmas",
-            "file": "Step Into Christmas .mp3",
-            "categoryID": "CR2",
-            "videoUrl": "https://dsvplay.com/e/n6o2x1516a2i",
-            "originalLang": "en"
+            "id": "trk_uomochecade",
+            "title": "uomo che cade",
+            "file": "uomo che cade.mp3",
+            "categoryID": "Indie",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "White Christmas",
-            "file": "White Christmas .mp3",
-            "categoryID": "CR3",
-            "videoUrl": "https://dsvplay.com/e/hly4485uowp8",
-            "originalLang": "en"
+            "id": "trk_restaconme",
+            "title": "Resta Con Me",
+            "file": "Resta Con Me.mp3",
+            "categoryID": "Festival San Remo",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
-            "title": "Winter Wonderland",
-            "file": "Winter Wonderland .mp3",
-            "categoryID": "CR3",
-            "videoUrl": "https://dsvplay.com/e/x9w70r8a9fwi",
-            "originalLang": "en"
+            "id": "trk_aiai",
+            "title": "AI AI",
+            "file": "AI AI.mp3",
+            "categoryID": "Dance",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_lecoseche",
+            "title": "le cose che non sai di me",
+            "file": "le cose che non sai di me.mp3",
+            "categoryID": "Pop",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_italiastarter",
+            "title": "ITALIA STARTER PACK",
+            "file": "ITALIA STARTER PACK.mp3",
+            "categoryID": "Rap",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_lafelicita",
+            "title": "La felicità e basta",
+            "file": "La felicità e basta.mp3",
+            "categoryID": "Indie",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_primaopoi",
+            "title": "Prima o poi",
+            "file": "Prima o poi.mp3",
+            "categoryID": "Festival San Remo",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_tipenso",
+            "title": "Ti penso sempre",
+            "file": "Ti penso sempre.mp3",
+            "categoryID": "Pop",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_poesie",
+            "title": "Poesie Clandestine",
+            "file": "Poesie Clandestine.mp3",
+            "categoryID": "Rap",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_seitu",
+            "title": "SEI TU",
+            "file": "SEI TU.mp3",
+            "categoryID": "Festival San Remo",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_stella",
+            "title": "Stella stellina",
+            "file": "Stella stellina.mp3",
+            "categoryID": "Dance",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_persempre",
+            "title": "Per sempre sì",
+            "file": "Per sempre sì.mp3",
+            "categoryID": "Festival San Remo",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_animali",
+            "title": "animali notturni",
+            "file": "animali notturni.mp3",
+            "categoryID": "Pop",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_ossessione",
+            "title": "OSSESSIONE",
+            "file": "OSSESSIONE.mp3",
+            "categoryID": "Pop",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_stupida",
+            "title": "Stupida sfortuna",
+            "file": "Stupida sfortuna.mp3",
+            "categoryID": "Dance",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_magica",
+            "title": "Magica Favola",
+            "file": "Magica Favola.mp3",
+            "categoryID": "Rap",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_romantici",
+            "title": "I romantici",
+            "file": "I romantici.mp3",
+            "categoryID": "Indie",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_primache",
+            "title": "Prima che",
+            "file": "Prima che.mp3",
+            "categoryID": "Festival San Remo",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_chefastidio",
+            "title": "Che fastidio!",
+            "file": "Che fastidio!.mp3",
+            "categoryID": "Indie",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_labirinto",
+            "title": "Labirinto",
+            "file": "Labirinto.mp3",
+            "categoryID": "Pop",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_tumipiaci",
+            "title": "TU MI PIACI TANTO",
+            "file": "TU MI PIACI TANTO.mp3",
+            "categoryID": "Dance",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_quiconme",
+            "title": "QUI CON ME",
+            "file": "QUI CON ME.mp3",
+            "categoryID": "Pop",
+            "artist": "Unknown",
+            "originalLang": "it"
+        },
+        {
+            "id": "trk_malenecessario",
+            "title": "MALE NECESSARIO",
+            "file": "MALE NECESSARIO.mp3",
+            "categoryID": "Rap",
+            "artist": "Unknown",
+            "originalLang": "it"
         },
         {
             "id": "icy_mifai",
