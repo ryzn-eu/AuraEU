@@ -103,7 +103,7 @@
 
         .ios-content { position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
         .live-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; display: inline-block; margin-right: 6px; }
-        .widget-block-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; padding-left: 4px; }
+        .widget-block-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; padding-left: 4px; text-transform: capitalize; }
 
         /* STORIES */
         .stories-scroll-container { display: flex; overflow-x: auto; gap: 16px; padding: 10px 4px; scrollbar-width: none; margin-bottom: 1.5rem; justify-content: flex-start; min-height: 90px; }
@@ -159,7 +159,7 @@
         .immersive-art-container { width: 280px; height: 280px; position: relative; margin: 2rem auto; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden; background: #000; transition: all 0.3s ease; }
         .art-square { width: 100%; height: 100%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
         
-        /* 360 PANORAMA STYLE: Isoliamo gli eventi nativi per gestirli col nostro Joystick */
+        /* 360 PANORAMA STYLE */
         #panorama { width: 100%; height: 100%; position: absolute; inset: 0; z-index: 0; background: #000; pointer-events: none; }
         .pnlm-container { background: #000 !important; width: 100% !important; height: 100% !important; pointer-events: none !important; }
 
@@ -168,7 +168,7 @@
             background: transparent !important;
             box-shadow: none !important;
             border: none !important;
-            touch-action: pan-y; /* Lascia lo scroll verticale nativo ma blocca zoom */
+            touch-action: pan-y;
         }
 
         .smart-scroller { white-space: nowrap; display: inline-block; transition: transform 1s ease; }
@@ -700,25 +700,21 @@
                     let tags = tag.tags;
                     let needsUIUpdate = false;
 
-                    // 1. Estrai il Titolo se mancante
                     if(!track.title || track.title === "Unknown") {
                         track.title = tags.title || track.title;
                         needsUIUpdate = true;
                     }
                     
-                    // 2. Estrai l'Artista se mancante
                     if(!track.artist || track.artist === "Unknown") {
                         track.artist = tags.artist || track.artist;
                         needsUIUpdate = true;
                     }
                     
-                    // 3. Estrai la Copertina (solo se stiamo usando il placeholder di default)
                     if(track.cover.includes("via.placeholder.com") && tags.picture) {
                         let data = tags.picture.data;
                         let format = tags.picture.format;
                         let base64String = "";
                         
-                        // Metodo efficiente per convertire enormi array di byte in Base64
                         let chunkSize = 8192;
                         for (let i = 0; i < data.length; i += chunkSize) {
                             base64String += String.fromCharCode.apply(null, data.slice(i, i + chunkSize));
@@ -728,17 +724,23 @@
                         needsUIUpdate = true;
                     }
 
-                    track.metadataExtracted = true; // Segna come completato per non rifarlo
+                    track.metadataExtracted = true; 
 
-                    // Se questa è la canzone che sta attualmente suonando, aggiorna l'interfaccia
                     if(needsUIUpdate && window.currentTrackData && window.currentTrackData.internalId === track.internalId) {
                         updateUI(track);
                         window.updateMediaSession();
+                        
+                        // FIX: Aggiorna in tempo reale anche le liste sulla UI se visibili
+                        renderHistoryGrid();
+                        if(document.getElementById('library-section').classList.contains('active')) {
+                             window.renderGenericList(window.currentViewList);
+                        }
+                        renderHomePageWidgets();
                     }
                 },
                 onError: function(error) {
                     console.warn("Nessun tag ID3 trovato o MP3 non compatibile:", error.info);
-                    track.metadataExtracted = true; // Segna come fallito per non riprovare
+                    track.metadataExtracted = true; 
                 }
             });
         }
@@ -767,8 +769,8 @@
                     return { 
                         ...t, 
                         internalId: safeId, 
-                        title: t.title || "Unknown", // Setup base per ID3 fallback
-                        artist: artistMap[t.artistId] || t.artist || "Unknown", // Setup base per ID3 fallback
+                        title: t.title || "Unknown", 
+                        artist: artistMap[t.artistId] || t.artist || "Unknown", 
                         audioUrl: rawAudioUrl, 
                         cover: coverUrl, 
                         status: t.Status,
@@ -825,7 +827,6 @@
             currentTrackData = t;
             audioPlayer.src = t.audioUrl;
             
-            // AVVIA LETTURA ID3 ON-DEMAND SE I DATI MANCANO
             if(!t.metadataExtracted && (t.cover.includes("via.placeholder.com") || t.title === "Unknown" || t.artist === "Unknown")) {
                 extractMetadataFromMP3(t);
             }
@@ -1044,12 +1045,17 @@
             const items = list.length >= 1 ? list.slice(0,6) : AURA_MAP.slice(0,6);
             document.getElementById('home-history-grid').innerHTML = items.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('');
         }
+        
+        // --- FUNZIONE MODIFICATA PER CATEGORIE DINAMICHE ---
         function renderHomePageWidgets() {
             const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
             let html = "";
-            const newRelease = AURA_MAP.find(t => t.status === "New");
+            
+            // 1. Nuovo Rilascio (In cima, se presente)
+            const newRelease = AURA_MAP.find(track => track.status === "New");
             if (newRelease) html += `<div class="mb-8"><h3 class="widget-block-title">${t.new_release}</h3><div onclick="playTrack('${newRelease.internalId}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg"><img src="${newRelease.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm"><div class="absolute inset-0 p-5 flex items-center gap-5"><img src="${newRelease.cover}" class="w-32 h-32 rounded-xl shadow-2xl z-10"><div class="z-10"><h4 class="text-2xl font-bold text-white mb-1">${newRelease.title}</h4><p class="text-gray-300">${newRelease.artist}</p></div></div></div></div>`;
             
+            // 2. Schede Social / Numeri
             const visitors = Math.floor(Math.random() * 15000) + 10200; 
             const globalLikes = (2840000 + Math.floor(Date.now() / 5000)).toLocaleString();
             html += `<div class="ios-widget-row">
@@ -1058,13 +1064,27 @@
                         <div class="ios-card" onclick="openLikedSongs()"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i></div><div><p class="text-2xl font-bold">${globalLikes}</p><p class="text-[10px] text-gray-400">Global Likes</p></div></div></div>
                      </div>`;
 
-            html += createWidgetBlock(t.rec_title, AURA_MAP.slice(0,8));
-            html += createWidgetBlock(t.chill_title, AURA_MAP.filter(t => t.categoryID === 'CR2').slice(0, 8));
+            // 3. Riga Fissa "Consigliati" (Prende i primi 8 brani di tutto il db)
+            html += createWidgetBlock(t.rec_title, AURA_MAP.slice(0, 8));
+
+            // 4. RIGHE DINAMICHE PER OGNI CATEGORIA NEL JSON
+            // Estrae un array di tutte le categorie univoche esistenti (es. ["Pop", "Rap", "Festival San Remo", "Indie", "Dance", "Ryzn Best"])
+            const uniqueCategories = [...new Set(AURA_MAP.map(track => track.categoryID).filter(Boolean))];
+            
+            // Crea un blocco per ogni categoria trovata
+            uniqueCategories.forEach(categoryName => {
+                const tracksInCategory = AURA_MAP.filter(track => track.categoryID === categoryName);
+                if (tracksInCategory.length > 0) {
+                    html += createWidgetBlock(categoryName, tracksInCategory);
+                }
+            });
+
             document.getElementById('home-widgets-container').innerHTML = html;
             lucide.createIcons();
         }
+
         function createWidgetBlock(title, tracks) {
-            return `<div><h3 class="widget-block-title">${title}</h3><div class="horizontal-scroll">${tracks.map(t => `<div onclick="playTrack('${t.internalId}')" class="flex-none w-36 cursor-pointer group"><img src="${t.cover}" class="w-36 h-36 rounded-xl object-cover mb-2 shadow-lg"><p class="text-xs font-bold truncate">${t.title}</p><p class="text-[10px] text-gray-400 truncate">${t.artist}</p></div>`).join('')}</div></div>`;
+            return `<div class="mb-6"><h3 class="widget-block-title">${title}</h3><div class="horizontal-scroll">${tracks.map(t => `<div onclick="playTrack('${t.internalId}')" class="flex-none w-36 cursor-pointer group"><img src="${t.cover}" class="w-36 h-36 rounded-xl object-cover mb-2 shadow-lg"><p class="text-xs font-bold truncate">${t.title}</p><p class="text-[10px] text-gray-400 truncate">${t.artist}</p></div>`).join('')}</div></div>`;
         }
 
         function checkPWAStatus() {
@@ -1134,7 +1154,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, update, push, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, update, push, onValue, get, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBjQC2dOKySeHPEJCVjjEEHyHEUy19DRPY",
@@ -1219,6 +1239,11 @@
             else { set(ref(db, refStr), true); showToast("Saved"); }
         };
 
+        window.renderLikedTracks = () => {
+             const list = Array.from(window.likedTracks).map(id => window.AURA_MAP.find(t=>t.internalId === id)).filter(Boolean);
+             document.getElementById('liked-tracks-list').innerHTML = list.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('');
+        };
+
         window.openCreatePlaylistModal=()=>document.getElementById('create-playlist-modal').classList.remove('hidden'); 
         window.closeCreatePlaylistModal=()=>document.getElementById('create-playlist-modal').classList.add('hidden');
         window.createPlaylist = () => {
@@ -1299,7 +1324,7 @@
                     authorName: auth.currentUser.displayName,
                     authorPic: auth.currentUser.photoURL,
                     text: txt,
-                    timestamp: Date.now(),
+                    timestamp: serverTimestamp(),
                     type: window.pendingTrackAttachment ? 'share' : 'text'
                 };
                 
