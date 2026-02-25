@@ -16,6 +16,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
@@ -567,8 +568,8 @@
         var pendingTrackAttachment = null; 
         
         // VARIABILI PER LA CODA DI RIPRODUZIONE
-        var currentViewList = [];     // I brani che sto guardando ora (nella playlist aperta)
-        var activePlaybackQueue = []; // La coda che sta suonando effettivamente
+        var currentViewList = [];     
+        var activePlaybackQueue = []; 
 
         const TRANSLATIONS = {
             en:{ greeting_m:"Good Morning.", greeting_a:"Good Afternoon.", greeting_e:"Good Evening.", saved_tracks:"Saved Tracks", sessions:"Sessions", caps_title:"Time Capsule", caps_desc:"Seal this track.", btn_seal:"Seal", btn_cancel:"Cancel", new_session:"New Session", add_session:"Add to Session", create:"Create", cancel:"Cancel", rec_title:"Recommended", trend_title:"Trending Now", chill_title:"Relax & Chill", class_title:"Classics", new_release: "Official New Release" },
@@ -619,13 +620,13 @@
         };
 
         window.playTrackFromList = (internalId) => {
-            window.activePlaybackQueue = [...window.currentViewList]; // Fissa la coda alla cartella aperta
+            window.activePlaybackQueue = [...window.currentViewList]; 
             window.playTrack(internalId, true);
         };
 
         window.playCurrentList = () => {
             if(!window.currentViewList || !window.currentViewList.length) return;
-            window.activePlaybackQueue = [...window.currentViewList]; // Fissa la coda
+            window.activePlaybackQueue = [...window.currentViewList]; 
             window.playTrack(window.activePlaybackQueue[0], true);
         };
 
@@ -690,6 +691,59 @@
         }
         // ------------------------------------------
 
+        // --- SISTEMA ESTRAZIONE ID3 MP3 ON-DEMAND ---
+        function extractMetadataFromMP3(track) {
+            if(!window.jsmediatags || track.metadataExtracted) return;
+            
+            window.jsmediatags.read(track.audioUrl, {
+                onSuccess: function(tag) {
+                    let tags = tag.tags;
+                    let needsUIUpdate = false;
+
+                    // 1. Estrai il Titolo se mancante
+                    if(!track.title || track.title === "Unknown") {
+                        track.title = tags.title || track.title;
+                        needsUIUpdate = true;
+                    }
+                    
+                    // 2. Estrai l'Artista se mancante
+                    if(!track.artist || track.artist === "Unknown") {
+                        track.artist = tags.artist || track.artist;
+                        needsUIUpdate = true;
+                    }
+                    
+                    // 3. Estrai la Copertina (solo se stiamo usando il placeholder di default)
+                    if(track.cover.includes("via.placeholder.com") && tags.picture) {
+                        let data = tags.picture.data;
+                        let format = tags.picture.format;
+                        let base64String = "";
+                        
+                        // Metodo efficiente per convertire enormi array di byte in Base64
+                        let chunkSize = 8192;
+                        for (let i = 0; i < data.length; i += chunkSize) {
+                            base64String += String.fromCharCode.apply(null, data.slice(i, i + chunkSize));
+                        }
+                        
+                        track.cover = `data:${format};base64,${window.btoa(base64String)}`;
+                        needsUIUpdate = true;
+                    }
+
+                    track.metadataExtracted = true; // Segna come completato per non rifarlo
+
+                    // Se questa è la canzone che sta attualmente suonando, aggiorna l'interfaccia
+                    if(needsUIUpdate && window.currentTrackData && window.currentTrackData.internalId === track.internalId) {
+                        updateUI(track);
+                        window.updateMediaSession();
+                    }
+                },
+                onError: function(error) {
+                    console.warn("Nessun tag ID3 trovato o MP3 non compatibile:", error.info);
+                    track.metadataExtracted = true; // Segna come fallito per non riprovare
+                }
+            });
+        }
+        // ------------------------------------------
+
         async function fetchData() {
             try {
                 const [trResponse, arResponse, vrResponse] = await Promise.all([ fetch(API.tracks), fetch(API.artists), fetch(API.videos) ]);
@@ -709,7 +763,17 @@
                     const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
                     
                     const safeId = t.id ? String(t.id) : `track_${index}_${(t.title||'').replace(/[^a-zA-Z0-9]/g, '')}`;
-                    return { ...t, internalId: safeId, artist: artistMap[t.artistId] || t.artist || "Unknown", audioUrl: rawAudioUrl, cover: coverUrl, status: t.Status };
+                    
+                    return { 
+                        ...t, 
+                        internalId: safeId, 
+                        title: t.title || "Unknown", // Setup base per ID3 fallback
+                        artist: artistMap[t.artistId] || t.artist || "Unknown", // Setup base per ID3 fallback
+                        audioUrl: rawAudioUrl, 
+                        cover: coverUrl, 
+                        status: t.Status,
+                        metadataExtracted: false 
+                    };
                 });
                 renderStories();
                 renderHomePageWidgets();
@@ -754,7 +818,6 @@
         };
 
         window.playTrack = (internalId, keepQueue = false) => {
-            // Se clicco su un brano a caso dalla home, la coda si resetta a tutti i brani globali
             if (!keepQueue) window.activePlaybackQueue = []; 
 
             const t = AURA_MAP.find(x => x.internalId === internalId);
@@ -762,6 +825,11 @@
             currentTrackData = t;
             audioPlayer.src = t.audioUrl;
             
+            // AVVIA LETTURA ID3 ON-DEMAND SE I DATI MANCANO
+            if(!t.metadataExtracted && (t.cover.includes("via.placeholder.com") || t.title === "Unknown" || t.artist === "Unknown")) {
+                extractMetadataFromMP3(t);
+            }
+
             window.updateMediaSession();
             audioPlayer.play().catch(e => console.log("Play error", e));
             
@@ -907,7 +975,6 @@
             document.getElementById(id+'-section').classList.add('active'); 
             if(id==='music') renderHistoryGrid(); 
 
-            // Controllo del Floating Action Button per Play
             const fab = document.getElementById('fab-play-list');
             if(id === 'library' && window.currentViewList && window.currentViewList.length > 0) {
                 fab.classList.remove('hidden');
@@ -919,7 +986,6 @@
         window.exitImmersiveMode=()=>document.getElementById('immersive-mode').classList.add('hidden');
         window.updateProgress=()=>{ if(audioPlayer.duration) document.querySelectorAll('#progress-bar, #progress-bar-immersive').forEach(e=>e.style.width=(audioPlayer.currentTime/audioPlayer.duration*100)+'%'); };
         
-        // --- CODA DI RIPRODUZIONE (Avanti e Indietro Intelligente) ---
         window.skipForward=()=>{ 
             if(currentTrackData){ 
                 let list = window.activePlaybackQueue && window.activePlaybackQueue.length > 0 ? window.activePlaybackQueue : AURA_MAP.map(t=>t.internalId);
