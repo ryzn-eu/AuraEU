@@ -7,7 +7,8 @@
             "categoryID": "Sanremo Pop",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_manifestazione",
@@ -16,7 +17,8 @@
             "categoryID": "Sanremo Pop",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_laguna",
@@ -25,7 +27,8 @@
             "categoryID": "Sanremo Pop",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_mattone",
@@ -34,7 +37,8 @@
             "categoryID": "Sanremo Rap",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_avvoltoi",
@@ -43,7 +47,8 @@
             "categoryID": "Sanremo Rap",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_oraepersempre",
@@ -52,7 +57,8 @@
             "categoryID": "Festival Sanremo",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_naturale",
@@ -61,7 +67,8 @@
             "categoryID": "Sanremo Pop",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_ilmegliodime",
@@ -70,7 +77,8 @@
             "categoryID": "Festival Sanremo",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_voila",
@@ -79,7 +87,8 @@
             "categoryID": "Sanremo Pop",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_opera",
@@ -88,7 +97,8 @@
             "categoryID": "Sanremo Rap",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_ognivolta",
@@ -97,7 +107,8 @@
             "categoryID": "Festival Sanremo",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_uomochecade",
@@ -106,7 +117,8 @@
             "categoryID": "Sanremo Indie",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_restaconme",
@@ -115,7 +127,8 @@
             "categoryID": "Festival Sanremo",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_aiai",
@@ -124,7 +137,8 @@
             "categoryID": "Sanremo Dance",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_lecoseche",
@@ -133,7 +147,8 @@
             "categoryID": "Sanremo Pop",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_italiastarter",
@@ -142,7 +157,8 @@
             "categoryID": "Sanremo Rap",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_lafelicita",
@@ -151,7 +167,8 @@
             "categoryID": "Sanremo Indie",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_primaopoi",
@@ -160,7 +177,8 @@
             "categoryID": "Festival Sanremo",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_tipenso",
@@ -169,7 +187,8 @@
             "categoryID": "Sanremo Pop",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_poesie",
@@ -178,7 +197,8 @@
             "categoryID": "Sanremo Rap",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_seitu",
@@ -187,7 +207,8 @@
             "categoryID": "Festival Sanremo",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_stella",
@@ -196,7 +217,8 @@
             "categoryID": "Sanremo Dance",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_persempre",
@@ -205,7 +227,8 @@
             "categoryID": "Festival Sanremo",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_animali",
@@ -214,7 +237,8 @@
             "categoryID": "Sanremo Pop",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_ossessione",
@@ -223,7 +247,8 @@
             "categoryID": "Sanremo Pop",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_stupida",
@@ -232,7 +257,8 @@
             "categoryID": "Sanremo Dance",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_magica",
@@ -241,7 +267,8 @@
             "categoryID": "Sanremo Rap",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_romantici",
@@ -250,7 +277,8 @@
             "categoryID": "Sanremo Indie",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_primache",
@@ -259,7 +287,8 @@
             "categoryID": "Festival Sanremo",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_chefastidio",
@@ -268,7 +297,8 @@
             "categoryID": "Sanremo Indie",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_labirinto",
@@ -277,7 +307,8 @@
             "categoryID": "Sanremo Pop",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_tumipiaci",
@@ -286,7 +317,8 @@
             "categoryID": "Sanremo Dance",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_quiconme",
@@ -295,7 +327,8 @@
             "categoryID": "Sanremo Pop",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "trk_malenecessario",
@@ -304,7 +337,8 @@
             "categoryID": "Sanremo Rap",
             "artist": "RadioTelevisione Italiana",
             "cover": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Covers/AuraSanremo.png",
-            "originalLang": "it"
+            "originalLang": "it",
+            "image360": "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/img360/Sanremo360.png"
         },
         {
             "id": "icy_mifai",
