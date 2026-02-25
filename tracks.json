@@ -4,7 +4,7 @@
             "id": "trk_neimieidm",
             "title": "Nei miei DM",
             "file": "Nei miei DM.mp3",
-            "categoryID": "Pop",
+            "categoryID": "Sanremo Pop",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -12,7 +12,7 @@
             "id": "trk_manifestazione",
             "title": "MANIFESTAZIONE D'AMORE",
             "file": "MANIFESTAZIONE D'AMORE.mp3",
-            "categoryID": "Pop",
+            "categoryID": "Sanremo Pop",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -20,7 +20,7 @@
             "id": "trk_laguna",
             "title": "Laguna",
             "file": "Laguna.mp3",
-            "categoryID": "Pop",
+            "categoryID": "Sanremo Pop",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -28,7 +28,7 @@
             "id": "trk_mattone",
             "title": "Mattone",
             "file": "Mattone.mp3",
-            "categoryID": "Rap",
+            "categoryID": "Sanremo Rap",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -36,7 +36,7 @@
             "id": "trk_avvoltoi",
             "title": "Avvoltoi",
             "file": "Avvoltoi.mp3",
-            "categoryID": "Rap",
+            "categoryID": "Sanremo Rap",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -44,7 +44,7 @@
             "id": "trk_oraepersempre",
             "title": "Ora e per sempre",
             "file": "Ora e per sempre.mp3",
-            "categoryID": "Festival San Remo",
+            "categoryID": "Festival Sanremo",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -52,7 +52,7 @@
             "id": "trk_naturale",
             "title": "NATURALE",
             "file": "NATURALE.mp3",
-            "categoryID": "Pop",
+            "categoryID": "Sanremo Pop",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -60,7 +60,7 @@
             "id": "trk_ilmegliodime",
             "title": "Il meglio di me",
             "file": "Il meglio di me.mp3",
-            "categoryID": "Festival San Remo",
+            "categoryID": "Festival Sanremo",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -68,7 +68,7 @@
             "id": "trk_voila",
             "title": "Voilà",
             "file": "Voilà.mp3",
-            "categoryID": "Pop",
+            "categoryID": "Sanremo Pop",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -76,7 +76,7 @@
             "id": "trk_opera",
             "title": "Opera",
             "file": "Opera.mp3",
-            "categoryID": "Rap",
+            "categoryID": "Sanremo Rap",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -84,7 +84,7 @@
             "id": "trk_ognivolta",
             "title": "Ogni volta che non so volare",
             "file": "Ogni volta che non so volare.mp3",
-            "categoryID": "Festival San Remo",
+            "categoryID": "Festival Sanremo",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -92,7 +92,7 @@
             "id": "trk_uomochecade",
             "title": "uomo che cade",
             "file": "uomo che cade.mp3",
-            "categoryID": "Indie",
+            "categoryID": "Sanremo Indie",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -100,7 +100,7 @@
             "id": "trk_restaconme",
             "title": "Resta Con Me",
             "file": "Resta Con Me.mp3",
-            "categoryID": "Festival San Remo",
+            "categoryID": "Festival Sanremo",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -108,7 +108,7 @@
             "id": "trk_aiai",
             "title": "AI AI",
             "file": "AI AI.mp3",
-            "categoryID": "Dance",
+            "categoryID": "Sanremo Dance",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -116,7 +116,7 @@
             "id": "trk_lecoseche",
             "title": "le cose che non sai di me",
             "file": "le cose che non sai di me.mp3",
-            "categoryID": "Pop",
+            "categoryID": "Sanremo Pop",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -124,7 +124,7 @@
             "id": "trk_italiastarter",
             "title": "ITALIA STARTER PACK",
             "file": "ITALIA STARTER PACK.mp3",
-            "categoryID": "Rap",
+            "categoryID": "Sanremo Rap",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -132,7 +132,7 @@
             "id": "trk_lafelicita",
             "title": "La felicità e basta",
             "file": "La felicità e basta.mp3",
-            "categoryID": "Indie",
+            "categoryID": "Sanremo Indie",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -140,7 +140,7 @@
             "id": "trk_primaopoi",
             "title": "Prima o poi",
             "file": "Prima o poi.mp3",
-            "categoryID": "Festival San Remo",
+            "categoryID": "Festival Sanremo",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -148,7 +148,7 @@
             "id": "trk_tipenso",
             "title": "Ti penso sempre",
             "file": "Ti penso sempre.mp3",
-            "categoryID": "Pop",
+            "categoryID": "Sanremo Pop",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -156,7 +156,7 @@
             "id": "trk_poesie",
             "title": "Poesie Clandestine",
             "file": "Poesie Clandestine.mp3",
-            "categoryID": "Rap",
+            "categoryID": "Sanremo Rap",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -164,7 +164,7 @@
             "id": "trk_seitu",
             "title": "SEI TU",
             "file": "SEI TU.mp3",
-            "categoryID": "Festival San Remo",
+            "categoryID": "Festival Sanremo",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -172,7 +172,7 @@
             "id": "trk_stella",
             "title": "Stella stellina",
             "file": "Stella stellina.mp3",
-            "categoryID": "Dance",
+            "categoryID": "Sanremo Dance",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -180,7 +180,7 @@
             "id": "trk_persempre",
             "title": "Per sempre sì",
             "file": "Per sempre sì.mp3",
-            "categoryID": "Festival San Remo",
+            "categoryID": "Festival Sanremo",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -188,7 +188,7 @@
             "id": "trk_animali",
             "title": "animali notturni",
             "file": "animali notturni.mp3",
-            "categoryID": "Pop",
+            "categoryID": "Sanremo Pop",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -196,7 +196,7 @@
             "id": "trk_ossessione",
             "title": "OSSESSIONE",
             "file": "OSSESSIONE.mp3",
-            "categoryID": "Pop",
+            "categoryID": "Sanremo Pop",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -204,7 +204,7 @@
             "id": "trk_stupida",
             "title": "Stupida sfortuna",
             "file": "Stupida sfortuna.mp3",
-            "categoryID": "Dance",
+            "categoryID": "Sanremo Dance",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -212,7 +212,7 @@
             "id": "trk_magica",
             "title": "Magica Favola",
             "file": "Magica Favola.mp3",
-            "categoryID": "Rap",
+            "categoryID": "Sanremo Rap",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -220,7 +220,7 @@
             "id": "trk_romantici",
             "title": "I romantici",
             "file": "I romantici.mp3",
-            "categoryID": "Indie",
+            "categoryID": "Sanremo Indie",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -228,7 +228,7 @@
             "id": "trk_primache",
             "title": "Prima che",
             "file": "Prima che.mp3",
-            "categoryID": "Festival San Remo",
+            "categoryID": "Festival Sanremo",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -236,7 +236,7 @@
             "id": "trk_chefastidio",
             "title": "Che fastidio!",
             "file": "Che fastidio!.mp3",
-            "categoryID": "Indie",
+            "categoryID": "Sanremo Indie",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -244,7 +244,7 @@
             "id": "trk_labirinto",
             "title": "Labirinto",
             "file": "Labirinto.mp3",
-            "categoryID": "Pop",
+            "categoryID": "Sanremo Pop",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -252,7 +252,7 @@
             "id": "trk_tumipiaci",
             "title": "TU MI PIACI TANTO",
             "file": "TU MI PIACI TANTO.mp3",
-            "categoryID": "Dance",
+            "categoryID": "Sanremo Dance",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -260,7 +260,7 @@
             "id": "trk_quiconme",
             "title": "QUI CON ME",
             "file": "QUI CON ME.mp3",
-            "categoryID": "Pop",
+            "categoryID": "Sanremo Pop",
             "artist": "Unknown",
             "originalLang": "it"
         },
@@ -268,7 +268,7 @@
             "id": "trk_malenecessario",
             "title": "MALE NECESSARIO",
             "file": "MALE NECESSARIO.mp3",
-            "categoryID": "Rap",
+            "categoryID": "Sanremo Rap",
             "artist": "Unknown",
             "originalLang": "it"
         },
