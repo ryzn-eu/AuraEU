@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="google" content="notranslate">
-    <title>Aura Music Universe</title>
+    <title>Aura by Horizon</title>
     
     <link rel="icon" href="https://via.placeholder.com/192x192">
     <link rel="apple-touch-icon" href="https://via.placeholder.com/192x192">
@@ -168,7 +168,7 @@
             background: transparent !important;
             box-shadow: none !important;
             border: none !important;
-            touch-action: pan-y;
+            touch-action: pan-y; 
         }
 
         .smart-scroller { white-space: nowrap; display: inline-block; transition: transform 1s ease; }
@@ -181,7 +181,7 @@
             width: 100%;
             max-width: 340px;
             margin: 20px auto 40px auto;
-            background-color: var(--primary); /* Fallback */
+            background-color: var(--primary); 
             border-radius: 12px;
             padding: 16px;
             height: 300px;
@@ -567,7 +567,6 @@
         var viewer360 = null; 
         var pendingTrackAttachment = null; 
         
-        // VARIABILI PER LA CODA DI RIPRODUZIONE
         var currentViewList = [];     
         var activePlaybackQueue = []; 
 
@@ -691,7 +690,7 @@
         }
         // ------------------------------------------
 
-        // --- SISTEMA ESTRAZIONE ID3 MP3 ON-DEMAND ---
+        // --- SISTEMA ESTRAZIONE ID3 MP3 ON-DEMAND MODIFICATO ---
         function extractMetadataFromMP3(track) {
             if(!window.jsmediatags || track.metadataExtracted) return;
             
@@ -700,17 +699,18 @@
                     let tags = tag.tags;
                     let needsUIUpdate = false;
 
-                    if(!track.title || track.title === "Unknown") {
-                        track.title = tags.title || track.title;
+                    if(tags.title && tags.title.trim() !== "") {
+                        track.title = tags.title;
                         needsUIUpdate = true;
                     }
                     
-                    if(!track.artist || track.artist === "Unknown") {
-                        track.artist = tags.artist || track.artist;
+                    if(tags.artist && tags.artist.trim() !== "") {
+                        track.artist = tags.artist;
                         needsUIUpdate = true;
                     }
                     
-                    if(track.cover.includes("via.placeholder.com") && tags.picture) {
+                    // Niente più blocchi: se l'mp3 ha una foto al suo interno, la estrae e la usa
+                    if(tags.picture) {
                         let data = tags.picture.data;
                         let format = tags.picture.format;
                         let base64String = "";
@@ -726,11 +726,11 @@
 
                     track.metadataExtracted = true; 
 
-                    if(needsUIUpdate && window.currentTrackData && window.currentTrackData.internalId === track.internalId) {
-                        updateUI(track);
-                        window.updateMediaSession();
-                        
-                        // FIX: Aggiorna in tempo reale anche le liste sulla UI se visibili
+                    if(needsUIUpdate) {
+                        if(window.currentTrackData && window.currentTrackData.internalId === track.internalId) {
+                            updateUI(track);
+                            window.updateMediaSession();
+                        }
                         renderHistoryGrid();
                         if(document.getElementById('library-section').classList.contains('active')) {
                              window.renderGenericList(window.currentViewList);
@@ -739,8 +739,8 @@
                     }
                 },
                 onError: function(error) {
-                    console.warn("Nessun tag ID3 trovato o MP3 non compatibile:", error.info);
-                    track.metadataExtracted = true; 
+                    console.warn("Nessun tag ID3 valido trovato in: " + track.title, error.info);
+                    track.metadataExtracted = true; // Segna come completato per non riprovare
                 }
             });
         }
@@ -827,7 +827,8 @@
             currentTrackData = t;
             audioPlayer.src = t.audioUrl;
             
-            if(!t.metadataExtracted && (t.cover.includes("via.placeholder.com") || t.title === "Unknown" || t.artist === "Unknown")) {
+            // CONTROLLO METADATI ON DEMAND ATTIVO SU OGNI BRANO
+            if(!t.metadataExtracted) {
                 extractMetadataFromMP3(t);
             }
 
@@ -1046,16 +1047,13 @@
             document.getElementById('home-history-grid').innerHTML = items.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('');
         }
         
-        // --- FUNZIONE MODIFICATA PER CATEGORIE DINAMICHE ---
         function renderHomePageWidgets() {
             const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
             let html = "";
             
-            // 1. Nuovo Rilascio (In cima, se presente)
             const newRelease = AURA_MAP.find(track => track.status === "New");
             if (newRelease) html += `<div class="mb-8"><h3 class="widget-block-title">${t.new_release}</h3><div onclick="playTrack('${newRelease.internalId}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg"><img src="${newRelease.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm"><div class="absolute inset-0 p-5 flex items-center gap-5"><img src="${newRelease.cover}" class="w-32 h-32 rounded-xl shadow-2xl z-10"><div class="z-10"><h4 class="text-2xl font-bold text-white mb-1">${newRelease.title}</h4><p class="text-gray-300">${newRelease.artist}</p></div></div></div></div>`;
             
-            // 2. Schede Social / Numeri
             const visitors = Math.floor(Math.random() * 15000) + 10200; 
             const globalLikes = (2840000 + Math.floor(Date.now() / 5000)).toLocaleString();
             html += `<div class="ios-widget-row">
@@ -1064,14 +1062,9 @@
                         <div class="ios-card" onclick="openLikedSongs()"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i></div><div><p class="text-2xl font-bold">${globalLikes}</p><p class="text-[10px] text-gray-400">Global Likes</p></div></div></div>
                      </div>`;
 
-            // 3. Riga Fissa "Consigliati" (Prende i primi 8 brani di tutto il db)
             html += createWidgetBlock(t.rec_title, AURA_MAP.slice(0, 8));
 
-            // 4. RIGHE DINAMICHE PER OGNI CATEGORIA NEL JSON
-            // Estrae un array di tutte le categorie univoche esistenti (es. ["Pop", "Rap", "Festival San Remo", "Indie", "Dance", "Ryzn Best"])
             const uniqueCategories = [...new Set(AURA_MAP.map(track => track.categoryID).filter(Boolean))];
-            
-            // Crea un blocco per ogni categoria trovata
             uniqueCategories.forEach(categoryName => {
                 const tracksInCategory = AURA_MAP.filter(track => track.categoryID === categoryName);
                 if (tracksInCategory.length > 0) {
