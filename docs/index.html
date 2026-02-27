@@ -57,17 +57,22 @@
 
         /* --- PWA INSTALL BLOCKER --- */
         #install-blocker { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; 
-            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(15px); 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            padding: 2rem; text-align: center; transition: opacity 0.3s ease; 
+            position: fixed; inset: 0; z-index: 99999; 
+            background-color: var(--bg-deep);
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease; 
         }
-        #install-blocker.hidden { display: none !important; opacity: 0; pointer-events: none; }
-        .install-arrow { animation: bounce 2s infinite; } 
-        @keyframes bounce { 
+        #install-blocker.hidden { 
+            opacity: 0; 
+            visibility: hidden; 
+            pointer-events: none; 
+        }
+        .install-arrow { animation: bounceArrow 2s infinite; } 
+        @keyframes bounceArrow { 
             0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 
-            40% {transform: translateY(-20px);} 
-            60% {transform: translateY(-10px);} 
+            40% {transform: translateY(-8px);} 
+            60% {transform: translateY(-4px);} 
         }
 
         /* --- WIDGETS & CARDS --- */
@@ -225,6 +230,11 @@
         .profile-stat-num { font-size: 1.1rem; font-weight: 700; display: block; }
         .profile-stat-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
         .profile-header-gradient { background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent); padding-bottom: 2rem; border-radius: 0 0 30px 30px; margin: -1.5rem -1rem 1rem -1rem; padding-top: 2rem; }
+        
+        /* LEGAL SCROLLBAR */
+        .legal-scroll::-webkit-scrollbar { width: 6px; }
+        .legal-scroll::-webkit-scrollbar-track { background: transparent; }
+        .legal-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -234,12 +244,98 @@
     <div id="toast-container" class="fixed top-6 right-6 z-[200] flex flex-col gap-2"></div>
 
     <div id="install-blocker" class="hidden">
-        <div class="max-w-md w-full bg-white/10 border border-white/20 p-8 rounded-3xl shadow-2xl relative backdrop-blur-md">
-            <div onclick="forceRecheckPWA()" class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 cursor-pointer hover:bg-white/20 transition">
-                <i data-lucide="download" class="w-10 h-10 text-cyan-400 install-arrow"></i>
+        <div class="min-h-screen flex flex-col items-center justify-center p-6 text-center relative">
+            <div class="absolute inset-0 bg-gradient-to-b from-violet-900/20 via-[#050505] to-[#050505] pointer-events-none z-0"></div>
+            <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="w-20 h-auto mb-6 z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" alt="Aura Logo">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400 mb-4 z-10">
+                Experience Aura
+            </h1>
+            <p class="text-base md:text-lg text-gray-300 max-w-md mx-auto mb-10 z-10 leading-relaxed">
+                Il tuo santuario musicale immersivo. Installa l'app per sbloccare l'audio in background, le live lyrics e la community.
+            </p>
+            <button onclick="forceRecheckPWA()" class="z-10 bg-white text-black px-8 py-4 rounded-full font-bold text-lg shadow-[0_10px_40px_rgba(6,182,212,0.4)] hover:scale-105 transition-transform flex items-center gap-3">
+                <i data-lucide="download" class="w-5 h-5 install-arrow"></i> Installa App
+            </button>
+            <div class="absolute bottom-10 animate-bounce z-10 text-gray-500 flex flex-col items-center">
+                <p class="text-[10px] uppercase tracking-widest mb-1">Scopri di più</p>
+                <i data-lucide="chevron-down" class="w-4 h-4"></i>
             </div>
-            <h2 class="text-3xl font-extrabold text-white mb-4">Install Aura</h2>
-            <p class="text-gray-300 mb-8 leading-relaxed">For continuous background audio and the full experience, install the app.</p>
+        </div>
+
+        <div class="max-w-4xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+            <div class="glass-panel p-6 rounded-3xl text-center hover:bg-white/5 transition">
+                <div class="w-14 h-14 bg-violet-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-violet-400 border border-violet-500/30">
+                    <i data-lucide="box" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-bold mb-2">360° Audio Art</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">Immergiti visivamente nei brani con player panoramici ed esplorazione giroscopica.</p>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-3xl text-center hover:bg-white/5 transition">
+                <div class="w-14 h-14 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-cyan-400 border border-cyan-500/30">
+                    <i data-lucide="mic-2" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-bold mb-2">Smart Lyrics</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">Canta seguendo il testo sincronizzato con traduzioni in tempo reale in varie lingue.</p>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-3xl text-center hover:bg-white/5 transition">
+                <div class="w-14 h-14 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-pink-400 border border-pink-500/30">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-bold mb-2">Community</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">Condividi ciò che ascolti, crea thread musicali e scopri nuovi utenti simili a te.</p>
+            </div>
+        </div>
+
+        <div class="max-w-2xl mx-auto px-6 py-12 mb-10 relative z-10">
+            <h2 class="text-2xl font-bold text-center mb-8">Come installare Aura</h2>
+            <div class="flex justify-center w-full max-w-md mx-auto">
+                <div id="guide-ios" class="glass-panel p-6 rounded-3xl w-full hidden">
+                    <h3 class="font-bold flex items-center gap-2 mb-4 text-white"><i data-lucide="apple" class="w-5 h-5 text-gray-300"></i> Su iOS (Safari)</h3>
+                    <ol class="text-sm text-gray-300 space-y-3 list-decimal list-inside marker:text-cyan-400 marker:font-bold">
+                        <li>Tocca il tasto <strong>Condividi</strong> <i data-lucide="share" class="w-4 h-4 inline"></i> in basso.</li>
+                        <li>Scorri il menu verso il basso.</li>
+                        <li>Seleziona <strong>Aggiungi alla schermata Home</strong>.</li>
+                        <li>Tocca <strong>Aggiungi</strong> in alto a destra.</li>
+                    </ol>
+                </div>
+                <div id="guide-android" class="glass-panel p-6 rounded-3xl w-full hidden">
+                    <h3 class="font-bold flex items-center gap-2 mb-4 text-white"><i data-lucide="smartphone" class="w-5 h-5 text-green-400"></i> Su Android (Chrome)</h3>
+                    <ol class="text-sm text-gray-300 space-y-3 list-decimal list-inside marker:text-violet-400 marker:font-bold">
+                        <li>Tocca il <strong>Menu (⋮)</strong> in alto a destra.</li>
+                        <li>Seleziona <strong>Installa app</strong> o <br><strong>Aggiungi a schermata Home</strong>.</li>
+                        <li>Conferma premendo su <strong>Installa</strong>.</li>
+                    </ol>
+                </div>
+                <div id="guide-desktop" class="glass-panel p-6 rounded-3xl w-full hidden">
+                    <h3 class="font-bold flex items-center gap-2 mb-4 text-white"><i data-lucide="monitor" class="w-5 h-5 text-blue-400"></i> Su PC / Mac</h3>
+                    <ol class="text-sm text-gray-300 space-y-3 list-decimal list-inside marker:text-blue-400 marker:font-bold">
+                        <li>Guarda nella barra degli indirizzi in alto a destra.</li>
+                        <li>Clicca sull'icona <strong>Installa Aura</strong>.</li>
+                        <li>Conferma cliccando su <strong>Installa</strong>.</li>
+                    </ol>
+                </div>
+            </div>
+            <p class="text-center text-xs text-gray-500 mt-10">Aura è una Progressive Web App (PWA). Non consuma spazio e non richiede store esterni.</p>
+        </div>
+
+        <footer class="py-8 mt-10 border-t border-white/10 text-center relative z-10 w-full bg-black/50">
+            <div class="flex flex-wrap justify-center gap-6 text-[11px] font-bold tracking-wider uppercase text-gray-400 mb-4">
+                <button onclick="openLegalModal('terms')" class="hover:text-cyan-400 transition">Termini di Servizio</button>
+                <button onclick="openLegalModal('privacy')" class="hover:text-cyan-400 transition">Privacy Policy</button>
+                <button onclick="openLegalModal('data')" class="hover:text-cyan-400 transition">Trattamento dei Dati</button>
+            </div>
+            <p class="text-[10px] text-gray-600">&copy; 2026 Aura by Horizon. Tutti i diritti riservati.</p>
+        </footer>
+    </div>
+
+    <div id="legal-modal" class="fixed inset-0 bg-black/95 z-[999999] hidden flex flex-col items-center justify-center p-6 backdrop-blur-xl">
+        <div class="glass-panel p-6 md:p-8 rounded-3xl w-full max-w-2xl h-[80vh] flex flex-col relative border border-white/10 shadow-2xl">
+            <button onclick="closeLegalModal()" class="absolute top-4 right-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition z-10"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h2 id="legal-modal-title" class="text-2xl font-extrabold mb-6 text-white border-b border-white/10 pb-4">Titolo Legale</h2>
+            <div id="legal-modal-content" class="flex-1 overflow-y-auto pr-4 text-sm text-gray-300 space-y-5 leading-relaxed legal-scroll">
+                </div>
         </div>
     </div>
 
@@ -439,10 +535,8 @@
     </div>
 
     <div id="immersive-mode" class="fixed inset-0 z-[150] hidden flex flex-col justify-between p-6 pb-10 overflow-y-auto">
-        
         <div id="panorama" class="hidden"></div>
         <div id="panorama-overlay" class="hidden absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-black/90 pointer-events-none"></div>
-        
         <div class="flex justify-between items-center mt-2 relative z-10">
             <button onclick="exitImmersiveMode()" class="p-3 bg-white/5 rounded-full"><i data-lucide="chevron-down" class="w-6 h-6"></i></button>
             <span class="text-[10px] font-bold tracking-widest uppercase opacity-50 drop-shadow-md">Now Playing</span>
@@ -450,7 +544,6 @@
         </div>
         
         <div class="flex-1 flex flex-col items-center justify-start w-full mt-4 relative z-10">
-            
             <div id="immersive-art-wrapper" class="immersive-art-container">
                 <img id="immersive-cover" src="" class="art-square" crossorigin="anonymous">
             </div>
@@ -579,8 +672,64 @@
             ar:{ greeting_m:"صباح الخير", greeting_a:"مساء الخير", greeting_e:"مساء النور", saved_tracks:"الأغاني المحفوظة", sessions:"جلسات", caps_title:"كبسولة الزمن", caps_desc:"ختم هذا المسار", btn_seal:"ختم", btn_cancel:"إلغاء", new_session:"جلسة جديدة", add_session:"إضافة إلى...", create:"إنشاء", cancel:"إلغاء", rec_title:"موصى به", trend_title:"رائج الآن", chill_title:"استرخاء", class_title:"كلاسيكيات", new_release: "إصدار رسمي جديد" }
         };
 
+        const LEGAL_TEXTS = {
+            terms: {
+                title: "Termini di Servizio",
+                content: `
+                    <p><strong>1. Accettazione dei Termini</strong><br>Scaricando, accedendo o utilizzando Aura, accetti di essere vincolato dai presenti Termini di Servizio. Se non sei d'accordo, ti preghiamo di non utilizzare l'applicazione.</p>
+                    <p><strong>2. Uso della Piattaforma e Contenuti Utente</strong><br>Aura offre funzionalità social ("Community") in cui gli utenti possono pubblicare testo e condividere brani. L'utente si impegna a non pubblicare contenuti offensivi, illegali, diffamatori o che violino i diritti d'autore di terzi. Aura si riserva il diritto insindacabile di rimuovere qualsiasi contenuto ritenuto inappropriato e di sospendere gli account responsabili.</p>
+                    <p><strong>3. Limitazione di Responsabilità</strong><br>Aura è fornita "così com'è" e "come disponibile". Non garantiamo l'assenza di errori, interruzioni di servizio o perdita di dati. Non siamo responsabili per alcun danno diretto o indiretto derivante dall'utilizzo dell'app.</p>
+                    <p><strong>4. Modifiche ai Termini</strong><br>Ci riserviamo il diritto di modificare questi Termini in qualsiasi momento. L'uso continuato dell'app dopo tali modifiche costituisce l'accettazione dei nuovi Termini.</p>
+                `
+            },
+            privacy: {
+                title: "Privacy Policy",
+                content: `
+                    <p><strong>1. Dati che raccogliamo</strong><br>Per il funzionamento di base, Aura può essere usata senza account. Tuttavia, accedendo con Google, raccogliamo le seguenti informazioni fornite dal provider: Indirizzo Email, Nome Display e Immagine del Profilo.</p>
+                    <p><strong>2. Come utilizziamo i tuoi dati</strong><br>Utilizziamo i tuoi dati unicamente per: creare e mantenere il tuo profilo utente; permetterti di salvare brani ("Mi piace") e creare playlist; identificarti all'interno della sezione "Community" quando pubblichi un post.</p>
+                    <p><strong>3. Condivisione dei dati</strong><br>Aura NON vende, affitta o cede i tuoi dati personali a terzi per scopi di marketing. I post pubblici nella Community saranno visibili ad altri utenti registrati.</p>
+                    <p><strong>4. Tecnologie utilizzate</strong><br>Utilizziamo LocalStorage per salvare le tue preferenze locali (come la cronologia di ascolto e la lingua scelta) direttamente sul tuo dispositivo.</p>
+                `
+            },
+            data: {
+                title: "Trattamento dei Dati (GDPR)",
+                content: `
+                    <p><strong>1. Titolare del Trattamento</strong><br>I dati sono gestiti dall'amministratore di Aura by Horizon.</p>
+                    <p><strong>2. Piattaforma di archiviazione</strong><br>Tutti i dati legati agli account (profili, like, playlist, post) sono archiviati in modo sicuro sui server di <strong>Google Firebase</strong> (Database Realtime e Authentication), situati in regioni conformi alle normative europee.</p>
+                    <p><strong>3. I tuoi diritti</strong><br>In conformità al Regolamento Generale sulla Protezione dei Dati (GDPR), hai il diritto di: accedere ai tuoi dati; rettificarli (tramite le impostazioni in-app); richiederne la cancellazione totale e definitiva dai nostri server.</p>
+                    <p><strong>4. Richiesta di Cancellazione</strong><br>Per eliminare in modo permanente il tuo account e tutti i dati a esso associati, accedi all'app e disconnettiti, oppure contatta l'amministratore per la rimozione manuale dal database Firebase.</p>
+                `
+            }
+        };
+
+        window.openLegalModal = (type) => {
+            const data = LEGAL_TEXTS[type];
+            if(!data) return;
+            document.getElementById('legal-modal-title').innerText = data.title;
+            document.getElementById('legal-modal-content').innerHTML = data.content;
+            document.getElementById('legal-modal').classList.remove('hidden');
+        };
+        window.closeLegalModal = () => document.getElementById('legal-modal').classList.add('hidden');
+
+        function detectOSForInstallGuide() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            const guideIos = document.getElementById('guide-ios');
+            const guideAndroid = document.getElementById('guide-android');
+            const guideDesktop = document.getElementById('guide-desktop');
+
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                if(guideIos) guideIos.classList.remove('hidden');
+            } else if (/android/i.test(userAgent)) {
+                if(guideAndroid) guideAndroid.classList.remove('hidden');
+            } else {
+                if(guideDesktop) guideDesktop.classList.remove('hidden');
+            }
+            if(window.lucide) lucide.createIcons();
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             checkPWAStatus();
+            detectOSForInstallGuide();
             getDOMElements();
             init360Joystick(); 
             loadLocalData();
@@ -709,7 +858,6 @@
                         needsUIUpdate = true;
                     }
                     
-                    // Niente più blocchi: se l'mp3 ha una foto al suo interno, la estrae e la usa
                     if(tags.picture) {
                         let data = tags.picture.data;
                         let format = tags.picture.format;
@@ -740,7 +888,7 @@
                 },
                 onError: function(error) {
                     console.warn("Nessun tag ID3 valido trovato in: " + track.title, error.info);
-                    track.metadataExtracted = true; // Segna come completato per non riprovare
+                    track.metadataExtracted = true; 
                 }
             });
         }
