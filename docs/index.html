@@ -411,7 +411,6 @@
             </div>
             <div class="flex gap-2">
                 <button onclick="showSection('playlists')" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="list-music" class="w-5 h-5"></i></button>
-                <button onclick="showSection('social')" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="users" class="w-5 h-5"></i></button>
                 <button onclick="openSearchModal()" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="search" class="w-5 h-5"></i></button>
                 <button onclick="openLanguageModal()" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="globe" class="w-5 h-5"></i></button>
                 <button onclick="handleProfileClick()" class="p-2.5 glass-panel rounded-full relative hover:bg-white/10">
@@ -455,14 +454,13 @@
                 <div id="social-header" class="sticky top-0 bg-[#050505]/95 backdrop-blur-md z-30 py-3 px-4 flex justify-between items-center border-b border-white/5 mx--4">
                     <div class="flex items-center gap-2 cursor-pointer transition hover:scale-105" onclick="showSection('music')">
                         <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="h-6 w-auto object-contain" alt="Aura">
-                        <span class="font-bold text-lg text-white tracking-wide">Aura</span>
                     </div>
                     
                     <div class="flex items-center gap-4">
                         <button class="text-gray-300 hover:text-white transition"><i data-lucide="music" class="w-5 h-5"></i></button>
                         <button onclick="toggleSocialSearch()" class="text-gray-300 hover:text-white transition"><i data-lucide="search" class="w-5 h-5"></i></button>
                         <button class="text-gray-300 hover:text-white transition"><i data-lucide="globe" class="w-5 h-5"></i></button>
-                        <img id="social-mini-avatar-new" src="https://via.placeholder.com/150" class="w-7 h-7 rounded-full object-cover border border-white/20">
+                        <img id="social-mini-avatar-new" src="https://via.placeholder.com/150" class="w-7 h-7 rounded-full object-cover border border-white/20 cursor-pointer hover:scale-105 transition" onclick="showSection('profile')" alt="Profile Settings">
                     </div>
                 </div>
 
@@ -1153,7 +1151,7 @@
             const visitors = Math.floor(Math.random() * 15000) + 10200; 
             const globalLikes = (2840000 + Math.floor(Date.now() / 5000)).toLocaleString();
             html += `<div class="ios-widget-row">
-                        <div class="ios-card community-card-big cursor-pointer" onclick="showSection('social')"><div class="ios-content"><div class="p-2 bg-white/20 rounded-full w-max"><i data-lucide="users" class="w-5 h-5 text-white"></i></div><div><p class="text-2xl font-bold text-white">Community & Friends</p><p class="text-xs text-white/80">Join the conversation</p></div></div></div>
+                        <div class="ios-card community-card-big cursor-pointer" onclick="handleProfileClick()"><div class="ios-content"><div class="p-2 bg-white/20 rounded-full w-max"><i data-lucide="users" class="w-5 h-5 text-white"></i></div><div><p class="text-2xl font-bold text-white">Community & Friends</p><p class="text-xs text-white/80">Join the conversation</p></div></div></div>
                         <div class="ios-card"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="globe" class="w-4 h-4 text-green-400"></i></div><div><p class="text-2xl font-bold">${visitors.toLocaleString()}</p><p class="text-[10px] text-gray-400"><span class="live-dot"></span>Online</p></div></div></div>
                         <div class="ios-card" onclick="openLikedSongs()"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i></div><div><p class="text-2xl font-bold">${globalLikes}</p><p class="text-[10px] text-gray-400">Global Likes</p></div></div></div>
                      </div>`;
@@ -1294,7 +1292,9 @@
         window.handleLogout = () => signOut(auth).then(()=>window.location.reload());
         window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
         window.openAuthModal = () => document.getElementById('auth-modal').classList.remove('hidden');
-        window.handleProfileClick = () => auth.currentUser ? showSection('profile') : window.openAuthModal();
+        
+        // MODIFICA: Il click sull'utente apre il SOCIAL (Aura Connect).
+        window.handleProfileClick = () => auth.currentUser ? showSection('social') : window.openAuthModal();
         
         onAuthStateChanged(auth, (user) => {
             if (user) {
