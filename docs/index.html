@@ -229,7 +229,6 @@
         .profile-stat-box { text-align: center; }
         .profile-stat-num { font-size: 1.1rem; font-weight: 700; display: block; }
         .profile-stat-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
-        .profile-header-gradient { background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent); padding-bottom: 2rem; border-radius: 0 0 30px 30px; margin: -1.5rem -1rem 1rem -1rem; padding-top: 2rem; }
         
         /* LEGAL SCROLLBAR */
         .legal-scroll::-webkit-scrollbar { width: 6px; }
@@ -387,33 +386,39 @@
                 <div id="playlists-list" class="grid grid-cols-2 gap-3 pb-24"></div>
             </section>
 
-            <section id="social-section" class="section-page pb-24">
-                <div class="flex justify-between items-center mb-6 sticky top-0 bg-[#050505] z-30 py-4 border-b border-white/5">
-                    <h2 class="text-2xl font-bold">Community</h2>
-                    <div class="flex gap-2">
-                        <button class="p-2 glass-panel rounded-full"><i data-lucide="users" class="w-5 h-5"></i></button>
-                        <button onclick="openComposeModal()" class="px-4 py-2 bg-white text-black rounded-full font-bold text-sm shadow-lg hover:bg-gray-200 flex items-center gap-2">
-                            <i data-lucide="pen-tool" class="w-4 h-4"></i> Post
+            <section id="social-section" class="section-page pb-24 bg-[#050505]">
+                <div class="flex items-center justify-between mb-4 sticky top-0 bg-[#050505]/95 backdrop-blur-md z-30 py-4 px-2 border-b border-white/5">
+                    <div class="flex items-center gap-3">
+                        <button onclick="showSection('profile')" class="relative hover:scale-105 transition">
+                            <img id="social-mini-avatar" src="https://via.placeholder.com/150" class="w-9 h-9 rounded-full border border-white/20 object-cover shadow-lg">
+                            <div id="social-mini-badge" class="hidden absolute -bottom-0.5 -right-0.5 bg-green-500 w-3 h-3 rounded-full border-2 border-[#050505]"></div>
                         </button>
+                        <h2 class="text-2xl font-extrabold tracking-tight">Feed</h2>
                     </div>
+                    <button class="p-2 glass-panel rounded-full hover:bg-white/10"><i data-lucide="bell" class="w-5 h-5"></i></button>
                 </div>
-                <div class="mb-6">
-                    <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 px-2">Discover Users</h3>
+
+                <div class="mb-6 mt-2">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 px-2">Discover</h3>
                     <div class="flex gap-4 overflow-x-auto px-2 pb-2 scrollbar-hide">
                          <div class="flex flex-col items-center gap-2 min-w-[60px] opacity-50"><div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center"><i data-lucide="search"></i></div><span class="text-[10px]">Find</span></div>
                     </div>
                 </div>
 
-                <div id="social-feed-container" class="max-w-md mx-auto min-h-[300px]">
-                    <p class="text-center text-gray-500 mt-10">Loading threads...</p>
+                <div id="social-feed-container" class="max-w-md mx-auto min-h-[500px] px-2 space-y-4">
+                    <p class="text-center text-gray-500 mt-10">Loading feed...</p>
                 </div>
+
+                <button onclick="openComposeModal()" class="fixed bottom-[100px] right-6 w-14 h-14 bg-white text-black rounded-full flex items-center justify-center shadow-[0_10px_40px_rgba(255,255,255,0.3)] z-[110] hover:scale-110 transition-transform">
+                    <i data-lucide="plus" class="w-7 h-7"></i>
+                </button>
             </section>
 
-            <section id="profile-section" class="section-page">
-                <div class="profile-header-gradient flex flex-col items-center">
+            <section id="profile-section" class="section-page bg-[#050505]">
+                <div class="flex flex-col items-center pt-4 pb-6">
                     <div class="relative">
-                         <img id="sp-avatar" src="https://via.placeholder.com/150" class="w-28 h-28 rounded-full border-4 border-black object-cover shadow-2xl">
-                         <div id="sp-badge" class="absolute bottom-0 right-0 bg-blue-500 text-white text-[10px] p-1 rounded-full border-2 border-black"><i data-lucide="check" class="w-3 h-3"></i></div>
+                         <img id="sp-avatar" src="https://via.placeholder.com/150" class="w-28 h-28 rounded-full border-4 border-[#050505] object-cover shadow-2xl">
+                         <div id="sp-badge" class="absolute bottom-0 right-0 bg-blue-500 text-white text-[10px] p-1 rounded-full border-2 border-[#050505]"><i data-lucide="check" class="w-3 h-3"></i></div>
                     </div>
                     <h2 id="sp-name" class="text-2xl font-bold mt-4">Guest User</h2>
                     <p id="sp-handle" class="text-sm text-gray-400">@guest</p>
@@ -473,7 +478,7 @@
             <h2 class="text-xl font-bold mb-4">New Thread</h2>
             <div class="flex gap-3 mb-4">
                 <img id="compose-avatar" src="" class="w-10 h-10 rounded-full bg-gray-700">
-                <textarea id="compose-text" class="flex-1 bg-transparent border-none text-white outline-none resize-none mt-2" rows="4" placeholder="What's playing in your mind?"></textarea>
+                <textarea id="compose-text" class="flex-1 bg-transparent border-none text-white outline-none resize-none mt-2" rows="4" placeholder="What's playing in your mind? or paste YouTube/Instagram links!"></textarea>
             </div>
             
             <div id="compose-song-preview" class="hidden mb-4 p-3 bg-white/5 rounded-xl border border-white/10 flex items-center gap-3 relative">
@@ -634,7 +639,12 @@
     <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-8 rounded-3xl w-full max-w-sm text-center"><h2 class="text-2xl font-bold mb-2">Welcome</h2><p class="text-xs text-gray-400 mb-6">Sign in to access your profile.</p><button onclick="loginWithGoogle()" class="w-full py-3 bg-white text-black rounded-xl font-bold mt-4 flex items-center justify-center gap-2"><i data-lucide="chrome" class="w-5 h-5 text-red-500"></i> Login with Google</button><button onclick="closeAuthModal()" class="mt-4 text-xs opacity-50">Close</button></div></div>
     <div id="capsule-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-8 rounded-3xl w-full max-w-sm border border-amber-500/30 text-center"><h3 id="txt-capsule-title" class="text-xl font-bold">Time Capsule</h3><p id="txt-capsule-desc" class="text-xs text-gray-400 mb-4">Seal this track.</p><button onclick="confirmTimeCapsule()" id="btn-capsule-seal" class="bg-amber-600 w-full py-2 rounded-lg font-bold">Seal</button><button onclick="closeCapsuleModal()" id="btn-capsule-cancel" class="mt-3 text-xs opacity-50">Close</button></div></div>
     
-    <div id="share-modal" class="fixed inset-0 bg-black/90 z-[210] hidden flex flex-col items-center justify-center p-6"><div id="share-card-content" class="w-64 bg-gray-900 rounded-xl p-4 flex flex-col items-center border border-white/10"><img id="share-card-cover" src="" class="w-32 h-32 rounded-full mb-4"><h2 id="share-card-title" class="font-bold text-center text-sm"></h2><div id="share-qr-container" class="mt-4 bg-white p-1 rounded"></div></div>
+    <div id="share-modal" class="fixed inset-0 bg-black/90 z-[210] hidden flex flex-col items-center justify-center p-6">
+        <div id="share-card-content" class="w-64 bg-gray-900 rounded-xl p-4 flex flex-col items-center border border-white/10">
+            <img id="share-card-cover" src="" class="w-32 h-32 rounded-full mb-4">
+            <h2 id="share-card-title" class="font-bold text-center text-sm"></h2>
+            <div id="share-qr-container" class="mt-4 bg-white p-1 rounded"></div>
+        </div>
         <button onclick="openComposeWithTrack()" class="mt-4 bg-violet-600 text-white px-6 py-2 rounded-full font-bold text-sm flex items-center gap-2"><i data-lucide="pen-tool" class="w-4 h-4"></i> Post to Feed</button>
         <button onclick="closeShareModal()" class="mt-6 text-sm opacity-50">Close</button>
     </div>
@@ -675,30 +685,15 @@
         const LEGAL_TEXTS = {
             terms: {
                 title: "Termini di Servizio",
-                content: `
-                    <p><strong>1. Accettazione dei Termini</strong><br>Scaricando, accedendo o utilizzando Aura, accetti di essere vincolato dai presenti Termini di Servizio. Se non sei d'accordo, ti preghiamo di non utilizzare l'applicazione.</p>
-                    <p><strong>2. Uso della Piattaforma e Contenuti Utente</strong><br>Aura offre funzionalità social ("Community") in cui gli utenti possono pubblicare testo e condividere brani. L'utente si impegna a non pubblicare contenuti offensivi, illegali, diffamatori o che violino i diritti d'autore di terzi. Aura si riserva il diritto insindacabile di rimuovere qualsiasi contenuto ritenuto inappropriato e di sospendere gli account responsabili.</p>
-                    <p><strong>3. Limitazione di Responsabilità</strong><br>Aura è fornita "così com'è" e "come disponibile". Non garantiamo l'assenza di errori, interruzioni di servizio o perdita di dati. Non siamo responsabili per alcun danno diretto o indiretto derivante dall'utilizzo dell'app.</p>
-                    <p><strong>4. Modifiche ai Termini</strong><br>Ci riserviamo il diritto di modificare questi Termini in qualsiasi momento. L'uso continuato dell'app dopo tali modifiche costituisce l'accettazione dei nuovi Termini.</p>
-                `
+                content: `<p><strong>1. Accettazione dei Termini</strong><br>Scaricando, accedendo o utilizzando Aura, accetti di essere vincolato dai presenti Termini di Servizio. Se non sei d'accordo, ti preghiamo di non utilizzare l'applicazione.</p>`
             },
             privacy: {
                 title: "Privacy Policy",
-                content: `
-                    <p><strong>1. Dati che raccogliamo</strong><br>Per il funzionamento di base, Aura può essere usata senza account. Tuttavia, accedendo con Google, raccogliamo le seguenti informazioni fornite dal provider: Indirizzo Email, Nome Display e Immagine del Profilo.</p>
-                    <p><strong>2. Come utilizziamo i tuoi dati</strong><br>Utilizziamo i tuoi dati unicamente per: creare e mantenere il tuo profilo utente; permetterti di salvare brani ("Mi piace") e creare playlist; identificarti all'interno della sezione "Community" quando pubblichi un post.</p>
-                    <p><strong>3. Condivisione dei dati</strong><br>Aura NON vende, affitta o cede i tuoi dati personali a terzi per scopi di marketing. I post pubblici nella Community saranno visibili ad altri utenti registrati.</p>
-                    <p><strong>4. Tecnologie utilizzate</strong><br>Utilizziamo LocalStorage per salvare le tue preferenze locali (come la cronologia di ascolto e la lingua scelta) direttamente sul tuo dispositivo.</p>
-                `
+                content: `<p><strong>1. Dati che raccogliamo</strong><br>Per il funzionamento di base, Aura può essere usata senza account. Tuttavia, accedendo con Google, raccogliamo le seguenti informazioni fornite dal provider: Indirizzo Email, Nome Display e Immagine del Profilo.</p>`
             },
             data: {
                 title: "Trattamento dei Dati (GDPR)",
-                content: `
-                    <p><strong>1. Titolare del Trattamento</strong><br>I dati sono gestiti dall'amministratore di Aura by Horizon.</p>
-                    <p><strong>2. Piattaforma di archiviazione</strong><br>Tutti i dati legati agli account (profili, like, playlist, post) sono archiviati in modo sicuro sui server di <strong>Google Firebase</strong> (Database Realtime e Authentication), situati in regioni conformi alle normative europee.</p>
-                    <p><strong>3. I tuoi diritti</strong><br>In conformità al Regolamento Generale sulla Protezione dei Dati (GDPR), hai il diritto di: accedere ai tuoi dati; rettificarli (tramite le impostazioni in-app); richiederne la cancellazione totale e definitiva dai nostri server.</p>
-                    <p><strong>4. Richiesta di Cancellazione</strong><br>Per eliminare in modo permanente il tuo account e tutti i dati a esso associati, accedi all'app e disconnettiti, oppure contatta l'amministratore per la rimozione manuale dal database Firebase.</p>
-                `
+                content: `<p><strong>1. Titolare del Trattamento</strong><br>I dati sono gestiti dall'amministratore di Aura by Horizon.</p>`
             }
         };
 
@@ -781,49 +776,31 @@
         // --- SISTEMA JOYSTICK CUSTOM PER IL 360 ---
         function init360Joystick() {
             const artWrapper = document.getElementById('immersive-art-wrapper');
-            let startX = 0, startY = 0;
-            let isDragging360 = false;
-            let isScrollingPage = false;
-            let initialYaw = 0;
-            let initialPitch = 0;
-            let autoRotateTimeout = null;
+            let startX = 0, startY = 0, isDragging360 = false, isScrollingPage = false, initialYaw = 0, initialPitch = 0, autoRotateTimeout = null;
 
             artWrapper.addEventListener('touchstart', (e) => {
                 if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return;
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                isDragging360 = false;
-                isScrollingPage = false;
-                initialYaw = window.viewer360.getYaw();
-                initialPitch = window.viewer360.getPitch();
-                
+                startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+                isDragging360 = false; isScrollingPage = false;
+                initialYaw = window.viewer360.getYaw(); initialPitch = window.viewer360.getPitch();
                 clearTimeout(autoRotateTimeout);
             }, {passive: true});
 
             artWrapper.addEventListener('touchmove', (e) => {
                 if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return;
-                
-                let currentX = e.touches[0].clientX;
-                let currentY = e.touches[0].clientY;
-                let deltaX = currentX - startX;
-                let deltaY = currentY - startY;
+                let currentX = e.touches[0].clientX, currentY = e.touches[0].clientY;
+                let deltaX = currentX - startX, deltaY = currentY - startY;
 
                 if(!isDragging360 && !isScrollingPage) {
                     if(Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-                        if(Math.abs(deltaX) > Math.abs(deltaY)) {
-                            isDragging360 = true; 
-                        } else {
-                            isScrollingPage = true; 
-                        }
+                        if(Math.abs(deltaX) > Math.abs(deltaY)) { isDragging360 = true; } else { isScrollingPage = true; }
                     }
                 }
-
                 if(isDragging360) {
                     e.preventDefault(); 
                     let fov = window.viewer360.getHfov();
                     let yawFactor = fov / artWrapper.clientWidth;
                     let pitchFactor = fov / artWrapper.clientHeight;
-                    
                     window.viewer360.setYaw(initialYaw - (deltaX * yawFactor));
                     window.viewer360.setPitch(initialPitch + (deltaY * pitchFactor));
                 }
@@ -832,109 +809,54 @@
             artWrapper.addEventListener('touchend', () => {
                 if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return;
                 clearTimeout(autoRotateTimeout);
-                autoRotateTimeout = setTimeout(() => {
-                    if(window.viewer360) window.viewer360.setPitch(0);
-                }, 3000);
+                autoRotateTimeout = setTimeout(() => { if(window.viewer360) window.viewer360.setPitch(0); }, 3000);
             });
         }
-        // ------------------------------------------
 
         // --- SISTEMA ESTRAZIONE ID3 MP3 ON-DEMAND MODIFICATO ---
         function extractMetadataFromMP3(track) {
             if(!window.jsmediatags || track.metadataExtracted) return;
-            
             window.jsmediatags.read(track.audioUrl, {
                 onSuccess: function(tag) {
-                    let tags = tag.tags;
-                    let needsUIUpdate = false;
-
-                    if(tags.title && tags.title.trim() !== "") {
-                        track.title = tags.title;
-                        needsUIUpdate = true;
-                    }
-                    
-                    if(tags.artist && tags.artist.trim() !== "") {
-                        track.artist = tags.artist;
-                        needsUIUpdate = true;
-                    }
-                    
+                    let tags = tag.tags, needsUIUpdate = false;
+                    if(tags.title && tags.title.trim() !== "") { track.title = tags.title; needsUIUpdate = true; }
+                    if(tags.artist && tags.artist.trim() !== "") { track.artist = tags.artist; needsUIUpdate = true; }
                     if(tags.picture) {
-                        let data = tags.picture.data;
-                        let format = tags.picture.format;
-                        let base64String = "";
-                        
+                        let data = tags.picture.data, format = tags.picture.format, base64String = "";
                         let chunkSize = 8192;
-                        for (let i = 0; i < data.length; i += chunkSize) {
-                            base64String += String.fromCharCode.apply(null, data.slice(i, i + chunkSize));
-                        }
-                        
+                        for (let i = 0; i < data.length; i += chunkSize) base64String += String.fromCharCode.apply(null, data.slice(i, i + chunkSize));
                         track.cover = `data:${format};base64,${window.btoa(base64String)}`;
                         needsUIUpdate = true;
                     }
-
                     track.metadataExtracted = true; 
-
                     if(needsUIUpdate) {
-                        if(window.currentTrackData && window.currentTrackData.internalId === track.internalId) {
-                            updateUI(track);
-                            window.updateMediaSession();
-                        }
+                        if(window.currentTrackData && window.currentTrackData.internalId === track.internalId) { updateUI(track); window.updateMediaSession(); }
                         renderHistoryGrid();
-                        if(document.getElementById('library-section').classList.contains('active')) {
-                             window.renderGenericList(window.currentViewList);
-                        }
+                        if(document.getElementById('library-section').classList.contains('active')) { window.renderGenericList(window.currentViewList); }
                         renderHomePageWidgets();
                     }
                 },
-                onError: function(error) {
-                    console.warn("Nessun tag ID3 valido trovato in: " + track.title, error.info);
-                    track.metadataExtracted = true; 
-                }
+                onError: function(error) { console.warn("Nessun tag ID3 valido trovato in: " + track.title, error.info); track.metadataExtracted = true; }
             });
         }
-        // ------------------------------------------
 
         async function fetchData() {
             try {
                 const [trResponse, arResponse, vrResponse] = await Promise.all([ fetch(API.tracks), fetch(API.artists), fetch(API.videos) ]);
-                const tr = await trResponse.json();
-                const ar = await arResponse.json();
-                const vr = await vrResponse.json();
+                const tr = await trResponse.json(); const ar = await arResponse.json(); const vr = await vrResponse.json();
                 
-                USER_VIDEOS = vr || [];
-                ARTISTS_FULL_LIST = ar || [];
+                USER_VIDEOS = vr || []; ARTISTS_FULL_LIST = ar || [];
                 const artistMap = {}; ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
                 const rawTracks = tr.tracks || tr || [];
                 
                 AURA_MAP = rawTracks.map((t, index) => {
                     let coverUrl = "https://via.placeholder.com/300";
-                    
-                    if(t.cover) {
-                        coverUrl = t.cover;
-                    } else if(t.albumId) {
-                        coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png";
-                    } else if (t.categoryID) {
-                        coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png";
-                    }
-                    
+                    if(t.cover) { coverUrl = t.cover; } else if(t.albumId) { coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png"; } else if (t.categoryID) { coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png"; }
                     const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
-                    
                     const safeId = t.id ? String(t.id) : `track_${index}_${(t.title||'').replace(/[^a-zA-Z0-9]/g, '')}`;
-                    
-                    return { 
-                        ...t, 
-                        internalId: safeId, 
-                        title: t.title || "Unknown", 
-                        artist: artistMap[t.artistId] || t.artist || "Unknown", 
-                        audioUrl: rawAudioUrl, 
-                        cover: coverUrl, 
-                        status: t.Status,
-                        metadataExtracted: false 
-                    };
+                    return { ...t, internalId: safeId, title: t.title || "Unknown", artist: artistMap[t.artistId] || t.artist || "Unknown", audioUrl: rawAudioUrl, cover: coverUrl, status: t.Status, metadataExtracted: false };
                 });
-                renderStories();
-                renderHomePageWidgets();
-                renderHistoryGrid();
+                renderStories(); renderHomePageWidgets(); renderHistoryGrid();
             } catch (e) { console.error("Data Load Error", e); }
         }
 
@@ -945,47 +867,24 @@
             audioPlayer.addEventListener('play', () => { document.querySelector('.player-bar-new').classList.add('active'); document.querySelectorAll('#play-icon, #immersive-play-icon').forEach(i=>i.setAttribute('data-lucide','pause')); lucide.createIcons(); });
             audioPlayer.addEventListener('pause', () => { document.querySelectorAll('#play-icon, #immersive-play-icon').forEach(i=>i.setAttribute('data-lucide','play')); lucide.createIcons(); });
             const pBar = document.getElementById('progress-bar-immersive-container');
-            pBar.addEventListener('click', (e) => {
-                const rect = pBar.getBoundingClientRect();
-                if(audioPlayer.duration) audioPlayer.currentTime = ((e.clientX - rect.left) / rect.width) * audioPlayer.duration;
-            });
+            pBar.addEventListener('click', (e) => { const rect = pBar.getBoundingClientRect(); if(audioPlayer.duration) audioPlayer.currentTime = ((e.clientX - rect.left) / rect.width) * audioPlayer.duration; });
         }
 
         window.updateMediaSession = function() {
             if (!('mediaSession' in navigator)) return;
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: currentTrackData.title,
-                artist: currentTrackData.artist,
-                album: "Aura Music",
-                artwork: [
-                    { src: currentTrackData.cover, sizes: '96x96', type: 'image/png' },
-                    { src: currentTrackData.cover, sizes: '128x128', type: 'image/png' },
-                    { src: currentTrackData.cover, sizes: '192x192', type: 'image/png' },
-                    { src: currentTrackData.cover, sizes: '256x256', type: 'image/png' },
-                    { src: currentTrackData.cover, sizes: '384x384', type: 'image/png' },
-                    { src: currentTrackData.cover, sizes: '512x512', type: 'image/png' },
-                ]
+                title: currentTrackData.title, artist: currentTrackData.artist, album: "Aura Music",
+                artwork: [ { src: currentTrackData.cover, sizes: '96x96', type: 'image/png' }, { src: currentTrackData.cover, sizes: '128x128', type: 'image/png' }, { src: currentTrackData.cover, sizes: '192x192', type: 'image/png' }, { src: currentTrackData.cover, sizes: '256x256', type: 'image/png' }, { src: currentTrackData.cover, sizes: '384x384', type: 'image/png' }, { src: currentTrackData.cover, sizes: '512x512', type: 'image/png' } ]
             });
-            navigator.mediaSession.setActionHandler('play', null);
-            navigator.mediaSession.setActionHandler('pause', null);
-            navigator.mediaSession.setActionHandler('seekbackward', null);
-            navigator.mediaSession.setActionHandler('seekforward', null);
-            navigator.mediaSession.setActionHandler('previoustrack', null);
-            navigator.mediaSession.setActionHandler('nexttrack', null);
         };
 
         window.playTrack = (internalId, keepQueue = false) => {
             if (!keepQueue) window.activePlaybackQueue = []; 
-
             const t = AURA_MAP.find(x => x.internalId === internalId);
             if(!t) return;
-            currentTrackData = t;
-            audioPlayer.src = t.audioUrl;
+            currentTrackData = t; audioPlayer.src = t.audioUrl;
             
-            // CONTROLLO METADATI ON DEMAND ATTIVO SU OGNI BRANO
-            if(!t.metadataExtracted) {
-                extractMetadataFromMP3(t);
-            }
+            if(!t.metadataExtracted) extractMetadataFromMP3(t);
 
             window.updateMediaSession();
             audioPlayer.play().catch(e => console.log("Play error", e));
@@ -999,73 +898,30 @@
             const panoOverlay = document.getElementById('panorama-overlay');
             const coverImg = document.getElementById('immersive-cover');
 
-            if(window.viewer360) { 
-                window.viewer360.destroy(); 
-                window.viewer360 = null; 
-            }
+            if(window.viewer360) { window.viewer360.destroy(); window.viewer360 = null; }
             panoContainer.innerHTML = ''; 
 
             if(t.image360) {
-                artWrapper.classList.add('spacer-mode');
-                coverImg.classList.add('hidden');
-                
-                panoContainer.classList.remove('hidden');
-                panoOverlay.classList.remove('hidden');
-                
+                artWrapper.classList.add('spacer-mode'); coverImg.classList.add('hidden'); panoContainer.classList.remove('hidden'); panoOverlay.classList.remove('hidden');
                 if (!document.getElementById('immersive-mode').classList.contains('hidden')) {
-                    setTimeout(() => {
-                        try {
-                            window.viewer360 = pannellum.viewer('panorama', {
-                                "type": "equirectangular", 
-                                "panorama": t.image360, 
-                                "autoLoad": true, 
-                                "autoRotate": -2, 
-                                "showControls": false,
-                                "draggable": false, 
-                                "mouseZoom": false,
-                                "disableKeyboardCtrl": true
-                            });
-                        } catch(e) { console.log("360 Error", e); }
-                    }, 150);
+                    setTimeout(() => { try { window.viewer360 = pannellum.viewer('panorama', { "type": "equirectangular", "panorama": t.image360, "autoLoad": true, "autoRotate": -2, "showControls": false, "draggable": false, "mouseZoom": false, "disableKeyboardCtrl": true }); } catch(e) {} }, 150);
                 }
             } else {
-                artWrapper.classList.remove('spacer-mode');
-                coverImg.classList.remove('hidden');
-                
-                panoContainer.classList.add('hidden');
-                panoOverlay.classList.add('hidden');
+                artWrapper.classList.remove('spacer-mode'); coverImg.classList.remove('hidden'); panoContainer.classList.add('hidden'); panoOverlay.classList.add('hidden');
             }
 
             if(t.lrcUrl) { isLyricsMode = true; fetchSmartLyrics(t); } else { isLyricsMode = false; document.getElementById('spotify-lyrics-card').style.display = 'none'; }
             
             updateUI(t);
             listeningHistory = [internalId, ...listeningHistory.filter(x => x !== internalId)].slice(0, 20);
-            saveLocalData();
-            renderHistoryGrid();
+            saveLocalData(); renderHistoryGrid();
         };
 
         window.enterImmersiveMode = () => {
             document.getElementById('immersive-mode').classList.remove('hidden');
-            
             if (currentTrackData && currentTrackData.image360 && !window.viewer360) {
-                setTimeout(() => {
-                    try {
-                        document.getElementById('panorama').innerHTML = '';
-                        window.viewer360 = pannellum.viewer('panorama', {
-                            "type": "equirectangular", 
-                            "panorama": currentTrackData.image360, 
-                            "autoLoad": true, 
-                            "autoRotate": -2, 
-                            "showControls": false,
-                            "draggable": false,
-                            "mouseZoom": false,
-                            "disableKeyboardCtrl": true
-                        });
-                    } catch(e) { console.log("360 Error", e); }
-                }, 150);
-            } else if (window.viewer360) {
-                window.viewer360.resize();
-            }
+                setTimeout(() => { try { document.getElementById('panorama').innerHTML = ''; window.viewer360 = pannellum.viewer('panorama', { "type": "equirectangular", "panorama": currentTrackData.image360, "autoLoad": true, "autoRotate": -2, "showControls": false, "draggable": false, "mouseZoom": false, "disableKeyboardCtrl": true }); } catch(e) {} }, 150);
+            } else if (window.viewer360) { window.viewer360.resize(); }
         };
 
         function updateUI(t) {
@@ -1077,8 +933,7 @@
             img.onload = () => { 
                 try { 
                     const c = new ColorThief().getColor(img); 
-                    const rgb = `rgb(${c[0]},${c[1]},${c[2]})`;
-                    const rgba = `rgba(${c[0]},${c[1]},${c[2]}, 0.5)`;
+                    const rgb = `rgb(${c[0]},${c[1]},${c[2]})`; const rgba = `rgba(${c[0]},${c[1]},${c[2]}, 0.5)`;
                     document.documentElement.style.setProperty('--primary', rgb); 
                     document.getElementById('spotify-lyrics-card').style.backgroundColor = rgba;
                 } catch(e){} 
@@ -1147,22 +1002,14 @@
             if(currentTrackData){ 
                 let list = window.activePlaybackQueue && window.activePlaybackQueue.length > 0 ? window.activePlaybackQueue : AURA_MAP.map(t=>t.internalId);
                 const i = list.indexOf(currentTrackData.internalId); 
-                if (i !== -1) {
-                    window.playTrack(list[(i+1) % list.length], true); 
-                } else {
-                    window.playTrack(AURA_MAP[0].internalId, true);
-                }
+                if (i !== -1) { window.playTrack(list[(i+1) % list.length], true); } else { window.playTrack(AURA_MAP[0].internalId, true); }
             } 
         };
         window.skipBackward=()=>{ 
             if(currentTrackData){ 
                 let list = window.activePlaybackQueue && window.activePlaybackQueue.length > 0 ? window.activePlaybackQueue : AURA_MAP.map(t=>t.internalId);
                 const i = list.indexOf(currentTrackData.internalId); 
-                if (i !== -1) {
-                    window.playTrack(list[(i-1+list.length) % list.length], true); 
-                } else {
-                    window.playTrack(AURA_MAP[0].internalId, true);
-                }
+                if (i !== -1) { window.playTrack(list[(i-1+list.length) % list.length], true); } else { window.playTrack(AURA_MAP[0].internalId, true); }
             } 
         };
 
@@ -1172,8 +1019,6 @@
         
         function saveLocalData(){ localStorage.setItem('aura_hist',JSON.stringify(listeningHistory)); localStorage.setItem('aura_lang', currentLang); }
         function loadLocalData(){ listeningHistory=JSON.parse(localStorage.getItem('aura_hist')||'[]'); currentLang = localStorage.getItem('aura_lang') || 'en'; updateLanguageUI(); }
-
-        // --- RENDERERS ---
 
         function renderStories() {
             const container = document.getElementById('stories-container');
@@ -1205,7 +1050,6 @@
         function renderHomePageWidgets() {
             const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
             let html = "";
-            
             const newRelease = AURA_MAP.find(track => track.status === "New");
             if (newRelease) html += `<div class="mb-8"><h3 class="widget-block-title">${t.new_release}</h3><div onclick="playTrack('${newRelease.internalId}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg"><img src="${newRelease.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm"><div class="absolute inset-0 p-5 flex items-center gap-5"><img src="${newRelease.cover}" class="w-32 h-32 rounded-xl shadow-2xl z-10"><div class="z-10"><h4 class="text-2xl font-bold text-white mb-1">${newRelease.title}</h4><p class="text-gray-300">${newRelease.artist}</p></div></div></div></div>`;
             
@@ -1222,9 +1066,7 @@
             const uniqueCategories = [...new Set(AURA_MAP.map(track => track.categoryID).filter(Boolean))];
             uniqueCategories.forEach(categoryName => {
                 const tracksInCategory = AURA_MAP.filter(track => track.categoryID === categoryName);
-                if (tracksInCategory.length > 0) {
-                    html += createWidgetBlock(categoryName, tracksInCategory);
-                }
+                if (tracksInCategory.length > 0) html += createWidgetBlock(categoryName, tracksInCategory);
             });
 
             document.getElementById('home-widgets-container').innerHTML = html;
@@ -1243,7 +1085,28 @@
         window.forceRecheckPWA = () => window.location.reload();
 
         window.openSearchModal=()=>document.getElementById('search-modal').classList.remove('hidden'); window.closeSearchModal=()=>document.getElementById('search-modal').classList.add('hidden');
-        window.openShareModal=()=>document.getElementById('share-modal').classList.remove('hidden'); window.closeShareModal=()=>document.getElementById('share-modal').classList.add('hidden');
+        
+        // --- SHARE MODAL FIX ---
+        window.openShareModal = () => {
+            if (!window.currentTrackData) return showToast("Nessun brano in riproduzione");
+            document.getElementById('share-card-title').innerText = window.currentTrackData.title;
+            document.getElementById('share-card-cover').src = window.currentTrackData.cover;
+            
+            const qrContainer = document.getElementById('share-qr-container');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: "https://aura-music.app/track/" + window.currentTrackData.internalId, 
+                width: 120,
+                height: 120,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+            });
+            
+            document.getElementById('share-modal').classList.remove('hidden');
+        };
+        window.closeShareModal=()=>document.getElementById('share-modal').classList.add('hidden');
+        // -----------------------
+        
         window.openCapsuleModal=()=>document.getElementById('capsule-modal').classList.remove('hidden'); window.closeCapsuleModal=()=>document.getElementById('capsule-modal').classList.add('hidden');
         window.openLanguageModal=()=>document.getElementById('language-modal').classList.remove('hidden'); window.closeLanguageModal=()=>document.getElementById('language-modal').classList.add('hidden');
         window.changeLanguage = (val) => { currentLang = val; saveLocalData(); updateLanguageUI(); renderHomePageWidgets(); }
@@ -1257,7 +1120,6 @@
             if(savedTitle === "Saved Tracks" || knownSavedTitles.includes(savedTitle)) {
                 document.getElementById('txt-saved-tracks').innerText = t.saved_tracks;
             }
-            
             document.getElementById('txt-sessions').innerText = t.sessions;
         };
 
@@ -1330,6 +1192,13 @@
                 window.loggedInUser = user;
                 document.getElementById('auth-dot').classList.remove('hidden');
                 document.getElementById('sp-avatar').src = user.photoURL;
+                
+                // Aggiornamento della Mini Foto nel Social Hub
+                const miniAvatar = document.getElementById('social-mini-avatar');
+                if(miniAvatar) miniAvatar.src = user.photoURL;
+                const miniBadge = document.getElementById('social-mini-badge');
+                if(miniBadge) miniBadge.classList.remove('hidden');
+
                 document.getElementById('sp-name').innerText = user.displayName;
                 document.getElementById('sp-handle').innerText = "@" + user.email.split('@')[0];
                 syncUserLibrary(user.uid);
@@ -1369,7 +1238,6 @@
             onValue(ref(db, `users/${uid}/playlists`), (s) => { 
                 window.userPlaylists = Object.values(s.val()||{}); 
                 window.renderPlaylists(); 
-                
                 if (document.getElementById('library-section').classList.contains('active')) {
                     const currentName = document.getElementById('txt-saved-tracks').innerText;
                     const p = window.userPlaylists.find(x => x.name === currentName);
@@ -1489,10 +1357,11 @@
             } catch(e) { showToast("Error publishing"); }
         };
 
+        // --- SISTEMA SOCIAL FEED COMPLETAMENTE NUOVO (Supporto Embed) ---
         function loadSocialFeed() {
             onValue(ref(db, 'posts'), (snap) => {
                 const data = snap.val();
-                if(!data) { document.getElementById('social-feed-container').innerHTML = '<p class="text-center text-gray-500">Be the first to post.</p>'; return; }
+                if(!data) { document.getElementById('social-feed-container').innerHTML = '<p class="text-center text-gray-500 mt-10">Be the first to post.</p>'; return; }
                 const posts = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
                 
                 document.getElementById('social-feed-container').innerHTML = posts.map(p => {
@@ -1500,50 +1369,75 @@
                     const likes = p.likes ? Object.keys(p.likes).length : 0;
                     const comments = p.comments ? Object.keys(p.comments).length : 0;
                     
+                    let postText = p.text || (p.caption || "");
+                    let embedHTML = "";
+                    
+                    // Regex per catturare video di YouTube
+                    const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+                    const ytMatch = postText.match(ytRegex);
+                    if(ytMatch) {
+                        embedHTML += `<div class="mt-3 rounded-xl overflow-hidden aspect-video border border-white/10 w-full"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen></iframe></div>`;
+                    }
+                    
+                    // Regex per catturare post di Instagram
+                    const igRegex = /instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)/i;
+                    const igMatch = postText.match(igRegex);
+                    if(igMatch) {
+                        embedHTML += `<div class="mt-3 rounded-xl overflow-hidden border border-white/10 w-full bg-black"><iframe src="https://www.instagram.com/${igMatch[1]}/${igMatch[2]}/embed" width="100%" height="400" frameborder="0" scrolling="no" allowtransparency="true"></iframe></div>`;
+                    }
+
+                    // Card Brani Interna (Condivisione Musicale Aura)
                     let attachmentHTML = "";
                     if(p.type === 'share' && p.trackId) {
                         attachmentHTML = `
-                        <div class="shared-song-card" onclick="playTrack('${p.trackId}')">
+                        <div class="shared-song-card mt-3" onclick="playTrack('${p.trackId}')">
                              <img src="${p.trackCover}" class="shared-song-img">
                              <div class="shared-song-info">
-                                 <p class="shared-song-title">${p.trackTitle}</p>
+                                 <p class="shared-song-title text-white">${p.trackTitle}</p>
                                  <p class="shared-song-artist">${p.trackArtist}</p>
                              </div>
-                             <div class="p-2 bg-white rounded-full"><i data-lucide="play" class="w-3 h-3 text-black fill-current"></i></div>
+                             <div class="p-2.5 bg-white rounded-full shadow-md"><i data-lucide="play" class="w-4 h-4 text-black fill-current ml-0.5"></i></div>
                         </div>`;
                     } else if (p.fileType === 'audio') { 
-                         attachmentHTML = `<div class="p-4 bg-white/5 rounded-xl mt-2 flex items-center gap-3 cursor-pointer" onclick="playSocialAudio('${p.fileUrl}','Audio','${p.authorName}')"><div class="p-3 bg-white text-black rounded-full"><i data-lucide="play" class="fill-current w-4 h-4"></i></div><span class="text-xs">Play Audio Clip</span></div>`;
+                         attachmentHTML = `<div class="p-4 bg-white/5 rounded-xl mt-3 flex items-center gap-3 cursor-pointer" onclick="playSocialAudio('${p.fileUrl}','Audio','${p.authorName}')"><div class="p-3 bg-white text-black rounded-full"><i data-lucide="play" class="fill-current w-4 h-4"></i></div><span class="text-xs">Play Audio Clip</span></div>`;
                     } else if (p.fileType === 'image') { 
-                         attachmentHTML = `<img src="${p.fileUrl}" class="rounded-xl mt-2 w-full max-h-60 object-cover">`;
+                         attachmentHTML = `<img src="${p.fileUrl}" class="rounded-xl mt-3 w-full max-h-60 object-cover">`;
                     }
                     
                     return `
-                    <div class="thread-card">
-                        <div class="thread-header">
-                            <img src="${p.authorPic}" class="thread-avatar">
-                            <div>
-                                <p class="text-sm font-bold text-white">${p.authorName}</p>
-                                <p class="text-[10px] text-gray-500">Just now</p>
+                    <div class="bg-[#0a0a0c] border border-white/5 rounded-2xl p-4 shadow-lg mb-4">
+                        <div class="flex items-start gap-3 mb-2">
+                            <img src="${p.authorPic}" class="w-10 h-10 rounded-full object-cover border border-white/10">
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center">
+                                    <p class="text-sm font-bold text-white hover:underline cursor-pointer">${p.authorName}</p>
+                                    <button class="text-gray-500 hover:text-white"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+                                </div>
+                                <p class="text-[10px] text-gray-500">${new Date(p.timestamp).toLocaleDateString()}</p>
                             </div>
                         </div>
-                        <div class="thread-content">
-                            <p class="thread-text">${p.text || (p.caption || "")}</p>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">${postText}</p>
+                            ${embedHTML}
                             ${attachmentHTML}
-                            <div class="thread-actions">
-                                <button onclick="togglePostLike('${p.id}')" class="thread-action-btn ${isLiked?'text-red-500':'text-gray-400'}">
-                                    <i data-lucide="heart" class="w-4 h-4 ${isLiked?'fill-current':''}"></i> ${likes||''}
-                                </button>
-                                <button onclick="openComments('${p.id}')" class="thread-action-btn text-gray-400">
-                                    <i data-lucide="message-circle" class="w-4 h-4"></i> ${comments||''}
-                                </button>
-                                <button class="thread-action-btn text-gray-400"><i data-lucide="share" class="w-4 h-4"></i></button>
-                            </div>
+                        </div>
+                        <div class="flex gap-6 mt-4 pt-3 border-t border-white/5 opacity-80">
+                            <button onclick="togglePostLike('${p.id}')" class="flex items-center gap-2 text-xs font-medium transition ${isLiked?'text-red-500':'text-gray-400 hover:text-red-400'}">
+                                <i data-lucide="heart" class="w-5 h-5 ${isLiked?'fill-current':''}"></i> ${likes||'0'}
+                            </button>
+                            <button onclick="openComments('${p.id}')" class="flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-white transition">
+                                <i data-lucide="message-circle" class="w-5 h-5"></i> ${comments||'0'}
+                            </button>
+                            <button class="flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-white transition ml-auto">
+                                <i data-lucide="share" class="w-5 h-5"></i>
+                            </button>
                         </div>
                     </div>`;
                 }).join('');
                 lucide.createIcons();
             });
         }
+        // -----------------------------------------------------------------
 
         window.togglePostLike = (pid) => {
              if(!auth.currentUser) return openAuthModal();
