@@ -552,7 +552,7 @@
         </div>
         <div class="flex-1 relative bg-gray-900 flex items-center justify-center">
             <video id="story-video" class="w-full h-full object-cover hidden" playsinline loop></video>
-            <iframe id="story-iframe" class="w-full h-full hidden border-none" allow="autoplay; encrypted-media; gyroscope" allowfullscreen></iframe>
+            <iframe id="story-iframe" class="w-full h-full hidden border-none" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
         </div>
         <div class="absolute bottom-0 left-0 right-0 z-20 p-6 pb-12 bg-gradient-to-t from-black via-black/80 to-transparent">
              <p id="story-viewer-text" class="text-sm font-medium mb-4 leading-relaxed"></p>
@@ -1283,6 +1283,7 @@
         }
 
         // --- RENDER STORIE (NELLA SOCIAL PAGE) ---
+        // L'ORDINE È BLOCCATO: 1) Tasto Aggiungi -> 2) Storie dal Manifest -> 3) Storie Utenti Firebase
         window.renderStories = function() {
             const container = document.getElementById('stories-container');
             if(!container) return;
@@ -1290,10 +1291,12 @@
             
             let html = `<div class="story-wrapper" onclick="window.promptAddStory()"><div class="story-ring"><div class="story-inner"><i data-lucide="plus" class="w-6 h-6 text-white"></i></div></div><span class="text-[10px] text-white">${t.add_story}</span></div>`;
             
+            // Storie dal Manifest (Principali)
             if(USER_VIDEOS && USER_VIDEOS.length) { 
                 html += USER_VIDEOS.map(s => `<div class="story-wrapper" onclick="openStory('${s.id}')"><div class="story-ring"><div class="story-inner" style="font-size:24px;">${STORY_EMOJIS[s.id]||"✨"}</div></div><span class="text-[10px] text-gray-300 max-w-[65px] truncate block text-center">${s.userName}</span></div>`).join('');
             }
 
+            // Storie degli Utenti (Accodate orizzontalmente tramite YouTube Shorts)
             if(window.FIREBASE_STORIES && window.FIREBASE_STORIES.length) {
                 html += window.FIREBASE_STORIES.map(s => `<div class="story-wrapper" onclick="openStory('${s.id}', true)"><div class="story-ring"><img src="${s.userPic || 'https://via.placeholder.com/150'}" class="story-inner object-cover"></div><span class="text-[10px] text-gray-300 max-w-[65px] truncate block text-center">${s.userName}</span></div>`).join('');
             }
@@ -1302,6 +1305,7 @@
             if(window.lucide) lucide.createIcons();
         };
         
+        // --- APERTURA PLAYER STORIE (CON FIX ANTI-BLOCCO YOUTUBE) ---
         window.openStory = (id, isFirebase = false) => {
             let s;
             if(isFirebase) {
@@ -1323,7 +1327,8 @@
             if (isFirebase && s.videoId) {
                 v.classList.add('hidden');
                 iframe.classList.remove('hidden');
-                iframe.src = `https://www.youtube.com/embed/${s.videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&playsinline=1`;
+                // Usa youtube-nocookie per aggirare i blocchi dei browser iOS/Android
+                iframe.src = `https://www.youtube-nocookie.com/embed/${s.videoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1`;
             } else {
                 iframe.classList.add('hidden');
                 iframe.src = "";
@@ -1839,17 +1844,18 @@
             }
         };
 
-        // --- FUNZIONE AGGIUNTA STORY YOUTUBE ---
+        // --- FUNZIONE AGGIUNTA STORY YOUTUBE (FIXATA CON REGEX UNIVERSALE) ---
         window.promptAddStory = () => {
             if(!auth.currentUser) return window.openAuthModal();
-            const link = prompt("Inserisci il link del video YouTube Short (o normale) per la tua storia:");
+            const link = prompt("Inserisci il link del video YouTube o Short per la tua storia:");
+            
             if(link) {
-                const shortRegex = /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/i;
-                const match = link.match(shortRegex);
-                const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
-                const ytMatch = link.match(ytRegex);
+                // Regex universale per estrarre l'ID da QUALSIASI link YouTube (Shorts, youtu.be, watch?v=)
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+                const match = link.match(regExp);
                 
-                let videoId = match ? match[1] : (ytMatch ? ytMatch[1] : null);
+                // L'ID di YouTube è sempre di 11 caratteri
+                const videoId = (match && match[2].length === 11) ? match[2] : null;
                 
                 if(videoId) {
                     const storyRef = push(ref(db, 'stories'));
@@ -1861,9 +1867,9 @@
                         videoId: videoId,
                         timestamp: Date.now()
                     });
-                    window.showToast("Storia aggiunta!");
+                    window.showToast("Storia aggiunta con successo!");
                 } else {
-                    window.showToast("Link YouTube non valido");
+                    window.showToast("Link YouTube non valido. Assicurati di copiare il link corretto.");
                 }
             }
         };
