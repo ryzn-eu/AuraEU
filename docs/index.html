@@ -816,7 +816,7 @@
                 content: `<p><strong>1. Titolare del Trattamento</strong><br>I tuoi dati personali sono raccolti e gestiti da AURA Music di Horizon Global (Conglomerato), con sede centrale in Drumul Onceștiului 4, Stanesti, Giurgiu, Romania e sede operativa in Vicolo Ritorto 5, 25050 San Gervasio Bresciano (BS), Italia.</p>
                 <p><strong>2. Dati Raccolti</strong><br>Quando utilizzi Aura, raccogliamo le seguenti informazioni:<br>- <strong>Dati di base del profilo:</strong> Se effettui l'accesso tramite Google, riceviamo il tuo indirizzo email, il nome visualizzato e la foto del profilo.<br>- <strong>Dati di utilizzo e streaming:</strong> Raccogliamo la tua cronologia di ascolto, i brani salvati, le playlist create per personalizzare la tua esperienza e per scopi di reportistica interna con Ryzn Music Group.<br>- <strong>Dati Social:</strong> Qualsiasi testo, link, immagine o commento pubblicato nella sezione social di Aura, oltre alle interazioni (like, amicizie).</p>
                 <p><strong>3. Finalità del Trattamento</strong><br>Utilizziamo i tuoi dati per: fornire e migliorare il servizio di streaming musicale; mantenere e moderare la piattaforma social integrata; sincronizzare il tuo profilo cross-device; fornire raccomandazioni musicali accurate.</p>
-                <p><strong>4. Condivisione dei Dati</strong><br>I tuoi dati non vengono venduti a terzi. Possono essere condivisi con fornitori di servizi cloud (es. Google Firebase) necessari per il funzionamento dell'App, e dati aggregati (non personally identificabili) possono essere condivisi con Ryzn Music Group per il calcolo delle royalties e le statistiche di ascolto.</p>
+                <p><strong>4. Condivisione dei Dati</strong><br>I tuoi dati non vengono venduti a terzi. Possono essere condivisi con fornitori di servizi cloud (es. Google Firebase) necessari per il funzionamento dell'App, e dati aggregati (non personalmente identificabili) possono essere condivisi con Ryzn Music Group per il calcolo delle royalties e le statistiche di ascolto.</p>
                 <p><strong>5. Sicurezza dei Dati</strong><br>Adottiamo misure tecniche e organizzative rigorose per proteggere i tuoi dati da accessi non autorizzati, alterazioni o distruzioni.</p>`
             },
             data: {
@@ -864,7 +864,6 @@
             showSection('music');
         });
 
-        // --- OROLOGIO DIGITALE ---
         function initClock() {
             const timeEl = document.getElementById('digital-clock-time');
             const dateEl = document.getElementById('digital-clock-date');
@@ -879,7 +878,6 @@
             setInterval(update, 1000);
         }
 
-        // --- GESTIONE APERTURA PLAYLIST E LIKES ---
         window.openLikedSongs = () => {
             const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
             document.getElementById('txt-saved-tracks').innerText = t.saved_tracks;
@@ -899,7 +897,7 @@
 
         window.renderGenericList = (idList) => {
             const list = idList.map(id => window.AURA_MAP.find(t=>t.internalId === id)).filter(Boolean);
-            document.getElementById('liked-tracks-list').innerHTML = list.length ? list.map(t => `<div onclick="playTrackFromList('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('') : '<p class="text-xs text-gray-500 col-span-2 mt-4">No tracks found.</p>';
+            document.getElementById('liked-tracks-list').innerHTML = list.length ? list.map(t => `<div onclick="playTrackFromList('${t.internalId}')" class="yt-card"><img src="${t.cover}" loading="eager" decoding="sync" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('') : '<p class="text-xs text-gray-500 col-span-2 mt-4">No tracks found.</p>';
             
             const fab = document.getElementById('fab-play-list');
             if(list.length > 0 && document.getElementById('library-section').classList.contains('active')) { 
@@ -985,20 +983,12 @@
             });
         }
 
-        // --- OPZIONI FETCH PER SALTARE IL BLOCCO DI NGROK ---
-        const ngrokFetchOptions = {
-            method: 'GET',
-            headers: {
-                "ngrok-skip-browser-warning": "1"
-            }
-        };
-
         async function fetchData() {
             try {
                 const [trResponse, arResponse, vrResponse] = await Promise.all([ 
-                    fetch(API.tracks, ngrokFetchOptions), 
-                    fetch(API.artists, ngrokFetchOptions), 
-                    fetch(API.videos, ngrokFetchOptions) 
+                    fetch(API.tracks), 
+                    fetch(API.artists), 
+                    fetch(API.videos) 
                 ]);
                 
                 const tr = await trResponse.json(); 
@@ -1032,12 +1022,24 @@
             pBar.addEventListener('click', (e) => { const rect = pBar.getBoundingClientRect(); if(audioPlayer.duration) audioPlayer.currentTime = ((e.clientX - rect.left) / rect.width) * audioPlayer.duration; });
         }
 
+        // --- AGGIORNAMENTO MEDIA SESSION: BLOCCO DEI CONTROLLI DI SISTEMA ---
         window.updateMediaSession = function() {
             if (!('mediaSession' in navigator)) return;
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: currentTrackData.title, artist: currentTrackData.artist, album: "Aura Music",
                 artwork: [ { src: currentTrackData.cover, sizes: '96x96', type: 'image/png' }, { src: currentTrackData.cover, sizes: '128x128', type: 'image/png' }, { src: currentTrackData.cover, sizes: '192x192', type: 'image/png' }, { src: currentTrackData.cover, sizes: '256x256', type: 'image/png' }, { src: currentTrackData.cover, sizes: '384x384', type: 'image/png' }, { src: currentTrackData.cover, sizes: '512x512', type: 'image/png' } ]
             });
+            
+            // Disabilita esplicitamente l'interazione per avanti/indietro e barra di scorrimento
+            navigator.mediaSession.setActionHandler('previoustrack', null);
+            navigator.mediaSession.setActionHandler('nexttrack', null);
+            navigator.mediaSession.setActionHandler('seekto', null);
+            navigator.mediaSession.setActionHandler('seekbackward', null);
+            navigator.mediaSession.setActionHandler('seekforward', null);
+            
+            // Mantiene attivi solo Play e Pause
+            navigator.mediaSession.setActionHandler('play', () => { audioPlayer.play(); });
+            navigator.mediaSession.setActionHandler('pause', () => { audioPlayer.pause(); });
         };
 
         window.updatePlayerButtonsState = () => {
@@ -1118,7 +1120,8 @@
             document.querySelectorAll('#player-artist, #immersive-artist').forEach(e => e.innerText = t.artist);
             document.querySelectorAll('#player-cover, #immersive-cover').forEach(e => e.src = t.cover);
             
-        const img = new Image(); img.src = t.cover;            img.onload = () => { 
+            const img = new Image(); img.crossOrigin = "anonymous"; img.src = t.cover;
+            img.onload = () => { 
                 try { 
                     const c = new ColorThief().getColor(img); 
                     const rgb = `rgb(${c[0]},${c[1]},${c[2]})`; const rgba = `rgba(${c[0]},${c[1]},${c[2]}, 0.5)`;
@@ -1135,11 +1138,11 @@
 
         async function fetchSmartLyrics(track) {
             try {
-                const originalRes = await fetch(track.lrcUrl, ngrokFetchOptions);
+                const originalRes = await fetch(track.lrcUrl);
                 if (!originalRes.ok) throw new Error("No lyric");
                 currentLyrics = parseLrc(await originalRes.text()); 
                 if (currentLang !== (track.originalLang || 'en')) {
-                    const transRes = await fetch(track.lrcUrl.replace('.lrc', `_${currentLang}.lrc`), ngrokFetchOptions);
+                    const transRes = await fetch(track.lrcUrl.replace('.lrc', `_${currentLang}.lrc`));
                     if(transRes.ok) currentTranslationLyrics = parseLrc(await transRes.text());
                 }
                 renderLyrics(); 
@@ -1286,14 +1289,14 @@
         function renderHistoryGrid() {
             const list = listeningHistory.map(id => AURA_MAP.find(x => x.internalId === id)).filter(Boolean);
             const items = list.length >= 1 ? list.slice(0,6) : AURA_MAP.slice(0,6);
-            document.getElementById('home-history-grid').innerHTML = items.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('');
+            document.getElementById('home-history-grid').innerHTML = items.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" loading="eager" decoding="sync" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('');
         }
         
         function renderHomePageWidgets() {
             const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
             let html = "";
             const newRelease = AURA_MAP.find(track => track.status === "New");
-            if (newRelease) html += `<div class="mb-8"><h3 class="widget-block-title">${t.new_release}</h3><div onclick="playTrack('${newRelease.internalId}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg"><img src="${newRelease.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm"><div class="absolute inset-0 p-5 flex items-center gap-5"><img src="${newRelease.cover}" class="w-32 h-32 rounded-xl shadow-2xl z-10"><div class="z-10"><h4 class="text-2xl font-bold text-white mb-1">${newRelease.title}</h4><p class="text-gray-300">${newRelease.artist}</p></div></div></div></div>`;
+            if (newRelease) html += `<div class="mb-8"><h3 class="widget-block-title">${t.new_release}</h3><div onclick="playTrack('${newRelease.internalId}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg"><img src="${newRelease.cover}" loading="eager" decoding="sync" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm"><div class="absolute inset-0 p-5 flex items-center gap-5"><img src="${newRelease.cover}" loading="eager" decoding="sync" class="w-32 h-32 rounded-xl shadow-2xl z-10"><div class="z-10"><h4 class="text-2xl font-bold text-white mb-1">${newRelease.title}</h4><p class="text-gray-300">${newRelease.artist}</p></div></div></div></div>`;
             
             const visitors = Math.floor(Math.random() * 15000) + 10200; 
             const globalLikes = (2840000 + Math.floor(Date.now() / 5000)).toLocaleString();
@@ -1315,8 +1318,9 @@
             if(window.lucide) lucide.createIcons();
         }
 
+        // AGGIUNTO: loading="eager" decoding="sync" PER CARICAMENTO IMMEDIATO
         function createWidgetBlock(title, tracks) {
-            return `<div class="mb-6"><h3 class="widget-block-title">${title}</h3><div class="horizontal-scroll">${tracks.map(t => `<div onclick="playTrack('${t.internalId}')" class="flex-none w-36 cursor-pointer group"><img src="${t.cover}" class="w-36 h-36 rounded-xl object-cover mb-2 shadow-lg"><p class="text-xs font-bold truncate">${t.title}</p><p class="text-[10px] text-gray-400 truncate">${t.artist}</p></div>`).join('')}</div></div>`;
+            return `<div class="mb-6"><h3 class="widget-block-title">${title}</h3><div class="horizontal-scroll">${tracks.map(t => `<div onclick="playTrack('${t.internalId}')" class="flex-none w-36 cursor-pointer group"><img src="${t.cover}" loading="eager" decoding="sync" class="w-36 h-36 rounded-xl object-cover mb-2 shadow-lg"><p class="text-xs font-bold truncate">${t.title}</p><p class="text-[10px] text-gray-400 truncate">${t.artist}</p></div>`).join('')}</div></div>`;
         }
 
         function checkPWAStatus() {
@@ -1334,26 +1338,37 @@
             if(!bar.classList.contains('hidden')) document.getElementById('social-user-search').focus();
         };
 
+        // --- RICERCA SOCIAL POTENZIATA (CERCA PER NOME E HANDLE) ---
         window.performSocialSearch = () => {
-            const q = document.getElementById('social-user-search').value.toLowerCase();
+            const q = document.getElementById('social-user-search').value.toLowerCase().trim();
             const res = document.getElementById('social-search-results');
             if(q.length < 2) { res.innerHTML = ''; return; }
             
             let html = `
                 <div class="p-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer rounded-xl transition">
                     <div class="w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center font-bold text-white">#</div>
-                    <div><p class="text-sm text-white">Search for "${q}" in threads</p></div>
+                    <div><p class="text-sm text-white">Cerca "${q}" nei threads</p></div>
                 </div>
             `;
 
             if(window.ALL_USERS && window.ALL_USERS.length > 0) {
                 const currentUid = auth.currentUser ? auth.currentUser.uid : '';
-                const matchedUsers = window.ALL_USERS.filter(u => u.name && u.name.toLowerCase().includes(q) && u.uid !== currentUid);
+                
+                const matchedUsers = window.ALL_USERS.filter(u => {
+                    if (u.uid === currentUid) return false;
+                    const userName = u.name ? u.name.toLowerCase() : "";
+                    const userHandle = u.email ? u.email.split('@')[0].toLowerCase() : "";
+                    return userName.includes(q) || userHandle.includes(q);
+                });
+
                 if (matchedUsers.length > 0) {
                     html += matchedUsers.map(u => `
                         <div class="p-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer rounded-xl transition" onclick="openOtherUserProfile('${u.uid}')">
-                            <img src="${u.pic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full object-cover">
-                            <div><p class="text-sm font-bold text-white">${u.name}</p></div>
+                            <img src="${u.pic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full object-cover border border-white/10">
+                            <div>
+                                <p class="text-sm font-bold text-white">${u.name || 'Utente Aura'}</p>
+                                <p class="text-[10px] text-gray-500">@${u.email ? u.email.split('@')[0] : 'user'}</p>
+                            </div>
                         </div>
                     `).join('');
                 }
@@ -1657,7 +1672,7 @@
 
         window.renderLikedTracks = () => {
              const list = Array.from(window.likedTracks).map(id => window.AURA_MAP.find(t=>t.internalId === id)).filter(Boolean);
-             document.getElementById('liked-tracks-list').innerHTML = list.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('');
+             document.getElementById('liked-tracks-list').innerHTML = list.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" loading="eager" decoding="sync" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('');
         };
 
         window.openCreatePlaylistModal=()=>document.getElementById('create-playlist-modal').classList.remove('hidden'); 
@@ -1796,14 +1811,45 @@
             }
         };
 
-        // --- SISTEMA SOCIAL FEED COLLEGATO AL WINDOW GLOBALE PER L'AGGIORNAMENTO ---
+        // --- FUNZIONI MENU POST (TRE PUNTINI) ---
+        window.togglePostMenu = (pid) => {
+            const menu = document.getElementById(`post-menu-${pid}`);
+            if(menu) menu.classList.toggle('hidden');
+        };
+
+        window.hidePost = (pid) => {
+            let hiddenPosts = JSON.parse(localStorage.getItem('aura_hidden_posts') || '[]');
+            if(!hiddenPosts.includes(pid)) {
+                hiddenPosts.push(pid);
+                localStorage.setItem('aura_hidden_posts', JSON.stringify(hiddenPosts));
+            }
+            const postCard = document.getElementById(`post-card-${pid}`);
+            if(postCard) postCard.style.display = 'none';
+            window.showToast("Post nascosto");
+        };
+
+        window.reportPost = (pid, authorName) => {
+            window.togglePostMenu(pid); 
+            window.showToast("Apertura app mail...");
+            const email = "Report@aurasound.it";
+            const subject = encodeURIComponent("Segnalazione Post su Aura Social");
+            const body = encodeURIComponent(`Ciao Team di Aura,\n\nVorrei segnalare il seguente post per violazione delle linee guida.\n\nID Post: ${pid}\nAutore: ${authorName}\n\nMotivazione della segnalazione: \n[Scrivi qui il motivo...]`);
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        };
+
+        // --- SISTEMA SOCIAL FEED ---
         window.loadSocialFeed = () => {
             onValue(ref(db, 'posts'), (snap) => {
                 const data = snap.val();
                 const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
 
                 if(!data) { document.getElementById('social-feed-container').innerHTML = `<p class="text-center text-gray-500 mt-10">${t.loading_feed}</p>`; return; }
-                const posts = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
+                
+                let posts = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
+                
+                // Filtriamo i post nascosti dall'utente
+                const hiddenPosts = JSON.parse(localStorage.getItem('aura_hidden_posts') || '[]');
+                posts = posts.filter(p => !hiddenPosts.includes(p.id));
                 
                 document.getElementById('social-feed-container').innerHTML = posts.map(p => {
                     const isLiked = auth.currentUser && p.likes && p.likes[auth.currentUser.uid];
@@ -1813,7 +1859,6 @@
                     let postText = p.text || (p.caption || "");
                     let embedHTML = "";
                     
-                    // Modifica Embed Youtube (Iframe Integrato invece che solo copertina)
                     const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
                     const ytMatch = postText.match(ytRegex);
                     if(ytMatch) {
@@ -1821,7 +1866,6 @@
                         postText = postText.replace(ytMatch[0], '').trim();
                     }
                     
-                    // Modifica Embed Instagram (Iframe Integrato)
                     const igRegex = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)/i;
                     const igMatch = postText.match(igRegex);
                     if(igMatch) {
@@ -1867,13 +1911,27 @@
                     }
                     
                     return `
-                    <div class="social-card-new">
-                        <div class="flex justify-between items-center mb-3">
+                    <div id="post-card-${p.id}" class="social-card-new relative">
+                        <div class="flex justify-between items-center mb-3 relative">
                              <div class="flex items-center gap-2 cursor-pointer" onclick="openOtherUserProfile('${p.authorId}')">
                                  <img src="${p.authorPic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full border border-white/10 object-cover">
                                  <span class="font-bold text-sm text-white">${p.authorName}</span>
                              </div>
-                             <button class="text-gray-500 hover:text-white"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+                             
+                             <div>
+                                 <button onclick="togglePostMenu('${p.id}')" class="p-2 text-gray-500 hover:text-white transition rounded-full hover:bg-white/5">
+                                     <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                                 </button>
+                                 
+                                 <div id="post-menu-${p.id}" class="hidden absolute right-0 top-10 w-36 bg-[#111115] border border-white/10 shadow-2xl rounded-xl py-2 z-50">
+                                     <button onclick="hidePost('${p.id}')" class="w-full text-left px-4 py-2.5 text-xs text-white hover:bg-white/5 flex items-center gap-2 transition">
+                                         <i data-lucide="eye-off" class="w-3.5 h-3.5"></i> Nascondi
+                                     </button>
+                                     <button onclick="reportPost('${p.id}', '${p.authorName.replace(/'/g, "\\'")}')" class="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition">
+                                         <i data-lucide="flag" class="w-3.5 h-3.5"></i> Segnala
+                                     </button>
+                                 </div>
+                             </div>
                         </div>
                         
                         ${postText ? `<p class="text-sm mb-3 text-gray-200 leading-relaxed whitespace-pre-wrap">${postText}</p>` : ''}
