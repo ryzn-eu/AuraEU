@@ -257,7 +257,7 @@
         /* CLOCK WIDGET HOME */
         .clock-widget-container {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            margin: 20px 0 30px 0; user-select: none;
+            margin: 20px 0 40px 0; user-select: none;
         }
     </style>
 </head>
@@ -807,7 +807,7 @@
             checkPWAStatus();
             detectOSForInstallGuide();
             getDOMElements();
-            initClock(); // Inizializza l'orologio digitale
+            initClock(); 
             init360Joystick(); 
             loadLocalData();
             fetchData(); 
@@ -1121,11 +1121,17 @@
         window.showToast=(m)=>{ const t=document.createElement('div'); t.className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold border border-white/20"; t.innerText=m; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.remove(),2000); };
         
         function saveLocalData(){ localStorage.setItem('aura_hist',JSON.stringify(listeningHistory)); localStorage.setItem('aura_lang', currentLang); }
-        function loadLocalData(){ listeningHistory=JSON.parse(localStorage.getItem('aura_hist')||'[]'); currentLang = localStorage.getItem('aura_lang') || 'en'; updateLanguageUI(); }
+        
+        function loadLocalData(){ 
+            listeningHistory=JSON.parse(localStorage.getItem('aura_hist')||'[]'); 
+            currentLang = localStorage.getItem('aura_lang') || 'en'; 
+            updateLanguageUI(); 
+        }
 
         // --- RENDER STORIE (NELLA SOCIAL PAGE) ---
         function renderStories() {
             const container = document.getElementById('stories-container');
+            if(!container) return;
             const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
             
             let html = `<div class="story-wrapper" onclick="openComposeModal()"><div class="story-ring"><div class="story-inner"><i data-lucide="plus" class="w-6 h-6 text-white"></i></div></div><span class="text-[10px] text-white">${t.add_story}</span></div>`;
@@ -1135,7 +1141,7 @@
             }
             
             container.innerHTML = html;
-            lucide.createIcons();
+            if(window.lucide) lucide.createIcons();
         }
         
         window.openStory = (id) => {
@@ -1182,7 +1188,7 @@
             });
 
             document.getElementById('home-widgets-container').innerHTML = html;
-            lucide.createIcons();
+            if(window.lucide) lucide.createIcons();
         }
 
         function createWidgetBlock(title, tracks) {
@@ -1233,20 +1239,26 @@
         
         window.openCapsuleModal=()=>document.getElementById('capsule-modal').classList.remove('hidden'); window.closeCapsuleModal=()=>document.getElementById('capsule-modal').classList.add('hidden');
         window.openLanguageModal=()=>document.getElementById('language-modal').classList.remove('hidden'); window.closeLanguageModal=()=>document.getElementById('language-modal').classList.add('hidden');
+        
         window.changeLanguage = (val) => { currentLang = val; saveLocalData(); updateLanguageUI(); renderHomePageWidgets(); }
         
         // --- TRADUZIONI SINCRONIZZATE CON L'INTERFACCIA SOCIAL ---
         window.updateLanguageUI = () => {
             const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
             const h = new Date().getHours();
-            document.getElementById('home-greeting').innerText = h < 12 ? t.greeting_m : h < 18 ? t.greeting_a : t.greeting_e;
             
-            const savedTitle = document.getElementById('txt-saved-tracks').innerText;
-            const knownSavedTitles = Object.values(TRANSLATIONS).map(x => x.saved_tracks);
-            if(savedTitle === "Saved Tracks" || knownSavedTitles.includes(savedTitle)) {
-                document.getElementById('txt-saved-tracks').innerText = t.saved_tracks;
+            const greetingEl = document.getElementById('home-greeting');
+            if(greetingEl) greetingEl.innerText = h < 12 ? t.greeting_m : h < 18 ? t.greeting_a : t.greeting_e;
+            
+            const savedTitle = document.getElementById('txt-saved-tracks');
+            if(savedTitle) {
+                const knownSavedTitles = Object.values(TRANSLATIONS).map(x => x.saved_tracks);
+                if(savedTitle.innerText === "Saved Tracks" || knownSavedTitles.includes(savedTitle.innerText)) {
+                    savedTitle.innerText = t.saved_tracks;
+                }
             }
-            document.getElementById('txt-sessions').innerText = t.sessions;
+            const elSessions = document.getElementById('txt-sessions');
+            if(elSessions) elSessions.innerText = t.sessions;
 
             // Traduzioni Social Page
             const elStories = document.getElementById('txt-aura-stories');
@@ -1256,7 +1268,7 @@
             const elSearch = document.getElementById('social-user-search');
             if (elSearch) elSearch.placeholder = t.social_search;
             const elNewPost = document.getElementById('txt-new-post-btn-text');
-            if (elNewPost) { elNewPost.innerHTML = `<i data-lucide="plus" class="w-4 h-4"></i> ${t.new_post}`; lucide.createIcons(); }
+            if (elNewPost) { elNewPost.innerHTML = `<i data-lucide="plus" class="w-4 h-4"></i> ${t.new_post}`; if(window.lucide) lucide.createIcons(); }
             
             const elThreadTitle = document.getElementById('txt-new-thread-title');
             if (elThreadTitle) elThreadTitle.innerText = t.new_post;
@@ -1266,13 +1278,10 @@
             if (elAnyone) elAnyone.innerText = t.anyone_reply;
             const elPublish = document.getElementById('btn-publish-thread');
             if (elPublish) elPublish.innerText = t.post_btn;
-
-            // Aggiorna l'orologio per forzare il re-render della data nella lingua scelta
-            initClock();
             
-            // Ricarica le storie e il feed per aggiornare i testi ("Add Story", "Like", "Reply", ecc)
+            // Render UI Dipendente
             renderStories();
-            loadSocialFeed();
+            if(typeof window.loadSocialFeed === 'function') window.loadSocialFeed();
         };
 
         window.performSearch=()=>{ 
@@ -1338,7 +1347,6 @@
         window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
         window.openAuthModal = () => document.getElementById('auth-modal').classList.remove('hidden');
         
-        // MODIFICA: Il click sull'utente apre il SOCIAL (Aura Connect).
         window.handleProfileClick = () => auth.currentUser ? showSection('social') : window.openAuthModal();
         
         onAuthStateChanged(auth, (user) => {
@@ -1355,7 +1363,7 @@
                 syncUserLibrary(user.uid);
                 closeAuthModal();
             }
-            loadSocialFeed(); 
+            if(typeof window.loadSocialFeed === 'function') window.loadSocialFeed(); 
         });
 
         window.saveProfileChanges = async () => {
@@ -1426,14 +1434,15 @@
                         </div>`;
             html += window.userPlaylists.map(p=>`<div onclick="openPlaylist('${p.id}')" class="p-4 glass-panel rounded-xl cursor-pointer relative"><h3 class="font-bold">${p.name}</h3><p class="text-xs text-gray-400">${(p.tracks||[]).length} tracks</p></div>`).join('');
             document.getElementById('playlists-list').innerHTML = html;
-            lucide.createIcons();
+            if(window.lucide) lucide.createIcons();
         };
 
         window.openAddToPlaylistModal=()=>{ 
             if(!window.currentTrackData) return; 
             const list=document.getElementById('playlist-selection-list'); 
             list.innerHTML=window.userPlaylists.length ? window.userPlaylists.map(p=>`<div onclick="toggleTrackInPlaylist('${p.id}')" class="p-3 mb-2 rounded-lg cursor-pointer flex justify-between bg-white/5"><span class="text-sm">${p.name}</span><i data-lucide="plus"></i></div>`).join('') : '<p class="text-xs text-center text-gray-500">No sessions.</p>';
-            document.getElementById('add-to-playlist-modal').classList.remove('hidden'); lucide.createIcons();
+            document.getElementById('add-to-playlist-modal').classList.remove('hidden'); 
+            if(window.lucide) lucide.createIcons();
         };
         window.closeAddToPlaylistModal=()=>document.getElementById('add-to-playlist-modal').classList.add('hidden');
         
@@ -1451,9 +1460,7 @@
             document.getElementById('compose-modal').classList.remove('hidden');
             document.getElementById('compose-avatar').src = auth.currentUser.photoURL;
             document.getElementById('compose-text').value = "";
-            if (!preserveAttachment) {
-                window.pendingTrackAttachment = null;
-            }
+            if (!preserveAttachment) { window.pendingTrackAttachment = null; }
             updateAttachmentPreview();
         };
         
@@ -1479,38 +1486,8 @@
         }
         window.removeAttachment = () => { window.pendingTrackAttachment = null; updateAttachmentPreview(); };
 
-        window.publishThread = async () => {
-            const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
-            const txt = document.getElementById('compose-text').value;
-            if(!txt && !window.pendingTrackAttachment) return showToast(t.new_post); // fallback toast msg
-            
-            try {
-                const newPost = push(ref(db, 'posts'));
-                const postData = {
-                    id: newPost.key,
-                    authorId: auth.currentUser.uid,
-                    authorName: auth.currentUser.displayName,
-                    authorPic: auth.currentUser.photoURL,
-                    text: txt,
-                    timestamp: serverTimestamp(),
-                    type: window.pendingTrackAttachment ? 'share' : 'text'
-                };
-                
-                if(window.pendingTrackAttachment) {
-                    postData.trackId = window.pendingTrackAttachment.internalId;
-                    postData.trackTitle = window.pendingTrackAttachment.title;
-                    postData.trackArtist = window.pendingTrackAttachment.artist;
-                    postData.trackCover = window.pendingTrackAttachment.cover;
-                }
-
-                await set(newPost, postData);
-                showToast("Post pubblicato!"); // Messaggio universale per brevità
-                closeComposeModal();
-            } catch(e) { showToast("Error publishing"); }
-        };
-
-        // --- SISTEMA SOCIAL FEED DINAMICO E STILIZZATO (COME DA FOTO) ---
-        function loadSocialFeed() {
+        // --- SISTEMA SOCIAL FEED COLLEGATO AL WINDOW GLOBALE PER L'AGGIORNAMENTO ---
+        window.loadSocialFeed = () => {
             onValue(ref(db, 'posts'), (snap) => {
                 const data = snap.val();
                 const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
@@ -1526,7 +1503,6 @@
                     let postText = p.text || (p.caption || "");
                     let embedHTML = "";
                     
-                    // Controlla embed di YouTube
                     const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
                     const ytMatch = postText.match(ytRegex);
                     if(ytMatch) {
@@ -1538,7 +1514,6 @@
                         postText = postText.replace(ytRegex, '').trim();
                     }
                     
-                    // Controlla embed di Instagram
                     const igRegex = /instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)/i;
                     const igMatch = postText.match(igRegex);
                     if(igMatch) {
@@ -1549,7 +1524,6 @@
                     let attachmentHTML = "";
                     let actionsHTML = "";
 
-                    // Costruzione Card Brani Condivisi o Altro
                     if(p.type === 'share' && p.trackId) {
                         attachmentHTML = `
                         <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-3 relative mb-4 hover:bg-white/10 transition cursor-pointer" onclick="playTrack('${p.trackId}')">
@@ -1559,7 +1533,6 @@
                                 <p class="text-xs text-gray-400">${p.trackArtist}</p>
                             </div>
                             <button class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-2"><i data-lucide="play" class="w-4 h-4 fill-current text-white ml-0.5"></i></button>
-                            
                             <div class="floating-heart-btn" onclick="event.stopPropagation(); togglePostLike('${p.id}')">
                                 <i data-lucide="heart" class="w-4 h-4 text-white ${isLiked?'fill-current':''}"></i>
                             </div>
@@ -1570,7 +1543,6 @@
                             <button onclick="togglePostLike('${p.id}')" class="flex items-center gap-1.5 text-xs hover:text-red-500 transition ${isLiked?'text-red-500':''}"><i data-lucide="heart" class="w-4 h-4 ${isLiked?'fill-current':''}"></i> ${t.like}</button>
                             <button onclick="openComments('${p.id}')" class="flex items-center gap-1.5 text-xs hover:text-white transition"><i data-lucide="message-circle" class="w-4 h-4"></i> ${t.reply}</button>
                         </div>`;
-
                     } else {
                         if (p.fileType === 'audio') { 
                              attachmentHTML = `<div class="p-4 bg-white/5 rounded-xl mt-3 flex items-center gap-3 cursor-pointer"><div class="p-3 bg-white text-black rounded-full"><i data-lucide="play" class="fill-current w-4 h-4"></i></div><span class="text-xs">Play Audio Clip</span></div>`;
@@ -1603,10 +1575,9 @@
                         ${actionsHTML}
                     </div>`;
                 }).join('');
-                lucide.createIcons();
+                if(window.lucide) lucide.createIcons();
             });
-        }
-        // -----------------------------------------------------------------
+        };
 
         window.togglePostLike = (pid) => {
              if(!auth.currentUser) return openAuthModal();
