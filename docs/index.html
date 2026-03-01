@@ -259,13 +259,18 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             margin: 20px 0 40px 0; user-select: none;
         }
+
+        /* Player Icons Active States */
+        #like-button-immersive.liked { color: #ef4444; opacity: 1; }
+        #like-button-immersive.liked svg { fill: currentColor; }
+        #playlist-button-immersive.in-playlist { color: #22c55e; opacity: 1; }
     </style>
 </head>
 <body>
 
     <div class="fixed-background"></div>
     <canvas id="visualizer-canvas"></canvas>
-    <div id="toast-container" class="fixed top-6 right-6 z-[200] flex flex-col gap-2"></div>
+    <div id="toast-container" class="fixed top-6 right-6 z-[200] flex flex-col gap-2 pointer-events-none"></div>
 
     <div id="install-blocker" class="hidden">
         <div class="min-h-screen flex flex-col items-center justify-center p-6 text-center relative">
@@ -491,6 +496,14 @@
         </main>
     </div>
 
+    <div id="other-user-modal" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-[400] hidden flex flex-col items-center p-6 pt-12 animate-fadeIn">
+        <button onclick="closeOtherUserProfile()" class="absolute top-6 right-6 p-2 bg-white/10 rounded-full z-10 hover:bg-white/20 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+        <img id="other-user-pic" src="" class="w-32 h-32 rounded-full object-cover shadow-2xl mb-4 border-2 border-white/10">
+        <h2 id="other-user-name" class="text-2xl font-bold mb-1 text-center"></h2>
+        <p id="other-user-bio" class="text-sm text-gray-400 mb-6 text-center max-w-sm"></p>
+        <button id="btn-add-friend" onclick="addFriendFromModal()" class="bg-violet-600 text-white px-8 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 hover:bg-violet-500 transition"><i data-lucide="user-plus" class="w-5 h-5"></i> Add Friend</button>
+    </div>
+
     <div id="story-modal" class="fixed inset-0 bg-black z-[250] hidden flex flex-col animate-fadeIn">
         <div class="absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent">
             <div class="flex items-center gap-3">
@@ -517,9 +530,13 @@
         <div class="glass-panel p-6 rounded-3xl w-full max-w-md border border-white/10 relative">
             <button onclick="closeComposeModal()" class="absolute top-4 right-4 p-2 opacity-70 hover:opacity-100"><i data-lucide="x"></i></button>
             <h2 id="txt-new-thread-title" class="text-xl font-bold mb-4">New Thread</h2>
+            
             <div class="flex gap-3 mb-4">
                 <img id="compose-avatar" src="" class="w-10 h-10 rounded-full bg-gray-700">
-                <textarea id="compose-text" class="flex-1 bg-transparent border-none text-white outline-none resize-none mt-2" rows="4" placeholder="What's playing in your mind? (Paste YouTube/Instagram links to embed)"></textarea>
+                <div class="flex-1 flex flex-col gap-2">
+                    <textarea id="compose-text" class="bg-transparent border-none text-white outline-none resize-none mt-2" rows="3" placeholder="What's playing in your mind? (Paste YouTube/Instagram links to embed)"></textarea>
+                    <input type="text" id="compose-image-link" class="bg-white/5 border border-white/10 rounded-xl p-2 text-xs text-white outline-none w-full" placeholder="Optional: Add an image URL (JPG/PNG/etc)">
+                </div>
             </div>
             
             <div id="compose-song-preview" class="hidden mb-4 p-3 bg-white/5 rounded-xl border border-white/10 flex items-center gap-3 relative">
@@ -557,6 +574,7 @@
             <button onclick="closeSettingsModal()" class="absolute top-4 right-4 p-2 opacity-70 hover:opacity-100"><i data-lucide="x"></i></button>
             <h2 class="text-xl font-bold mb-6">Profile Settings</h2>
             <div class="space-y-4">
+                <div><label class="text-xs text-gray-400 ml-1">Profile Image URL</label><input type="text" id="edit-pic" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none" placeholder="https://..."></div>
                 <div><label class="text-xs text-gray-400 ml-1">Display Name</label><input type="text" id="edit-name" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none"></div>
                 <div><label class="text-xs text-gray-400 ml-1">Bio</label><textarea id="edit-bio" rows="3" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none"></textarea></div>
                 <hr class="border-white/10 my-4">
@@ -620,8 +638,8 @@
                 </button>
                 <button onclick="skipForward()"><i data-lucide="skip-forward" class="w-8 h-8 fill-current"></i></button>
                 <div class="flex flex-col gap-1 items-center">
-                    <button onclick="toggleLike()" id="like-button-immersive" class="opacity-70 hover:text-red-500"><i data-lucide="heart" class="w-5 h-5"></i></button>
-                    <button onclick="openAddToPlaylistModal()" class="opacity-70 hover:text-white"><i data-lucide="list-plus" class="w-5 h-5"></i></button>
+                    <button onclick="toggleLike()" id="like-button-immersive" class="opacity-70 hover:opacity-100 transition"><i data-lucide="heart" class="w-5 h-5 pointer-events-none"></i></button>
+                    <button onclick="openAddToPlaylistModal()" id="playlist-button-immersive" class="opacity-70 hover:opacity-100 transition"><i data-lucide="list-plus" class="w-5 h-5 pointer-events-none"></i></button>
                 </div>
             </div>
 
@@ -724,6 +742,7 @@
 
         window.ALL_USERS = [];
         window.FIREBASE_STORIES = [];
+        window.myFriends = {};
 
         const TRANSLATIONS = {
             en: { 
@@ -977,6 +996,30 @@
             });
         };
 
+        window.updatePlayerButtonsState = () => {
+            if(!window.currentTrackData) return;
+            const trackId = window.currentTrackData.internalId;
+            
+            const likeBtn = document.getElementById('like-button-immersive');
+            if(likeBtn) {
+                if(window.likedTracks && window.likedTracks.has(trackId)) {
+                    likeBtn.classList.add('liked');
+                } else {
+                    likeBtn.classList.remove('liked');
+                }
+            }
+            
+            const plBtn = document.getElementById('playlist-button-immersive');
+            if(plBtn) {
+                const inAnyPlaylist = window.userPlaylists && window.userPlaylists.some(p => p.tracks && p.tracks.includes(trackId));
+                if(inAnyPlaylist) {
+                    plBtn.classList.add('in-playlist');
+                } else {
+                    plBtn.classList.remove('in-playlist');
+                }
+            }
+        };
+
         window.playTrack = (internalId, keepQueue = false) => {
             if (!keepQueue) window.activePlaybackQueue = []; 
             const t = AURA_MAP.find(x => x.internalId === internalId);
@@ -1012,6 +1055,8 @@
             if(t.lrcUrl) { isLyricsMode = true; fetchSmartLyrics(t); } else { isLyricsMode = false; document.getElementById('spotify-lyrics-card').style.display = 'none'; }
             
             updateUI(t);
+            window.updatePlayerButtonsState();
+            
             listeningHistory = [internalId, ...listeningHistory.filter(x => x !== internalId)].slice(0, 20);
             saveLocalData(); renderHistoryGrid();
         };
@@ -1021,6 +1066,7 @@
             if (currentTrackData && currentTrackData.image360 && !window.viewer360) {
                 setTimeout(() => { try { document.getElementById('panorama').innerHTML = ''; window.viewer360 = pannellum.viewer('panorama', { "type": "equirectangular", "panorama": currentTrackData.image360, "autoLoad": true, "autoRotate": -2, "showControls": false, "draggable": false, "mouseZoom": false, "disableKeyboardCtrl": true }); } catch(e) {} }, 150);
             } else if (window.viewer360) { window.viewer360.resize(); }
+            window.updatePlayerButtonsState();
         };
 
         function updateUI(t) {
@@ -1257,10 +1303,11 @@
             `;
 
             if(window.ALL_USERS && window.ALL_USERS.length > 0) {
-                const matchedUsers = window.ALL_USERS.filter(u => u.name && u.name.toLowerCase().includes(q));
+                const currentUid = auth.currentUser ? auth.currentUser.uid : '';
+                const matchedUsers = window.ALL_USERS.filter(u => u.name && u.name.toLowerCase().includes(q) && u.uid !== currentUid);
                 if (matchedUsers.length > 0) {
                     html += matchedUsers.map(u => `
-                        <div class="p-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer rounded-xl transition">
+                        <div class="p-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer rounded-xl transition" onclick="openOtherUserProfile('${u.uid}')">
                             <img src="${u.pic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full object-cover">
                             <div><p class="text-sm font-bold text-white">${u.name}</p></div>
                         </div>
@@ -1270,6 +1317,36 @@
 
             res.innerHTML = html;
         };
+
+        // --- OTHER USER PROFILE MODAL ---
+        let currentViewedUserId = null;
+        window.openOtherUserProfile = (uid) => {
+            const u = window.ALL_USERS.find(x => x.uid === uid);
+            if(!u) return;
+            currentViewedUserId = uid;
+            
+            document.getElementById('other-user-name').innerText = u.name;
+            document.getElementById('other-user-pic').src = u.pic || 'https://via.placeholder.com/150';
+            document.getElementById('other-user-bio').innerText = u.bio || 'No bio available.';
+            document.getElementById('other-user-modal').classList.remove('hidden');
+            
+            const btn = document.getElementById('btn-add-friend');
+            if(auth.currentUser && window.myFriends && window.myFriends[uid]) {
+                btn.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> Friends`;
+                btn.classList.remove('bg-violet-600', 'hover:bg-violet-500');
+                btn.classList.add('bg-green-600', 'hover:bg-green-500');
+            } else {
+                btn.innerHTML = `<i data-lucide="user-plus" class="w-5 h-5"></i> Add Friend`;
+                btn.classList.remove('bg-green-600', 'hover:bg-green-500');
+                btn.classList.add('bg-violet-600', 'hover:bg-violet-500');
+            }
+            if(window.lucide) lucide.createIcons();
+            
+            document.getElementById('social-search-bar').classList.add('hidden');
+            document.getElementById('social-user-search').value = '';
+            document.getElementById('social-search-results').innerHTML = '';
+        };
+        window.closeOtherUserProfile = () => document.getElementById('other-user-modal').classList.add('hidden');
 
         window.openShareModal = () => {
             if (!window.currentTrackData) return showToast("Nessun brano in riproduzione");
@@ -1373,7 +1450,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, set, update, push, onValue, get, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         
         const firebaseConfig = {
@@ -1406,6 +1483,31 @@
             }
         });
 
+        // --- ADD FRIEND FROM MODAL ---
+        window.addFriendFromModal = async () => {
+            if(!auth.currentUser) return window.openAuthModal();
+            if(!currentViewedUserId) return;
+            
+            const r = ref(db, `users/${auth.currentUser.uid}/friends/${currentViewedUserId}`);
+            const snapshot = await get(r);
+            const btn = document.getElementById('btn-add-friend');
+
+            if(snapshot.exists()) {
+                await remove(r);
+                window.showToast("Removed from friends");
+                btn.innerHTML = `<i data-lucide="user-plus" class="w-5 h-5"></i> Add Friend`;
+                btn.classList.remove('bg-green-600', 'hover:bg-green-500');
+                btn.classList.add('bg-violet-600', 'hover:bg-violet-500');
+            } else {
+                await set(r, true);
+                window.showToast("Added to friends!");
+                btn.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> Friends`;
+                btn.classList.remove('bg-violet-600', 'hover:bg-violet-500');
+                btn.classList.add('bg-green-600', 'hover:bg-green-500');
+            }
+            if(window.lucide) lucide.createIcons();
+        };
+
         // --- LOAD GLOBAL STORIES ---
         window.loadStoriesData = () => {
             onValue(ref(db, 'stories'), (snap) => {
@@ -1420,10 +1522,10 @@
             if (user) {
                 window.loggedInUser = user;
                 document.getElementById('auth-dot').classList.remove('hidden');
-                document.getElementById('sp-avatar').src = user.photoURL;
+                document.getElementById('sp-avatar').src = user.photoURL || 'https://via.placeholder.com/150';
                 
                 const miniAvatar = document.getElementById('social-mini-avatar-new');
-                if(miniAvatar) miniAvatar.src = user.photoURL;
+                if(miniAvatar) miniAvatar.src = user.photoURL || 'https://via.placeholder.com/150';
 
                 document.getElementById('sp-name').innerText = user.displayName;
                 document.getElementById('sp-handle').innerText = "@" + user.email.split('@')[0];
@@ -1445,21 +1547,39 @@
              if(!auth.currentUser) return;
              const newName = document.getElementById('edit-name').value;
              const newBio = document.getElementById('edit-bio').value;
+             const newPic = document.getElementById('edit-pic').value || auth.currentUser.photoURL;
+
              try {
-                await update(ref(db, `users/${auth.currentUser.uid}`), { name: newName, bio: newBio });
+                await updateProfile(auth.currentUser, { displayName: newName, photoURL: newPic });
+                await update(ref(db, `users/${auth.currentUser.uid}`), { name: newName, bio: newBio, pic: newPic });
+                
                 document.getElementById('sp-name').innerText = newName;
                 document.getElementById('sp-bio').innerText = newBio;
+                document.getElementById('sp-avatar').src = newPic;
+                
+                const miniAvatar = document.getElementById('social-mini-avatar-new');
+                if(miniAvatar) miniAvatar.src = newPic;
+                
                 document.getElementById('settings-modal').classList.add('hidden');
                 showToast("Profile Updated");
-             } catch(e) { showToast("Error updating"); }
+             } catch(e) { showToast("Error updating profile"); }
         };
-        window.openSettingsModal = () => { document.getElementById('settings-modal').classList.remove('hidden'); document.getElementById('edit-name').value = auth.currentUser.displayName; };
+        
+        window.openSettingsModal = () => { 
+            document.getElementById('settings-modal').classList.remove('hidden'); 
+            document.getElementById('edit-name').value = auth.currentUser.displayName;
+            document.getElementById('edit-pic').value = auth.currentUser.photoURL || ''; 
+        };
         window.closeSettingsModal = () => document.getElementById('settings-modal').classList.add('hidden');
 
         function syncUserLibrary(uid) {
+            onValue(ref(db, `users/${uid}/friends`), (s) => {
+                window.myFriends = s.val() || {};
+            });
             onValue(ref(db, `users/${uid}/likes`), (s) => {
                 window.likedTracks = new Set(Object.keys(s.val()||{}));
                 window.renderPlaylists();
+                window.updatePlayerButtonsState();
                 
                 if (document.getElementById('library-section').classList.contains('active')) {
                     const savedTitle = document.getElementById('txt-saved-tracks').innerText;
@@ -1472,6 +1592,8 @@
             onValue(ref(db, `users/${uid}/playlists`), (s) => { 
                 window.userPlaylists = Object.values(s.val()||{}); 
                 window.renderPlaylists(); 
+                window.updatePlayerButtonsState();
+
                 if (document.getElementById('library-section').classList.contains('active')) {
                     const currentName = document.getElementById('txt-saved-tracks').innerText;
                     const p = window.userPlaylists.find(x => x.name === currentName);
@@ -1533,8 +1655,9 @@
         window.openComposeModal = (preserveAttachment = false) => {
             if(!auth.currentUser) return window.openAuthModal();
             document.getElementById('compose-modal').classList.remove('hidden');
-            document.getElementById('compose-avatar').src = auth.currentUser.photoURL;
+            document.getElementById('compose-avatar').src = auth.currentUser.photoURL || 'https://via.placeholder.com/150';
             document.getElementById('compose-text').value = "";
+            document.getElementById('compose-image-link').value = "";
             if (!preserveAttachment) { window.pendingTrackAttachment = null; }
             updateAttachmentPreview();
         };
@@ -1565,12 +1688,14 @@
         window.publishThread = async () => {
             if(!auth.currentUser) return window.openAuthModal();
             const text = document.getElementById('compose-text').value;
-            if(!text.trim() && !window.pendingTrackAttachment) return;
+            const imageLink = document.getElementById('compose-image-link').value.trim();
+
+            if(!text.trim() && !window.pendingTrackAttachment && !imageLink) return;
             
             const postData = {
                 authorId: auth.currentUser.uid,
                 authorName: auth.currentUser.displayName,
-                authorPic: auth.currentUser.photoURL,
+                authorPic: auth.currentUser.photoURL || 'https://via.placeholder.com/150',
                 text: text,
                 timestamp: Date.now(),
                 type: window.pendingTrackAttachment ? 'share' : 'text'
@@ -1581,6 +1706,11 @@
                 postData.trackTitle = window.pendingTrackAttachment.title;
                 postData.trackArtist = window.pendingTrackAttachment.artist;
                 postData.trackCover = window.pendingTrackAttachment.cover;
+            }
+
+            if(imageLink) {
+                postData.fileType = 'image';
+                postData.fileUrl = imageLink;
             }
 
             try {
@@ -1611,7 +1741,7 @@
                         id: storyRef.key,
                         userId: auth.currentUser.uid,
                         userName: auth.currentUser.displayName,
-                        userPic: auth.currentUser.photoURL,
+                        userPic: auth.currentUser.photoURL || 'https://via.placeholder.com/150',
                         videoId: videoId,
                         timestamp: Date.now()
                     });
@@ -1680,8 +1810,8 @@
                     } else {
                         if (p.fileType === 'audio') { 
                              attachmentHTML = `<div class="p-4 bg-white/5 rounded-xl mt-3 flex items-center gap-3 cursor-pointer"><div class="p-3 bg-white text-black rounded-full"><i data-lucide="play" class="fill-current w-4 h-4"></i></div><span class="text-xs">Play Audio Clip</span></div>`;
-                        } else if (p.fileType === 'image') { 
-                             attachmentHTML = `<img src="${p.fileUrl}" class="rounded-xl mt-3 w-full max-h-60 object-cover">`;
+                        } else if (p.fileType === 'image' && p.fileUrl) { 
+                             attachmentHTML = `<img src="${p.fileUrl}" class="rounded-xl mt-3 w-full max-h-60 object-cover border border-white/5">`;
                         }
 
                         actionsHTML = `
@@ -1695,8 +1825,8 @@
                     return `
                     <div class="social-card-new">
                         <div class="flex justify-between items-center mb-3">
-                             <div class="flex items-center gap-2">
-                                 <img src="${p.authorPic}" class="w-8 h-8 rounded-full border border-white/10 object-cover">
+                             <div class="flex items-center gap-2 cursor-pointer" onclick="openOtherUserProfile('${p.authorId}')">
+                                 <img src="${p.authorPic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full border border-white/10 object-cover">
                                  <span class="font-bold text-sm text-white">${p.authorName}</span>
                              </div>
                              <button class="text-gray-500 hover:text-white"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
@@ -1725,14 +1855,14 @@
             document.getElementById('comments-modal').classList.remove('hidden');
             onValue(ref(db, `posts/${pid}/comments`), (s) => {
                 const d = s.val();
-                document.getElementById('comments-list').innerHTML = d ? Object.values(d).map(c => `<div class="flex gap-3 mb-4"><img src="${c.userPic}" class="w-8 h-8 rounded-full mt-1"><div><p class="text-xs font-bold">${c.userName}</p><p class="text-sm text-gray-200">${c.text}</p></div></div>`).join('') : '<p class="text-center text-gray-500 text-xs">No replies yet.</p>';
+                document.getElementById('comments-list').innerHTML = d ? Object.values(d).map(c => `<div class="flex gap-3 mb-4"><img src="${c.userPic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full mt-1"><div><p class="text-xs font-bold">${c.userName}</p><p class="text-sm text-gray-200">${c.text}</p></div></div>`).join('') : '<p class="text-center text-gray-500 text-xs">No replies yet.</p>';
             });
         };
         window.closeCommentsModal = () => document.getElementById('comments-modal').classList.add('hidden');
         window.submitComment = () => {
             const txt = document.getElementById('comment-input').value;
             if(!txt || !currentPostId || !auth.currentUser) return;
-            push(ref(db, `posts/${currentPostId}/comments`), { userId: auth.currentUser.uid, userName: auth.currentUser.displayName, userPic: auth.currentUser.photoURL, text: txt, timestamp: Date.now() });
+            push(ref(db, `posts/${currentPostId}/comments`), { userId: auth.currentUser.uid, userName: auth.currentUser.displayName, userPic: auth.currentUser.photoURL || 'https://via.placeholder.com/150', text: txt, timestamp: Date.now() });
             document.getElementById('comment-input').value = "";
         };
 
@@ -1750,7 +1880,7 @@
                     if(!d) { c.innerHTML = '<p class="text-center text-gray-500 mt-4">No threads yet.</p>'; return; }
                     const myPosts = Object.values(d).filter(p => p.authorId === auth.currentUser.uid);
                     document.getElementById('sp-posts').innerText = myPosts.length;
-                    c.innerHTML = myPosts.map(p => `<div class="p-4 border-b border-white/10"><p class="text-sm">${p.text || "Shared a song"}</p><p class="text-[10px] text-gray-500 mt-1">${new Date(p.timestamp).toLocaleDateString()}</p></div>`).join('');
+                    c.innerHTML = myPosts.map(p => `<div class="p-4 border-b border-white/10"><p class="text-sm">${p.text || "Shared a post"}</p><p class="text-[10px] text-gray-500 mt-1">${new Date(p.timestamp).toLocaleDateString()}</p></div>`).join('');
                 });
             }
         };
