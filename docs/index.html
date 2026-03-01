@@ -816,7 +816,7 @@
                 content: `<p><strong>1. Titolare del Trattamento</strong><br>I tuoi dati personali sono raccolti e gestiti da AURA Music di Horizon Global (Conglomerato), con sede centrale in Drumul Onceștiului 4, Stanesti, Giurgiu, Romania e sede operativa in Vicolo Ritorto 5, 25050 San Gervasio Bresciano (BS), Italia.</p>
                 <p><strong>2. Dati Raccolti</strong><br>Quando utilizzi Aura, raccogliamo le seguenti informazioni:<br>- <strong>Dati di base del profilo:</strong> Se effettui l'accesso tramite Google, riceviamo il tuo indirizzo email, il nome visualizzato e la foto del profilo.<br>- <strong>Dati di utilizzo e streaming:</strong> Raccogliamo la tua cronologia di ascolto, i brani salvati, le playlist create per personalizzare la tua esperienza e per scopi di reportistica interna con Ryzn Music Group.<br>- <strong>Dati Social:</strong> Qualsiasi testo, link, immagine o commento pubblicato nella sezione social di Aura, oltre alle interazioni (like, amicizie).</p>
                 <p><strong>3. Finalità del Trattamento</strong><br>Utilizziamo i tuoi dati per: fornire e migliorare il servizio di streaming musicale; mantenere e moderare la piattaforma social integrata; sincronizzare il tuo profilo cross-device; fornire raccomandazioni musicali accurate.</p>
-                <p><strong>4. Condivisione dei Dati</strong><br>I tuoi dati non vengono venduti a terzi. Possono essere condivisi con fornitori di servizi cloud (es. Google Firebase) necessari per il funzionamento dell'App, e dati aggregati (non personalmente identificabili) possono essere condivisi con Ryzn Music Group per il calcolo delle royalties e le statistiche di ascolto.</p>
+                <p><strong>4. Condivisione dei Dati</strong><br>I tuoi dati non vengono venduti a terzi. Possono essere condivisi con fornitori di servizi cloud (es. Google Firebase) necessari per il funzionamento dell'App, e dati aggregati (non personally identificabili) possono essere condivisi con Ryzn Music Group per il calcolo delle royalties e le statistiche di ascolto.</p>
                 <p><strong>5. Sicurezza dei Dati</strong><br>Adottiamo misure tecniche e organizzative rigorose per proteggere i tuoi dati da accessi non autorizzati, alterazioni o distruzioni.</p>`
             },
             data: {
@@ -985,10 +985,25 @@
             });
         }
 
+        // --- OPZIONI FETCH PER SALTARE IL BLOCCO DI NGROK ---
+        const ngrokFetchOptions = {
+            method: 'GET',
+            headers: {
+                "ngrok-skip-browser-warning": "1"
+            }
+        };
+
         async function fetchData() {
             try {
-                const [trResponse, arResponse, vrResponse] = await Promise.all([ fetch(API.tracks), fetch(API.artists), fetch(API.videos) ]);
-                const tr = await trResponse.json(); const ar = await arResponse.json(); const vr = await vrResponse.json();
+                const [trResponse, arResponse, vrResponse] = await Promise.all([ 
+                    fetch(API.tracks, ngrokFetchOptions), 
+                    fetch(API.artists, ngrokFetchOptions), 
+                    fetch(API.videos, ngrokFetchOptions) 
+                ]);
+                
+                const tr = await trResponse.json(); 
+                const ar = await arResponse.json(); 
+                const vr = await vrResponse.json();
                 
                 USER_VIDEOS = vr || []; ARTISTS_FULL_LIST = ar || [];
                 const artistMap = {}; ARTISTS_FULL_LIST.forEach(a => artistMap[a.id] = a.name);
@@ -1002,7 +1017,9 @@
                     return { ...t, internalId: safeId, title: t.title || "Unknown", artist: artistMap[t.artistId] || t.artist || "Unknown", audioUrl: rawAudioUrl, cover: coverUrl, status: t.Status, metadataExtracted: false };
                 });
                 window.renderStories(); renderHomePageWidgets(); renderHistoryGrid();
-            } catch (e) { console.error("Data Load Error", e); }
+            } catch (e) { 
+                console.error("Data Load Error", e); 
+            }
         }
 
         function getDOMElements() {
@@ -1116,13 +1133,14 @@
             const regex = /\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
             return txt.split('\n').map(l => { const m=l.match(regex); return m ? {time: parseInt(m[1])*60+parseInt(m[2])+parseInt(m[3])/100, text: m[4].trim()} : null; }).filter(Boolean);
         }
+
         async function fetchSmartLyrics(track) {
             try {
-                const originalRes = await fetch(track.lrcUrl);
+                const originalRes = await fetch(track.lrcUrl, ngrokFetchOptions);
                 if (!originalRes.ok) throw new Error("No lyric");
                 currentLyrics = parseLrc(await originalRes.text()); 
                 if (currentLang !== (track.originalLang || 'en')) {
-                    const transRes = await fetch(track.lrcUrl.replace('.lrc', `_${currentLang}.lrc`));
+                    const transRes = await fetch(track.lrcUrl.replace('.lrc', `_${currentLang}.lrc`), ngrokFetchOptions);
                     if(transRes.ok) currentTranslationLyrics = parseLrc(await transRes.text());
                 }
                 renderLyrics(); 
