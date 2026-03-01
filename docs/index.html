@@ -282,7 +282,14 @@
             <p class="text-base md:text-lg text-gray-300 max-w-md mx-auto mb-10 z-10 leading-relaxed">
                 Il tuo santuario musicale immersivo. Installa l'app per sbloccare l'audio in background, le live lyrics e la community.
             </p>
-            <button onclick="forceRecheckPWA()" class="z-10 bg-white text-black px-8 py-4 rounded-full font-bold text-lg shadow-[0_10px_40px_rgba(6,182,212,0.4)] hover:scale-105 transition-transform flex items-center gap-3">
+            
+            <div class="flex flex-wrap justify-center gap-4 text-[10px] font-bold tracking-wider uppercase text-gray-400 mb-6 z-10">
+                <button onclick="openLegalModal('terms')" class="hover:text-white transition bg-white/5 px-4 py-2 rounded-full border border-white/10 shadow-lg backdrop-blur-md">Termini</button>
+                <button onclick="openLegalModal('privacy')" class="hover:text-white transition bg-white/5 px-4 py-2 rounded-full border border-white/10 shadow-lg backdrop-blur-md">Privacy</button>
+                <button onclick="openLegalModal('data')" class="hover:text-white transition bg-white/5 px-4 py-2 rounded-full border border-white/10 shadow-lg backdrop-blur-md">GDPR</button>
+            </div>
+
+            <button onclick="openInstallGuideModal()" class="z-10 bg-white text-black px-8 py-4 rounded-full font-bold text-lg shadow-[0_10px_40px_rgba(6,182,212,0.4)] hover:scale-105 transition-transform flex items-center gap-3">
                 <i data-lucide="download" class="w-5 h-5 install-arrow"></i> Installa App
             </button>
             <div class="absolute bottom-10 animate-bounce z-10 text-gray-500 flex flex-col items-center">
@@ -317,10 +324,16 @@
             </div>
         </div>
 
-        <div class="max-w-2xl mx-auto px-6 py-12 mb-10 relative z-10">
-            <h2 class="text-2xl font-bold text-center mb-8">Come installare Aura</h2>
-            <div class="flex justify-center w-full max-w-md mx-auto">
-                <div id="guide-ios" class="glass-panel p-6 rounded-3xl w-full hidden">
+        <p class="text-center text-xs text-gray-500 mt-10 mb-10 pb-10">Aura è una Progressive Web App (PWA). Non consuma spazio e non richiede store esterni.</p>
+    </div>
+
+    <div id="install-guide-modal" class="fixed inset-0 bg-black/95 z-[999999] hidden flex flex-col items-center justify-center p-6 backdrop-blur-xl">
+        <div class="glass-panel p-6 md:p-8 rounded-3xl w-full max-w-md flex flex-col relative border border-white/10 shadow-2xl">
+            <button onclick="closeInstallGuideModal()" class="absolute top-4 right-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition z-10"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h2 class="text-2xl font-extrabold mb-6 text-white text-center border-b border-white/10 pb-4">Come installare Aura</h2>
+            
+            <div class="flex justify-center w-full">
+                <div id="guide-ios" class="w-full hidden">
                     <h3 class="font-bold flex items-center gap-2 mb-4 text-white"><i data-lucide="apple" class="w-5 h-5 text-gray-300"></i> Su iOS (Safari)</h3>
                     <ol class="text-sm text-gray-300 space-y-3 list-decimal list-inside marker:text-cyan-400 marker:font-bold">
                         <li>Tocca il tasto <strong>Condividi</strong> <i data-lucide="share" class="w-4 h-4 inline"></i> in basso.</li>
@@ -329,7 +342,7 @@
                         <li>Tocca <strong>Aggiungi</strong> in alto a destra.</li>
                     </ol>
                 </div>
-                <div id="guide-android" class="glass-panel p-6 rounded-3xl w-full hidden">
+                <div id="guide-android" class="w-full hidden">
                     <h3 class="font-bold flex items-center gap-2 mb-4 text-white"><i data-lucide="smartphone" class="w-5 h-5 text-green-400"></i> Su Android (Chrome)</h3>
                     <ol class="text-sm text-gray-300 space-y-3 list-decimal list-inside marker:text-violet-400 marker:font-bold">
                         <li>Tocca il <strong>Menu (⋮)</strong> in alto a destra.</li>
@@ -337,7 +350,7 @@
                         <li>Conferma premendo su <strong>Installa</strong>.</li>
                     </ol>
                 </div>
-                <div id="guide-desktop" class="glass-panel p-6 rounded-3xl w-full hidden">
+                <div id="guide-desktop" class="w-full hidden">
                     <h3 class="font-bold flex items-center gap-2 mb-4 text-white"><i data-lucide="monitor" class="w-5 h-5 text-blue-400"></i> Su PC / Mac</h3>
                     <ol class="text-sm text-gray-300 space-y-3 list-decimal list-inside marker:text-blue-400 marker:font-bold">
                         <li>Guarda nella barra degli indirizzi in alto a destra.</li>
@@ -346,17 +359,7 @@
                     </ol>
                 </div>
             </div>
-            <p class="text-center text-xs text-gray-500 mt-10">Aura è una Progressive Web App (PWA). Non consuma spazio e non richiede store esterni.</p>
         </div>
-
-        <footer class="py-8 mt-10 border-t border-white/10 text-center relative z-10 w-full bg-black/50">
-            <div class="flex flex-wrap justify-center gap-6 text-[11px] font-bold tracking-wider uppercase text-gray-400 mb-4">
-                <button onclick="openLegalModal('terms')" class="hover:text-cyan-400 transition">Termini di Servizio</button>
-                <button onclick="openLegalModal('privacy')" class="hover:text-cyan-400 transition">Privacy Policy</button>
-                <button onclick="openLegalModal('data')" class="hover:text-cyan-400 transition">Trattamento dei Dati</button>
-            </div>
-            <p class="text-[10px] text-gray-600">&copy; 2026 Aura by Horizon. Tutti i diritti riservati.</p>
-        </footer>
     </div>
 
     <div id="legal-modal" class="fixed inset-0 bg-black/95 z-[999999] hidden flex flex-col items-center justify-center p-6 backdrop-blur-xl">
@@ -721,6 +724,9 @@
     <div id="add-to-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3 id="txt-add-session">Add to...</h3><div id="playlist-selection-list" class="max-h-60 overflow-y-auto space-y-2 mt-4"></div><button onclick="closeAddToPlaylistModal()" class="mt-4 w-full text-xs">Close</button></div></div>
 
     <script>
+        window.openInstallGuideModal = () => document.getElementById('install-guide-modal').classList.remove('hidden');
+        window.closeInstallGuideModal = () => document.getElementById('install-guide-modal').classList.add('hidden');
+
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
         const API = { 
             tracks: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/tracks.json", 
