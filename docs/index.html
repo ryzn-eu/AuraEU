@@ -275,7 +275,7 @@
     <div id="install-blocker" class="hidden">
         <div class="min-h-screen flex flex-col items-center justify-center p-6 text-center relative">
             <div class="absolute inset-0 bg-gradient-to-b from-violet-900/20 via-[#050505] to-[#050505] pointer-events-none z-0"></div>
-            <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="w-20 h-auto mb-6 z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" alt="Aura Logo">
+            <img src="https://loris-photolithographic-adah.ngrok-free.dev/Image/logo.png" class="w-20 h-auto mb-6 z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" alt="Aura Logo">
             <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400 mb-4 z-10">
                 Experience Aura
             </h1>
@@ -377,7 +377,7 @@
     <div class="container-app max-w-4xl mx-auto px-4 pt-6">
         <header id="main-global-header" class="flex justify-between items-center mb-4 transition-opacity">
             <div class="flex items-center gap-3 cursor-pointer" onclick="showSection('music')">
-                <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="h-8 w-auto object-contain" alt="Aura Logo">
+                <img src="https://loris-photolithographic-adah.ngrok-free.dev/Image/logo.png" class="h-8 w-auto object-contain" alt="Aura Logo">
             </div>
             <div class="flex gap-2">
                 <button onclick="showSection('playlists')" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="list-music" class="w-5 h-5"></i></button>
@@ -426,7 +426,7 @@
                 
                 <div id="social-header" class="sticky top-0 bg-[#050505]/95 backdrop-blur-md z-30 py-3 px-4 flex justify-between items-center border-b border-white/5 mx--4">
                     <div class="flex items-center gap-2 cursor-pointer transition hover:scale-105" onclick="showSection('music')">
-                        <img src="https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/Image/logo.png" class="h-6 w-auto object-contain" alt="Aura">
+                        <img src="https://loris-photolithographic-adah.ngrok-free.dev/Image/logo.png" class="h-6 w-auto object-contain" alt="Aura">
                     </div>
                     
                     <div class="flex items-center gap-4">
@@ -727,11 +727,12 @@
         window.openInstallGuideModal = () => document.getElementById('install-guide-modal').classList.remove('hidden');
         window.closeInstallGuideModal = () => document.getElementById('install-guide-modal').classList.add('hidden');
 
-        const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/";
+        /* 🚀 CONFIGURAZIONE SERVER LOCALE AURA (NGROK) 🚀 */
+        const GITHUB_RAW_BASE = "https://loris-photolithographic-adah.ngrok-free.dev/";
         const API = { 
-            tracks: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/tracks.json", 
-            artists: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/artist.json",
-            videos: "https://raw.githubusercontent.com/ryzn-eu/AuraEU/main/User_videos.json"
+            tracks: "https://loris-photolithographic-adah.ngrok-free.dev/tracks.json", 
+            artists: "https://loris-photolithographic-adah.ngrok-free.dev/artist.json",
+            videos: "https://loris-photolithographic-adah.ngrok-free.dev/User_videos.json"
         };
         
         const STORY_EMOJIS = {1: "💻", 2: "🎬", 3: "🚀", 4: "🪐", 5: "🧘"};
@@ -773,7 +774,7 @@
                 add_session: "Añadir a...", create: "Crear", cancel: "Cancelar", rec_title: "Recomendados", trend_title: "Tendencias", 
                 chill_title: "Relax", class_title: "Clásicos", new_release: "Nuevo Lanzamiento Oficial",
                 social_stories: "Historias", social_discover: "Descubrir", social_search: "Buscar usuarios o hilos...", new_post: "Nuevo Post", 
-                like: "Me Gusta", reply: "Responder", share: "Compartir", add_story: "Añadir", loading_feed: "Cargando...", write_something: "¿Qué tienes en mente?", anyone_reply: "Cualquiera puede responder", post_btn: "Publicar"
+                like: "Me Gusta", reply: "Responder", share: "Compartir", add_story: "Añadir", loading_feed: "Cargando...", write_something: "¿Qué tienes en mente?", anyone_reply: "Cualquiera può rispondere", post_btn: "Publicar"
             },
             de: { 
                 greeting_m: "Guten Morgen.", greeting_a: "Guten Tag.", greeting_e: "Guten Abend.", saved_tracks: "Gespeicherte Titel", sessions: "Sitzungen", 
@@ -802,30 +803,9 @@
         };
 
         const LEGAL_TEXTS = {
-            terms: {
-                title: "Termini e Condizioni di Servizio",
-                content: `<p><strong>1. Accettazione dei Termini</strong><br>Scaricando, accedendo o utilizzando l'applicazione "Aura by Horizon" (di seguito "Aura" o l'"App"), accetti di essere legalmente vincolato dai presenti Termini di Servizio. Se non sei d'accordo con una qualsiasi delle disposizioni qui contenute, ti preghiamo di interrompere immediatamente l'utilizzo dell'applicazione. Aura è un prodotto gestito da AURA Music di Horizon Global (Conglomerato).</p>
-                <p><strong>2. Informazioni Aziendali</strong><br>AURA Music fa capo a Horizon Global (Conglomerato).<br>Sede Operativa (esclusivamente logistica/operativa, non aperta al pubblico): Vicolo Ritorto 5, 25050 San Gervasio Bresciano (BS), Italia.<br>Sede Centrale Legale: Drumul Onceștiului 4, Stanesti, Giurgiu, Romania.</p>
-                <p><strong>3. Descrizione del Servizio e Streaming Musicale</strong><br>Aura fornisce un servizio di streaming musicale immersivo, testi sincronizzati e funzionalità social. I contenuti musicali e i brani resi disponibili sulla piattaforma sono ricevuti, gestiti e distribuiti in collaborazione con <strong>Ryzn Music Group</strong>, la piattaforma ufficiale per il ricevimento e la gestione dei diritti dei brani su Aura. L'ascolto è concesso per uso strettamente personale e non commerciale.</p>
-                <p><strong>4. Funzionalità Social Network</strong><br>L'App integra un social network ("Aura Social") che permette agli utenti di creare post, condividere brani, interagire tramite commenti e "mi piace", e aggiungere altri utenti agli amici. L'utente è l'unico responsabile dei contenuti testuali, multimediali o link che pubblica. È severamente vietato pubblicare contenuti offensivi, diffamatori, illegali o che violino i diritti d'autore di terzi. Horizon Global si riserva il diritto di rimuovere qualsiasi contenuto e sospendere account senza preavviso in caso di violazioni.</p>
-                <p><strong>5. Proprietà Intellettuale</strong><br>Tutti i diritti sui brani musicali, loghi, design e codice dell'App appartengono ai rispettivi proprietari, inclusi Horizon Global e Ryzn Music Group. L'utente non acquisisce alcun diritto di proprietà sui brani ascoltati o scaricati temporaneamente nella cache dell'App.</p>
-                <p><strong>6. Modifiche e Risoluzione</strong><br>Ci riserviamo il diritto di modificare o interrompere il servizio, o di aggiornare questi termini in qualsiasi momento. L'uso continuato dell'App costituisce accettazione delle modifiche.</p>`
-            },
-            privacy: {
-                title: "Privacy Policy",
-                content: `<p><strong>1. Titolare del Trattamento</strong><br>I tuoi dati personali sono raccolti e gestiti da AURA Music di Horizon Global (Conglomerato), con sede centrale in Drumul Onceștiului 4, Stanesti, Giurgiu, Romania e sede operativa in Vicolo Ritorto 5, 25050 San Gervasio Bresciano (BS), Italia.</p>
-                <p><strong>2. Dati Raccolti</strong><br>Quando utilizzi Aura, raccogliamo le seguenti informazioni:<br>- <strong>Dati di base del profilo:</strong> Se effettui l'accesso tramite Google, riceviamo il tuo indirizzo email, il nome visualizzato e la foto del profilo.<br>- <strong>Dati di utilizzo e streaming:</strong> Raccogliamo la tua cronologia di ascolto, i brani salvati, le playlist create per personalizzare la tua esperienza e per scopi di reportistica interna con Ryzn Music Group.<br>- <strong>Dati Social:</strong> Qualsiasi testo, link, immagine o commento pubblicato nella sezione social di Aura, oltre alle interazioni (like, amicizie).</p>
-                <p><strong>3. Finalità del Trattamento</strong><br>Utilizziamo i tuoi dati per: fornire e migliorare il servizio di streaming musicale; mantenere e moderare la piattaforma social integrata; sincronizzare il tuo profilo cross-device; fornire raccomandazioni musicali accurate.</p>
-                <p><strong>4. Condivisione dei Dati</strong><br>I tuoi dati non vengono venduti a terzi. Possono essere condivisi con fornitori di servizi cloud (es. Google Firebase) necessari per il funzionamento dell'App, e dati aggregati (non personalmente identificabili) possono essere condivisi con Ryzn Music Group per il calcolo delle royalties e le statistiche di ascolto.</p>
-                <p><strong>5. Sicurezza dei Dati</strong><br>Adottiamo misure tecniche e organizzative rigorose per proteggere i tuoi dati da accessi non autorizzati, alterazioni o distruzioni.</p>`
-            },
-            data: {
-                title: "Trattamento dei Dati (GDPR)",
-                content: `<p><strong>1. Conformità al GDPR</strong><br>AURA Music di Horizon Global, operando anche sul territorio dell'Unione Europea (Sedi in Italia e Romania), gestisce i tuoi dati personali in totale conformità con il Regolamento Generale sulla Protezione dei Dati (GDPR - Regolamento UE 2016/679).</p>
-                <p><strong>2. Basi Giuridiche del Trattamento</strong><br>Trattiamo i tuoi dati sulla base di: <em>consenso esplicito</em> (quando ti registri ed entri nella piattaforma social); <em>esecuzione di un contratto</em> (per fornirti lo streaming musicale richiesto); <em>legittimo interesse</em> (per migliorare i nostri servizi e prevenire frodi informatiche).</p>
-                <p><strong>3. I tuoi Diritti (Articoli 15-22 GDPR)</strong><br>In qualità di utente, hai il diritto di:<br>- <strong>Accesso:</strong> Richiedere una copia dei dati personali che conserviamo su di te.<br>- <strong>Rettifica:</strong> Correggere dati inaccurati o incompleti (modificabili anche via App).<br>- <strong>Cancellazione (Diritto all'oblio):</strong> Richiedere l'eliminazione permanente del tuo account e dei dati associati (inclusi i post sul social network).<br>- <strong>Portabilità:</strong> Ricevere i tuoi dati in un formato strutturato e leggibile da dispositivo automatico.<br>- <strong>Opposizione:</strong> Opporti al trattamento dei tuoi dati per finalità specifiche.</p>
-                <p><strong>4. Contatti per la Privacy</strong><br>Per esercitare i tuoi diritti o per qualsiasi domanda riguardante il trattamento dei tuoi dati da parte di AURA Music o Ryzn Music Group, puoi indirizzare le tue richieste per iscritto alla sede legale in Romania o alla sede operativa in Italia (Vicolo Ritorto 5, San Gervasio Bresciano).</p>`
-            }
+            terms: { title: "Termini di Servizio", content: `<p><strong>1. Accettazione dei Termini</strong><br>Scaricando, accedendo o utilizzando Aura, accetti di essere vincolato dai presenti Termini di Servizio. Se non sei d'accordo, ti preghiamo di non utilizzare l'applicazione.</p>` },
+            privacy: { title: "Privacy Policy", content: `<p><strong>1. Dati che raccogliamo</strong><br>Per il funzionamento di base, Aura può essere usata senza account. Tuttavia, accedendo con Google, raccogliamo le seguenti informazioni fornite dal provider: Indirizzo Email, Nome Display e Immagine del Profilo.</p>` },
+            data: { title: "Trattamento dei Dati (GDPR)", content: `<p><strong>1. Titolare del Trattamento</strong><br>I dati sono gestiti dall'amministratore di Aura by Horizon.</p>` }
         };
 
         window.openLegalModal = (type) => {
@@ -1154,13 +1134,12 @@
             }
         }
 
-        // --- SISTEMA NAVIGAZIONE: MOSTRA/NASCONDI HEADER CORRETTO ---
+        // --- SISTEMA NAVIGAZIONE ---
         window.showSection=(id)=>{ 
             document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); 
             document.getElementById(id+'-section').classList.add('active'); 
             if(id==='music') renderHistoryGrid(); 
 
-            // Logica scambio Header
             const globalHeader = document.getElementById('main-global-header');
             if (globalHeader) {
                 if(id === 'social' || id === 'profile') globalHeader.classList.add('hidden');
@@ -1205,7 +1184,7 @@
             updateLanguageUI(); 
         }
 
-        // --- RENDER STORIE (NELLA SOCIAL PAGE) ---
+        // --- RENDER STORIE ---
         window.renderStories = function() {
             const container = document.getElementById('stories-container');
             if(!container) return;
@@ -1345,7 +1324,6 @@
             res.innerHTML = html;
         };
 
-        // --- OTHER USER PROFILE MODAL ---
         let currentViewedUserId = null;
         window.openOtherUserProfile = (uid) => {
             const u = window.ALL_USERS.find(x => x.uid === uid);
@@ -1395,7 +1373,6 @@
         
         window.changeLanguage = (val) => { currentLang = val; saveLocalData(); updateLanguageUI(); renderHomePageWidgets(); }
         
-        // --- TRADUZIONI SINCRONIZZATE CON L'INTERFACCIA SOCIAL ---
         window.updateLanguageUI = () => {
             const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
             const h = new Date().getHours();
@@ -1413,7 +1390,6 @@
             const elSessions = document.getElementById('txt-sessions');
             if(elSessions) elSessions.innerText = t.sessions;
 
-            // Traduzioni Social Page
             const elStories = document.getElementById('txt-aura-stories');
             if (elStories) elStories.innerText = t.social_stories;
             const elFeed = document.getElementById('txt-discover-feed');
@@ -1432,7 +1408,6 @@
             const elPublish = document.getElementById('btn-publish-thread');
             if (elPublish) elPublish.innerText = t.post_btn;
             
-            // Render UI Dipendente
             window.renderStories();
             if(typeof window.loadSocialFeed === 'function') window.loadSocialFeed();
         };
@@ -1502,7 +1477,6 @@
         
         window.handleProfileClick = () => auth.currentUser ? showSection('social') : window.openAuthModal();
 
-        // --- LOAD GLOBAL USERS FOR SEARCH ---
         onValue(ref(db, 'users'), (snap) => {
             const data = snap.val();
             if(data) {
@@ -1510,7 +1484,6 @@
             }
         });
 
-        // --- ADD FRIEND FROM MODAL ---
         window.addFriendFromModal = async () => {
             if(!auth.currentUser) return window.openAuthModal();
             if(!currentViewedUserId) return;
@@ -1535,7 +1508,6 @@
             if(window.lucide) lucide.createIcons();
         };
 
-        // --- LOAD GLOBAL STORIES ---
         window.loadStoriesData = () => {
             onValue(ref(db, 'stories'), (snap) => {
                 const data = snap.val();
@@ -1557,7 +1529,6 @@
                 document.getElementById('sp-name').innerText = user.displayName;
                 document.getElementById('sp-handle').innerText = "@" + user.email.split('@')[0];
                 
-                // Update user details for search
                 update(ref(db, `users/${user.uid}`), {
                     name: user.displayName,
                     pic: user.photoURL,
@@ -1711,7 +1682,6 @@
         }
         window.removeAttachment = () => { window.pendingTrackAttachment = null; updateAttachmentPreview(); };
 
-        // --- FUNZIONE PUBBLICAZIONE THREAD ---
         window.publishThread = async () => {
             if(!auth.currentUser) return window.openAuthModal();
             const text = document.getElementById('compose-text').value;
@@ -1750,7 +1720,6 @@
             }
         };
 
-        // --- FUNZIONE AGGIUNTA STORY YOUTUBE ---
         window.promptAddStory = () => {
             if(!auth.currentUser) return window.openAuthModal();
             const link = prompt("Inserisci il link del video YouTube Short (o normale) per la tua storia:");
@@ -1779,7 +1748,6 @@
             }
         };
 
-        // --- SISTEMA SOCIAL FEED COLLEGATO AL WINDOW GLOBALE PER L'AGGIORNAMENTO ---
         window.loadSocialFeed = () => {
             onValue(ref(db, 'posts'), (snap) => {
                 const data = snap.val();
@@ -1796,7 +1764,6 @@
                     let postText = p.text || (p.caption || "");
                     let embedHTML = "";
                     
-                    // Modifica Embed Youtube (Iframe Integrato invece che solo copertina)
                     const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
                     const ytMatch = postText.match(ytRegex);
                     if(ytMatch) {
@@ -1804,7 +1771,6 @@
                         postText = postText.replace(ytMatch[0], '').trim();
                     }
                     
-                    // Modifica Embed Instagram (Iframe Integrato)
                     const igRegex = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)/i;
                     const igMatch = postText.match(igRegex);
                     if(igMatch) {
