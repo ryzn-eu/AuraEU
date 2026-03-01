@@ -1118,8 +1118,7 @@
             document.querySelectorAll('#player-artist, #immersive-artist').forEach(e => e.innerText = t.artist);
             document.querySelectorAll('#player-cover, #immersive-cover').forEach(e => e.src = t.cover);
             
-            const img = new Image(); img.crossOrigin = "anonymous"; img.src = t.cover;
-            img.onload = () => { 
+        const img = new Image(); img.src = t.cover;            img.onload = () => { 
                 try { 
                     const c = new ColorThief().getColor(img); 
                     const rgb = `rgb(${c[0]},${c[1]},${c[2]})`; const rgba = `rgba(${c[0]},${c[1]},${c[2]}, 0.5)`;
