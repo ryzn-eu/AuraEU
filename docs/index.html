@@ -753,9 +753,29 @@
     <div id="create-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3 id="txt-new-session">New Session</h3><input type="text" id="playlist-name-input" class="w-full p-3 rounded-xl bg-white/10 mt-2 mb-4 text-white"><button id="btn-session-create" onclick="createPlaylist()" class="bg-white text-black px-4 py-2 rounded-lg font-bold">Create</button><button id="btn-session-cancel" onclick="closeCreatePlaylistModal()" class="ml-2 text-xs">Cancel</button></div></div>
     <div id="add-to-playlist-modal" class="fixed inset-0 bg-black/80 z-[200] hidden flex items-center justify-center p-6"><div class="glass-panel p-6 rounded-2xl w-full max-w-sm"><h3 id="txt-add-session">Add to...</h3><div id="playlist-selection-list" class="max-h-60 overflow-y-auto space-y-2 mt-4"></div><button onclick="closeAddToPlaylistModal()" class="mt-4 w-full text-xs">Close</button></div></div>
 
+    <div id="webview-modal" class="fixed inset-0 bg-black/95 z-[999999] hidden flex flex-col items-center justify-center p-4 backdrop-blur-xl">
+        <div class="glass-panel w-full max-w-4xl h-[90vh] rounded-3xl flex flex-col relative border border-white/10 shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center bg-[#050505]">
+                <h3 class="font-bold text-white flex items-center gap-2"><i data-lucide="globe" class="w-5 h-5 text-cyan-400"></i> <span id="webview-title">News</span></h3>
+                <button onclick="closeWebView()"><i data-lucide="x" class="w-6 h-6 text-gray-400 hover:text-white transition"></i></button>
+            </div>
+            <iframe id="webview-frame" class="w-full flex-1 bg-white" src=""></iframe>
+        </div>
+    </div>
+
     <script>
         window.openInstallGuideModal = () => document.getElementById('install-guide-modal').classList.remove('hidden');
         window.closeInstallGuideModal = () => document.getElementById('install-guide-modal').classList.add('hidden');
+
+        // Funzioni per aprire e chiudere il webview
+        window.openWebView = (url) => {
+            document.getElementById('webview-frame').src = url;
+            document.getElementById('webview-modal').classList.remove('hidden');
+        };
+        window.closeWebView = () => {
+            document.getElementById('webview-frame').src = "";
+            document.getElementById('webview-modal').classList.add('hidden');
+        };
 
         const GITHUB_RAW_BASE = "https://loris-photolithographic-adah.ngrok-free.dev/";
         const API = { 
@@ -1922,6 +1942,28 @@
                     let postText = p.text || (p.caption || "");
                     let embedHTML = "";
                     
+                    // -- NUOVA LOGICA AI E WEBVIEW --
+                    if (p.authorId === 'aura-ai-bot') {
+                        try {
+                            const transObj = JSON.parse(postText);
+                            postText = transObj[window.currentLang] || transObj['en'] || postText;
+                        } catch(e) {}
+                        
+                        if (p.sourceLink) {
+                            let btnText = 'Read Article';
+                            if (window.currentLang === 'it') btnText = 'Leggi Articolo';
+                            else if (window.currentLang === 'es') btnText = 'Leer Artículo';
+                            else if (window.currentLang === 'de') btnText = 'Artikel lesen';
+                            else if (window.currentLang === 'ro') btnText = 'Citește Articolul';
+                            else if (window.currentLang === 'ar') btnText = 'اقرأ المقال';
+
+                            embedHTML += `
+                            <button onclick="openWebView('${p.sourceLink}')" class="mt-4 w-full bg-gradient-to-r from-cyan-500/10 to-violet-500/10 border border-cyan-500/30 text-cyan-400 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-cyan-500/20 transition shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+                                <i data-lucide="external-link" class="w-4 h-4"></i> ${btnText}
+                            </button>`;
+                        }
+                    }
+                    
                     const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
                     const ytMatch = postText.match(ytRegex);
                     if(ytMatch) {
@@ -1977,8 +2019,9 @@
                     <div id="post-card-${p.id}" class="social-card-new relative">
                         <div class="flex justify-between items-center mb-3 relative">
                              <div class="flex items-center gap-2 cursor-pointer" onclick="openOtherUserProfile('${p.authorId}')">
-                                 <img src="${p.authorPic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full border border-white/10 object-cover">
-                                 <span class="font-bold text-sm text-white">${p.authorName}</span>
+                                 <img src="${p.authorPic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full border border-white/10 object-cover ${p.authorId === 'aura-ai-bot' ? 'ring-2 ring-cyan-400' : ''}">
+                                 <span class="font-bold text-sm text-white ${p.authorId === 'aura-ai-bot' ? 'text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400' : ''}">${p.authorName}</span>
+                                 ${p.authorId === 'aura-ai-bot' ? '<span class="bg-cyan-500/20 text-cyan-400 text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider font-bold border border-cyan-500/30 ml-1">AI</span>' : ''}
                              </div>
                              
                              <div>
