@@ -508,7 +508,7 @@
                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
                         <input type="text" id="social-user-search" oninput="performSocialSearch()" placeholder="Search users..." class="w-full bg-white/5 pl-10 pr-4 py-2.5 rounded-xl text-white outline-none text-sm border border-white/10 focus:border-violet-500/50 transition">
                     </div>
-                    <div id="social-search-results" class="mt-2 space-y-2 max-h-40 overflow-y-auto empty:hidden"></div>
+                    <div id="social-search-results" class="mt-2 space-y-2 max-h-40 overflow-y-auto hidden"></div>
                 </div>
 
                 <h3 id="txt-aura-stories" class="font-bold text-base mt-4 px-2 mb-1">Aura Stories</h3>
@@ -545,17 +545,17 @@
                         <div class="profile-stat-box" onclick="openUserListModal('following')"><span id="sp-following" class="profile-stat-num">0</span><span class="profile-stat-label">Following</span></div>
                     </div>
 
-                    <div id="friend-requests-btn-container" class="mt-4 hidden text-center">
-                        <button onclick="openUserListModal('requests')" class="px-6 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-bold text-sm shadow-lg flex items-center gap-2 mx-auto">
-                             <i data-lucide="bell" class="w-4 h-4"></i> Friend Requests (<span id="req-count">0</span>)
+                    <div id="friend-requests-btn-container" class="mt-4 text-center">
+                        <button onclick="openUserListModal('requests')" class="px-6 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-bold text-sm shadow-lg flex items-center gap-2 mx-auto transition hover:scale-105">
+                             <i data-lucide="bell" class="w-4 h-4"></i> Richieste d'Amicizia (<span id="req-count">0</span>)
                         </button>
                     </div>
 
                     <div class="flex gap-3 mt-6">
-                        <button onclick="openSettingsModal()" class="px-6 py-2 bg-white/10 rounded-full font-bold text-sm border border-white/20 flex items-center gap-2">
+                        <button onclick="openSettingsModal()" class="px-6 py-2 bg-white/10 rounded-full font-bold text-sm border border-white/20 flex items-center gap-2 hover:bg-white/20 transition">
                              <i data-lucide="settings" class="w-4 h-4"></i> Settings
                         </button>
-                        <button onclick="handleLogout()" class="px-6 py-2 bg-red-500/10 text-red-500 rounded-full font-bold text-sm border border-red-500/20">Logout</button>
+                        <button onclick="handleLogout()" class="px-6 py-2 bg-red-500/10 text-red-500 rounded-full font-bold text-sm border border-red-500/20 hover:bg-red-500/20 transition">Logout</button>
                     </div>
                 </div>
 
@@ -564,8 +564,8 @@
                 </div>
 
                 <div class="flex border-b border-white/10 mb-6">
-                    <button onclick="switchProfileTab('drops')" id="tab-drops" class="flex-1 py-3 text-center border-b-2 border-cyan-400 font-bold">Threads</button>
-                    <button onclick="switchProfileTab('likes')" id="tab-likes" class="flex-1 py-3 text-center border-b-2 border-transparent text-gray-500">Liked</button>
+                    <button onclick="switchProfileTab('drops')" id="tab-drops" class="flex-1 py-3 text-center border-b-2 border-cyan-400 font-bold transition">Threads</button>
+                    <button onclick="switchProfileTab('likes')" id="tab-likes" class="flex-1 py-3 text-center border-b-2 border-transparent text-gray-500 transition">Liked</button>
                 </div>
 
                 <div id="profile-content-area" class="pb-24"></div>
@@ -1551,21 +1551,41 @@
         };
 
         // --- RICERCA SOCIAL POTENZIATA (CERCA SOLO UTENTI) ---
-        window.performSocialSearch = () => {
+        window.performSocialSearch = async () => {
             const q = document.getElementById('social-user-search').value.toLowerCase().trim();
             const res = document.getElementById('social-search-results');
-            if(q.length < 2) { res.innerHTML = ''; return; }
+            
+            if(q.length < 2) { 
+                res.innerHTML = ''; 
+                res.classList.add('hidden');
+                return; 
+            }
+
+            // Fallback: se l'array è vuoto per colpa di Firebase, lo forziamo a caricare
+            if (!window.ALL_USERS || window.ALL_USERS.length === 0) {
+                console.log("Forzo lettura globale utenti...");
+                // Se Firebase lo permette tramite le Rules, leggerà. 
+                // Altrimenti questo codice fallirà pacificamente mostrando l'errore.
+                if (window.forceLoadAllUsers) {
+                    await window.forceLoadAllUsers();
+                }
+            }
             
             let html = ``;
 
             if(window.ALL_USERS && window.ALL_USERS.length > 0) {
-                const currentUid = window.loggedInUser ? window.loggedInUser.uid : '';
+                // Recupera in sicurezza il current user (funziona sia con Auth che con il global loggato)
+                const currentUid = (window.loggedInUser && window.loggedInUser.uid) ? window.loggedInUser.uid : '';
                 
                 const matchedUsers = window.ALL_USERS.filter(u => {
                     if (u.uid === currentUid) return false;
-                    const userName = u.name ? u.name.toLowerCase() : "";
-                    const userHandle = u.email ? u.email.split('@')[0].toLowerCase() : "";
-                    return userName.includes(q) || userHandle.includes(q);
+                    if (!u || typeof u !== 'object') return false; // Safety check
+                    
+                    const userName = u.name ? String(u.name).toLowerCase() : "";
+                    const userEmail = u.email ? String(u.email).toLowerCase() : "";
+                    const userHandle = userEmail.split('@')[0];
+                    
+                    return userName.includes(q) || userHandle.includes(q) || userEmail.includes(q);
                 });
 
                 if (matchedUsers.length > 0) {
@@ -1573,17 +1593,20 @@
                         <div class="p-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer rounded-xl transition" onclick="openOtherUserProfile('${u.uid}')">
                             <img src="${u.pic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full object-cover border border-white/10">
                             <div>
-                                <p class="text-sm font-bold text-white">${u.name || 'Utente Aura'}</p>
+                                <p class="text-sm font-bold text-white">${u.name || 'Utente Sconosciuto'}</p>
                                 <p class="text-[10px] text-gray-500">@${u.email ? u.email.split('@')[0] : 'user'}</p>
                             </div>
                         </div>
                     `).join('');
                 } else {
-                    html = `<p class="text-xs text-gray-500 p-2">Nessun utente trovato.</p>`;
+                    html = `<p class="text-xs text-gray-500 p-2">Nessun utente trovato per "${q}".</p>`;
                 }
+            } else {
+                html = `<p class="text-xs text-gray-500 p-2">Nessun utente caricato. Controlla le regole Firebase.</p>`;
             }
 
             res.innerHTML = html;
+            res.classList.remove('hidden');
         };
 
         // --- OTHER USER PROFILE MODAL ---
@@ -1695,7 +1718,8 @@
             let html = '';
             const matchedUsers = window.ALL_USERS.filter(u => {
                 if(!myNetworkIds.includes(u.uid)) return false; // Solo chi mi segue o chi seguo
-                const userName = u.name ? u.name.toLowerCase() : "";
+                if (!u || typeof u !== 'object') return false; // Safety check
+                const userName = u.name ? String(u.name).toLowerCase() : "";
                 return userName.includes(q);
             });
 
@@ -1704,7 +1728,7 @@
                     <div class="p-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer rounded-xl transition border-b border-white/5" onclick="startChat('${u.uid}')">
                         <img src="${u.pic || 'https://via.placeholder.com/150'}" class="w-10 h-10 rounded-full object-cover border border-white/10">
                         <div>
-                            <p class="text-sm font-bold text-white">${u.name || 'Utente Aura'}</p>
+                            <p class="text-sm font-bold text-white">${u.name || 'Utente Sconosciuto'}</p>
                             <p class="text-[10px] text-gray-500">@${u.email ? u.email.split('@')[0] : 'user'}</p>
                         </div>
                     </div>
@@ -1946,7 +1970,18 @@
         
         window.handleProfileClick = () => auth.currentUser ? showSection('social') : window.openAuthModal();
 
-        // --- LOAD GLOBAL USERS FOR SEARCH ---
+        // --- LOAD GLOBAL USERS FOR SEARCH (CON FUNZIONE DI FORZATURA) ---
+        window.forceLoadAllUsers = async () => {
+            try {
+                const snap = await get(ref(db, 'users'));
+                if (snap.exists()) {
+                    window.ALL_USERS = Object.entries(snap.val()).map(([uid, u]) => ({uid, ...u}));
+                }
+            } catch(e) {
+                console.error("Errore lettura utenti (controlla le regole Firebase):", e);
+            }
+        };
+
         onValue(ref(db, 'users'), (snap) => {
             const data = snap.val();
             if(data) {
@@ -2280,7 +2315,6 @@
                 const reqCount = Object.keys(window.myFriendRequests).length;
                 const reqContainer = document.getElementById('friend-requests-btn-container');
                 document.getElementById('req-count').innerText = reqCount;
-                if(reqCount > 0) reqContainer.classList.remove('hidden'); else reqContainer.classList.add('hidden');
             });
             
             // --- Listener Chats Personali ---
@@ -2685,6 +2719,7 @@
                     const d = s.val();
                     if(!d) { c.innerHTML = '<p class="text-center text-gray-500 mt-4">No threads yet.</p>'; return; }
                     
+                    // FIX: Stessa logica per i post del profilo, garantendo la presenza dell'ID
                     const myPosts = Object.entries(d).map(([k, v]) => ({ ...v, id: k })).filter(p => p.authorId === auth.currentUser.uid);
                     
                     document.getElementById('sp-posts').innerText = myPosts.length;
