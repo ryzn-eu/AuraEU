@@ -2097,7 +2097,7 @@
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
         };
 
-        // --- SISTEMA SOCIAL FEED ---
+        // --- SISTEMA SOCIAL FEED FIXATO ---
         window.loadSocialFeed = () => {
             onValue(ref(db, 'posts'), (snap) => {
                 const data = snap.val();
@@ -2105,7 +2105,8 @@
 
                 if(!data) { document.getElementById('social-feed-container').innerHTML = `<p class="text-center text-gray-500 mt-10">${t.loading_feed}</p>`; return; }
                 
-                let posts = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
+                // FIX: Estrae l'ID direttamente dalla chiave Firebase per assicurarsi che i post dei bot abbiano sempre un ID valido
+                let posts = Object.entries(data).map(([key, val]) => ({ ...val, id: key })).sort((a,b) => b.timestamp - a.timestamp);
                 
                 // Filtriamo i post nascosti dall'utente
                 const hiddenPosts = JSON.parse(localStorage.getItem('aura_hidden_posts') || '[]');
@@ -2263,7 +2264,10 @@
                 get(ref(db, 'posts')).then(s => {
                     const d = s.val();
                     if(!d) { c.innerHTML = '<p class="text-center text-gray-500 mt-4">No threads yet.</p>'; return; }
-                    const myPosts = Object.values(d).filter(p => p.authorId === auth.currentUser.uid);
+                    
+                    // FIX: Stessa logica per i post del profilo, garantendo la presenza dell'ID
+                    const myPosts = Object.entries(d).map(([k, v]) => ({ ...v, id: k })).filter(p => p.authorId === auth.currentUser.uid);
+                    
                     document.getElementById('sp-posts').innerText = myPosts.length;
                     c.innerHTML = myPosts.map(p => `<div class="p-4 border-b border-white/10"><p class="text-sm">${p.text || "Shared a post"}</p><p class="text-[10px] text-gray-500 mt-1">${new Date(p.timestamp).toLocaleDateString()}</p></div>`).join('');
                 });
