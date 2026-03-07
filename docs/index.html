@@ -245,7 +245,8 @@
         #visualizer-canvas { position: fixed; bottom: 0; left: 0; width: 100%; height: 30%; z-index: -1; pointer-events: none; opacity: 0.3; mask-image: linear-gradient(to top, black, transparent); }
 
         /* PROFILE */
-        .profile-stat-box { text-align: center; }
+        .profile-stat-box { text-align: center; cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.2s; }
+        .profile-stat-box:hover { background: rgba(255,255,255,0.05); }
         .profile-stat-num { font-size: 1.1rem; font-weight: 700; display: block; }
         .profile-stat-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
         
@@ -290,6 +291,12 @@
         #like-button-immersive.liked { color: #ef4444; opacity: 1; }
         #like-button-immersive.liked svg { fill: currentColor; }
         #playlist-button-immersive.in-playlist { color: #22c55e; opacity: 1; }
+        
+        /* User List Element */
+        .user-list-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
     </style>
 </head>
 <body>
@@ -468,7 +475,7 @@
                 <div id="social-search-bar" class="hidden px-4 py-3 border-b border-white/5 bg-[#0a0a0c] mx--4">
                     <div class="relative">
                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
-                        <input type="text" id="social-user-search" oninput="performSocialSearch()" placeholder="Search users or threads..." class="w-full bg-white/5 pl-10 pr-4 py-2.5 rounded-xl text-white outline-none text-sm border border-white/10 focus:border-violet-500/50 transition">
+                        <input type="text" id="social-user-search" oninput="performSocialSearch()" placeholder="Search users..." class="w-full bg-white/5 pl-10 pr-4 py-2.5 rounded-xl text-white outline-none text-sm border border-white/10 focus:border-violet-500/50 transition">
                     </div>
                     <div id="social-search-results" class="mt-2 space-y-2 max-h-40 overflow-y-auto empty:hidden"></div>
                 </div>
@@ -503,8 +510,14 @@
                     
                     <div class="flex gap-8 mt-6">
                         <div class="profile-stat-box"><span id="sp-posts" class="profile-stat-num">0</span><span class="profile-stat-label">Posts</span></div>
-                        <div class="profile-stat-box"><span id="sp-followers" class="profile-stat-num">0</span><span class="profile-stat-label">Followers</span></div>
-                        <div class="profile-stat-box"><span id="sp-following" class="profile-stat-num">0</span><span class="profile-stat-label">Following</span></div>
+                        <div class="profile-stat-box" onclick="openUserListModal('followers')"><span id="sp-followers" class="profile-stat-num">0</span><span class="profile-stat-label">Followers</span></div>
+                        <div class="profile-stat-box" onclick="openUserListModal('following')"><span id="sp-following" class="profile-stat-num">0</span><span class="profile-stat-label">Following</span></div>
+                    </div>
+
+                    <div id="friend-requests-btn-container" class="mt-4 hidden text-center">
+                        <button onclick="openUserListModal('requests')" class="px-6 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-bold text-sm shadow-lg flex items-center gap-2 mx-auto">
+                             <i data-lucide="bell" class="w-4 h-4"></i> Friend Requests (<span id="req-count">0</span>)
+                        </button>
                     </div>
 
                     <div class="flex gap-3 mt-6">
@@ -534,7 +547,21 @@
         <img id="other-user-pic" src="" class="w-32 h-32 rounded-full object-cover shadow-2xl mb-4 border-2 border-white/10">
         <h2 id="other-user-name" class="text-2xl font-bold mb-1 text-center"></h2>
         <p id="other-user-bio" class="text-sm text-gray-400 mb-6 text-center max-w-sm"></p>
-        <button id="btn-add-friend" onclick="addFriendFromModal()" class="bg-violet-600 text-white px-8 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 hover:bg-violet-500 transition"><i data-lucide="user-plus" class="w-5 h-5"></i> Add Friend</button>
+        <div class="flex gap-4">
+            <button id="btn-follow" onclick="toggleFollowFromModal()" class="bg-cyan-600 text-white px-8 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 hover:bg-cyan-500 transition"></button>
+            <button id="btn-add-friend" onclick="sendFriendRequestFromModal()" class="bg-violet-600 text-white px-8 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 hover:bg-violet-500 transition"></button>
+        </div>
+    </div>
+
+    <div id="user-list-modal" class="fixed inset-0 bg-black/90 z-[500] hidden flex flex-col p-4 backdrop-blur-sm">
+        <div class="glass-panel w-full max-w-md h-[80vh] mx-auto mt-10 rounded-3xl border border-white/10 flex flex-col overflow-hidden">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center bg-[#050505]">
+                <h3 id="user-list-title" class="font-bold text-white text-lg">List</h3>
+                <button onclick="closeUserListModal()"><i data-lucide="x" class="w-6 h-6 text-gray-400 hover:text-white transition"></i></button>
+            </div>
+            <div id="user-list-content" class="flex-1 overflow-y-auto p-4 space-y-2">
+                </div>
+        </div>
     </div>
 
     <div id="story-modal" class="fixed inset-0 bg-black z-[250] hidden flex flex-col animate-fadeIn">
@@ -799,6 +826,9 @@
         window.ALL_USERS = [];
         window.FIREBASE_STORIES = [];
         window.myFriends = {};
+        window.myFollowers = {};
+        window.myFollowing = {};
+        window.myFriendRequests = {};
 
         const TRANSLATIONS = {
             en: { 
@@ -806,7 +836,7 @@
                 caps_title: "Time Capsule", caps_desc: "Seal this track.", btn_seal: "Seal", btn_cancel: "Cancel", new_session: "New Session", 
                 add_session: "Add to Session", create: "Create", cancel: "Cancel", rec_title: "Recommended", trend_title: "Trending Now", 
                 chill_title: "Relax & Chill", class_title: "Classics", new_release: "Official New Release",
-                social_stories: "Aura Stories", social_discover: "Discover Feed", social_search: "Search users or threads...", new_post: "New Post", 
+                social_stories: "Aura Stories", social_discover: "Discover Feed", social_search: "Search users...", new_post: "New Post", 
                 like: "Like", reply: "Reply", share: "Share", add_story: "Add Story", loading_feed: "Loading feed...", write_something: "What's playing in your mind?", anyone_reply: "Anyone can reply", post_btn: "Post"
             },
             it: { 
@@ -814,7 +844,7 @@
                 caps_title: "Capsula Temporale", caps_desc: "Sigilla il brano.", btn_seal: "Sigilla", btn_cancel: "Annulla", new_session: "Nuova Sessione", 
                 add_session: "Aggiungi a...", create: "Crea", cancel: "Annulla", rec_title: "Consigliati", trend_title: "In Tendenza", 
                 chill_title: "Relax", class_title: "Classici", new_release: "Ultima Uscita Ufficiale",
-                social_stories: "Storie", social_discover: "Esplora Feed", social_search: "Cerca utenti o thread...", new_post: "Nuovo Post", 
+                social_stories: "Storie", social_discover: "Esplora Feed", social_search: "Cerca utenti...", new_post: "Nuovo Post", 
                 like: "Mi Piace", reply: "Rispondi", share: "Condividi", add_story: "Aggiungi", loading_feed: "Caricamento feed...", write_something: "A cosa stai pensando?", anyone_reply: "Chiunque può rispondere", post_btn: "Pubblica"
             },
             es: { 
@@ -822,7 +852,7 @@
                 caps_title: "Cápsula del Tiempo", caps_desc: "Sellar esta pista.", btn_seal: "Sellar", btn_cancel: "Cancelar", new_session: "Nueva Sesión", 
                 add_session: "Añadir a...", create: "Crear", cancel: "Cancelar", rec_title: "Recomendados", trend_title: "Tendencias", 
                 chill_title: "Relax", class_title: "Clásicos", new_release: "Nuevo Lanzamiento Oficial",
-                social_stories: "Historias", social_discover: "Descubrir", social_search: "Buscar usuarios o hilos...", new_post: "Nuevo Post", 
+                social_stories: "Historias", social_discover: "Descubrir", social_search: "Buscar usuarios...", new_post: "Nuevo Post", 
                 like: "Me Gusta", reply: "Responder", share: "Compartir", add_story: "Añadir", loading_feed: "Cargando...", write_something: "¿Qué tienes en mente?", anyone_reply: "Cualquiera puede responder", post_btn: "Publicar"
             },
             de: { 
@@ -830,7 +860,7 @@
                 caps_title: "Zeitkapsel", caps_desc: "Diesen Titel versiegeln.", btn_seal: "Versiegeln", btn_cancel: "Abbrechen", new_session: "Neue Sitzung", 
                 add_session: "Hinzufügen zu...", create: "Erstellen", cancel: "Abbrechen", rec_title: "Empfohlen", trend_title: "Im Trend", 
                 chill_title: "Entspannung", class_title: "Klassiker", new_release: "Offizielle Neuerscheinung",
-                social_stories: "Geschichten", social_discover: "Entdecken", social_search: "Benutzer oder Threads suchen...", new_post: "Neuer Beitrag", 
+                social_stories: "Geschichten", social_discover: "Entdecken", social_search: "Benutzer suchen...", new_post: "Neuer Beitrag", 
                 like: "Gefällt mir", reply: "Antworten", share: "Teilen", add_story: "Hinzufügen", loading_feed: "Wird geladen...", write_something: "Woran denkst du?", anyone_reply: "Jeder kann antworten", post_btn: "Posten"
             },
             ro: { 
@@ -1292,7 +1322,7 @@
 
         window.togglePlayPause=()=>audioPlayer.paused?audioPlayer.play():audioPlayer.pause();
         window.toggleLoop=()=>{ isLooping=!isLooping; showToast(isLooping?"Loop On":"Loop Off"); };
-        window.showToast=(m)=>{ const t=document.createElement('div'); t.className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold border border-white/20"; t.innerText=m; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.remove(),2000); };
+        window.showToast=(m)=>{ const t=document.createElement('div'); t.className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold border border-white/20 z-[999999]"; t.innerText=m; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.remove(),2000); };
         
         function saveLocalData(){ localStorage.setItem('aura_hist',JSON.stringify(listeningHistory)); localStorage.setItem('aura_lang', currentLang); }
         
@@ -1420,21 +1450,16 @@
             if(!bar.classList.contains('hidden')) document.getElementById('social-user-search').focus();
         };
 
-        // --- RICERCA SOCIAL POTENZIATA (CERCA PER NOME E HANDLE) ---
+        // --- RICERCA SOCIAL POTENZIATA (CERCA SOLO UTENTI) ---
         window.performSocialSearch = () => {
             const q = document.getElementById('social-user-search').value.toLowerCase().trim();
             const res = document.getElementById('social-search-results');
             if(q.length < 2) { res.innerHTML = ''; return; }
             
-            let html = `
-                <div class="p-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer rounded-xl transition">
-                    <div class="w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center font-bold text-white">#</div>
-                    <div><p class="text-sm text-white">Cerca "${q}" nei threads</p></div>
-                </div>
-            `;
+            let html = ``;
 
             if(window.ALL_USERS && window.ALL_USERS.length > 0) {
-                const currentUid = auth.currentUser ? auth.currentUser.uid : '';
+                const currentUid = window.loggedInUser ? window.loggedInUser.uid : '';
                 
                 const matchedUsers = window.ALL_USERS.filter(u => {
                     if (u.uid === currentUid) return false;
@@ -1453,6 +1478,8 @@
                             </div>
                         </div>
                     `).join('');
+                } else {
+                    html = `<p class="text-xs text-gray-500 p-2">Nessun utente trovato.</p>`;
                 }
             }
 
@@ -1471,15 +1498,29 @@
             document.getElementById('other-user-bio').innerText = u.bio || 'No bio available.';
             document.getElementById('other-user-modal').classList.remove('hidden');
             
-            const btn = document.getElementById('btn-add-friend');
-            if(auth.currentUser && window.myFriends && window.myFriends[uid]) {
-                btn.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> Friends`;
-                btn.classList.remove('bg-violet-600', 'hover:bg-violet-500');
-                btn.classList.add('bg-green-600', 'hover:bg-green-500');
+            const btnFollow = document.getElementById('btn-follow');
+            const btnFriend = document.getElementById('btn-add-friend');
+            
+            // Stato Follow
+            if(window.loggedInUser && window.myFollowing && window.myFollowing[uid]) {
+                btnFollow.innerHTML = `<i data-lucide="user-minus" class="w-5 h-5"></i> Unfollow`;
+                btnFollow.classList.replace('bg-cyan-600', 'bg-gray-600');
+                btnFollow.classList.replace('hover:bg-cyan-500', 'hover:bg-gray-500');
             } else {
-                btn.innerHTML = `<i data-lucide="user-plus" class="w-5 h-5"></i> Add Friend`;
-                btn.classList.remove('bg-green-600', 'hover:bg-green-500');
-                btn.classList.add('bg-violet-600', 'hover:bg-violet-500');
+                btnFollow.innerHTML = `<i data-lucide="user-plus" class="w-5 h-5"></i> Follow`;
+                btnFollow.classList.replace('bg-gray-600', 'bg-cyan-600');
+                btnFollow.classList.replace('hover:bg-gray-500', 'hover:bg-cyan-500');
+            }
+
+            // Stato Amicizia / Richiesta
+            if(window.loggedInUser && window.myFriends && window.myFriends[uid]) {
+                btnFriend.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> Friends`;
+                btnFriend.classList.remove('bg-violet-600', 'hover:bg-violet-500', 'bg-yellow-600', 'hover:bg-yellow-500');
+                btnFriend.classList.add('bg-green-600', 'hover:bg-green-500');
+            } else {
+                btnFriend.innerHTML = `<i data-lucide="user-plus" class="w-5 h-5"></i> Add Friend`;
+                btnFriend.classList.remove('bg-green-600', 'hover:bg-green-500', 'bg-yellow-600', 'hover:bg-yellow-500');
+                btnFriend.classList.add('bg-violet-600', 'hover:bg-violet-500');
             }
             if(window.lucide) lucide.createIcons();
             
@@ -1624,30 +1665,148 @@
             }
         });
 
-        // --- ADD FRIEND FROM MODAL ---
-        window.addFriendFromModal = async () => {
+        // --- SISTEMA FRIEND REQUEST ---
+        window.sendFriendRequestFromModal = async () => {
             if(!auth.currentUser) return window.openAuthModal();
             if(!currentViewedUserId) return;
+            const myUid = auth.currentUser.uid;
             
-            const r = ref(db, `users/${auth.currentUser.uid}/friends/${currentViewedUserId}`);
-            const snapshot = await get(r);
-            const btn = document.getElementById('btn-add-friend');
-
-            if(snapshot.exists()) {
-                await remove(r);
-                window.showToast("Removed from friends");
-                btn.innerHTML = `<i data-lucide="user-plus" class="w-5 h-5"></i> Add Friend`;
-                btn.classList.remove('bg-green-600', 'hover:bg-green-500');
-                btn.classList.add('bg-violet-600', 'hover:bg-violet-500');
+            // Se già amici, rimuovi amicizia
+            if(window.myFriends && window.myFriends[currentViewedUserId]) {
+                await remove(ref(db, `users/${myUid}/friends/${currentViewedUserId}`));
+                await remove(ref(db, `users/${currentViewedUserId}/friends/${myUid}`));
+                window.showToast("Amicizia rimossa");
             } else {
-                await set(r, true);
-                window.showToast("Added to friends!");
-                btn.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> Friends`;
-                btn.classList.remove('bg-violet-600', 'hover:bg-violet-500');
-                btn.classList.add('bg-green-600', 'hover:bg-green-500');
+                // Invia richiesta
+                await set(ref(db, `users/${currentViewedUserId}/friendRequests/${myUid}`), { timestamp: Date.now() });
+                window.showToast("Richiesta inviata!");
             }
-            if(window.lucide) lucide.createIcons();
+            window.openOtherUserProfile(currentViewedUserId); // Aggiorna modale
         };
+
+        window.acceptFriendRequest = async (requesterUid) => {
+            if(!auth.currentUser) return;
+            const myUid = auth.currentUser.uid;
+            
+            // Aggiungi ai mutual friends
+            await set(ref(db, `users/${myUid}/friends/${requesterUid}`), true);
+            await set(ref(db, `users/${requesterUid}/friends/${myUid}`), true);
+            
+            // Rimuovi la richiesta
+            await remove(ref(db, `users/${myUid}/friendRequests/${requesterUid}`));
+            
+            window.showToast("Richiesta accettata!");
+            if(!document.getElementById('user-list-modal').classList.contains('hidden')) {
+                window.openUserListModal('requests'); // Refresh list
+            }
+        };
+
+        window.rejectFriendRequest = async (requesterUid) => {
+            if(!auth.currentUser) return;
+            await remove(ref(db, `users/${auth.currentUser.uid}/friendRequests/${requesterUid}`));
+            window.showToast("Richiesta rifiutata");
+            if(!document.getElementById('user-list-modal').classList.contains('hidden')) {
+                window.openUserListModal('requests'); // Refresh list
+            }
+        };
+
+        // --- SISTEMA FOLLOW / UNFOLLOW ---
+        window.toggleFollowFromModal = async () => {
+            if(!auth.currentUser) return window.openAuthModal();
+            if(!currentViewedUserId) return;
+            const targetUid = currentViewedUserId;
+            
+            await window.executeFollowToggle(targetUid);
+            window.openOtherUserProfile(targetUid); // Refresh state in modal
+        };
+
+        window.executeFollowToggle = async (targetUid) => {
+            if(!auth.currentUser) return;
+            const myUid = auth.currentUser.uid;
+            const isFollowing = window.myFollowing && window.myFollowing[targetUid];
+            
+            if(isFollowing) {
+                // Unfollow
+                await remove(ref(db, `users/${myUid}/following/${targetUid}`));
+                await remove(ref(db, `users/${targetUid}/followers/${myUid}`));
+                window.showToast("Unfollowed");
+            } else {
+                // Follow
+                await set(ref(db, `users/${myUid}/following/${targetUid}`), true);
+                await set(ref(db, `users/${targetUid}/followers/${myUid}`), true);
+                window.showToast("Following");
+            }
+        };
+
+        window.toggleFollowFromList = async (targetUid) => {
+            await window.executeFollowToggle(targetUid);
+            // Refresh User List
+            const title = document.getElementById('user-list-title').innerText.toLowerCase();
+            window.openUserListModal(title);
+        };
+
+        // --- GESTIONE LISTE UTENTI (Followers / Following / Requests) ---
+        window.openUserListModal = (type) => {
+            if(!auth.currentUser) return;
+            const modal = document.getElementById('user-list-modal');
+            const content = document.getElementById('user-list-content');
+            const title = document.getElementById('user-list-title');
+            
+            content.innerHTML = '';
+            let dataIds = [];
+            
+            if(type === 'followers') {
+                title.innerText = 'Followers';
+                dataIds = Object.keys(window.myFollowers || {});
+            } else if (type === 'following') {
+                title.innerText = 'Following';
+                dataIds = Object.keys(window.myFollowing || {});
+            } else if (type === 'requests') {
+                title.innerText = 'Requests';
+                dataIds = Object.keys(window.myFriendRequests || {});
+            }
+
+            if(dataIds.length === 0) {
+                content.innerHTML = `<p class="text-center text-gray-500 mt-4 text-sm">Nessun utente.</p>`;
+            } else {
+                let html = '';
+                dataIds.forEach(uid => {
+                    const u = window.ALL_USERS.find(x => x.uid === uid) || { uid: uid, name: 'Utente Sconosciuto', pic: 'https://via.placeholder.com/150' };
+                    
+                    if (type === 'requests') {
+                        html += `
+                        <div class="user-list-item">
+                            <div class="flex items-center gap-3 cursor-pointer" onclick="openOtherUserProfile('${u.uid}')">
+                                <img src="${u.pic}" class="w-10 h-10 rounded-full object-cover border border-white/10">
+                                <span class="font-bold text-sm text-white">${u.name}</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="acceptFriendRequest('${u.uid}')" class="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                <button onclick="rejectFriendRequest('${u.uid}')" class="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>`;
+                    } else {
+                        const isFollowing = window.myFollowing && window.myFollowing[uid];
+                        const btnText = isFollowing ? 'Unfollow' : 'Follow';
+                        const btnClass = isFollowing ? 'bg-gray-600 hover:bg-gray-500' : 'bg-cyan-600 hover:bg-cyan-500';
+                        
+                        html += `
+                        <div class="user-list-item">
+                            <div class="flex items-center gap-3 cursor-pointer" onclick="openOtherUserProfile('${u.uid}')">
+                                <img src="${u.pic}" class="w-10 h-10 rounded-full object-cover border border-white/10">
+                                <span class="font-bold text-sm text-white">${u.name}</span>
+                            </div>
+                            <button onclick="toggleFollowFromList('${u.uid}')" class="px-4 py-1.5 rounded-full text-xs font-bold text-white transition ${btnClass}">${btnText}</button>
+                        </div>`;
+                    }
+                });
+                content.innerHTML = html;
+                if(window.lucide) lucide.createIcons();
+            }
+
+            modal.classList.remove('hidden');
+        };
+        window.closeUserListModal = () => document.getElementById('user-list-modal').classList.add('hidden');
 
         // --- LOAD GLOBAL STORIES ---
         window.loadStoriesData = () => {
@@ -1717,6 +1876,24 @@
             onValue(ref(db, `users/${uid}/friends`), (s) => {
                 window.myFriends = s.val() || {};
             });
+            
+            // Nuovi Listener per Followers, Following, Requests
+            onValue(ref(db, `users/${uid}/followers`), (s) => { 
+                window.myFollowers = s.val() || {}; 
+                document.getElementById('sp-followers').innerText = Object.keys(window.myFollowers).length;
+            });
+            onValue(ref(db, `users/${uid}/following`), (s) => { 
+                window.myFollowing = s.val() || {}; 
+                document.getElementById('sp-following').innerText = Object.keys(window.myFollowing).length;
+            });
+            onValue(ref(db, `users/${uid}/friendRequests`), (s) => { 
+                window.myFriendRequests = s.val() || {}; 
+                const reqCount = Object.keys(window.myFriendRequests).length;
+                const reqContainer = document.getElementById('friend-requests-btn-container');
+                document.getElementById('req-count').innerText = reqCount;
+                if(reqCount > 0) reqContainer.classList.remove('hidden'); else reqContainer.classList.add('hidden');
+            });
+
             onValue(ref(db, `users/${uid}/likes`), (s) => {
                 window.likedTracks = new Set(Object.keys(s.val()||{}));
                 window.renderPlaylists();
