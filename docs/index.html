@@ -291,7 +291,7 @@
         #like-button-immersive.liked { color: #ef4444; opacity: 1; }
         #like-button-immersive.liked svg { fill: currentColor; }
         #playlist-button-immersive.in-playlist { color: #22c55e; opacity: 1; }
-        
+
         /* User List Element */
         .user-list-item {
             display: flex; align-items: center; justify-content: space-between;
@@ -1333,7 +1333,6 @@
         }
 
         // --- RENDER STORIE (NELLA SOCIAL PAGE) ---
-        // L'ORDINE È BLOCCATO: 1) Tasto Aggiungi -> 2) Storie dal Manifest -> 3) Storie Utenti Firebase
         window.renderStories = function() {
             const container = document.getElementById('stories-container');
             if(!container) return;
@@ -1628,12 +1627,42 @@
         function handleGyro(e) { if(gyroEnabled) audioPlayer.volume = Math.max(0, Math.min(1, (e.gamma + 45) / 90)); }
         window.toggleTranslation = () => { isTranslationEnabled = !isTranslationEnabled; document.getElementById('btn-translate').classList.toggle('active', isTranslationEnabled); renderLyrics(); };
 
+        // --- SISTEMA TRADUZIONE API GOOGLE GRATUITO ---
+        window.translateTextFree = async (text, lang) => {
+            if (!text || lang === 'en') return text;
+            
+            // Crea una cache key sicura
+            let safeKey = "";
+            try { safeKey = btoa(unescape(encodeURIComponent(text))).slice(0,30); } 
+            catch(e) { safeKey = text.substring(0, 20).replace(/[^a-zA-Z0-9]/g, ''); }
+            
+            const cacheKey = `trans_${lang}_${safeKey}`;
+            const cache = JSON.parse(localStorage.getItem('aura_trans_cache') || '{}');
+            if (cache[cacheKey]) return cache[cacheKey];
+
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                let translated = "";
+                if (data && data[0]) {
+                    data[0].forEach(item => { if (item[0]) translated += item[0]; });
+                }
+                if (translated) {
+                    cache[cacheKey] = translated;
+                    localStorage.setItem('aura_trans_cache', JSON.stringify(cache));
+                    return translated;
+                }
+            } catch(e) { console.log(e); }
+            return text;
+        };
+
     </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, update, push, onValue, get, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, update, push, onValue, get, remove, serverTimestamp, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBjQC2dOKySeHPEJCVjjEEHyHEUy19DRPY",
@@ -2097,36 +2126,48 @@
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
         };
 
-        // --- SISTEMA SOCIAL FEED FIXATO ---
+        // --- SISTEMA SOCIAL FEED FIXATO & TRADOTTO ---
         window.loadSocialFeed = () => {
-            onValue(ref(db, 'posts'), (snap) => {
+            const postsRef = ref(db, 'posts');
+            off(postsRef); // Rimuove listener precedenti per evitare duplicati
+            onValue(postsRef, async (snap) => {
                 const data = snap.val();
                 const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
 
                 if(!data) { document.getElementById('social-feed-container').innerHTML = `<p class="text-center text-gray-500 mt-10">${t.loading_feed}</p>`; return; }
                 
-                // FIX: Estrae l'ID direttamente dalla chiave Firebase per assicurarsi che i post dei bot abbiano sempre un ID valido
+                // Estrae l'ID direttamente dalla chiave Firebase per assicurarsi che i post dei bot abbiano sempre un ID valido
                 let posts = Object.entries(data).map(([key, val]) => ({ ...val, id: key })).sort((a,b) => b.timestamp - a.timestamp);
                 
-                // Filtriamo i post nascosti dall'utente
+                // Filtra i post nascosti
                 const hiddenPosts = JSON.parse(localStorage.getItem('aura_hidden_posts') || '[]');
                 posts = posts.filter(p => !hiddenPosts.includes(p.id));
+
+                // Traduce in modo asincrono tutti i post AI
+                await Promise.all(posts.map(async (p) => {
+                    let rawText = p.text || p.caption || "";
+                    if (p.authorId === 'aura-ai-bot') {
+                        try {
+                            const transObj = JSON.parse(rawText);
+                            p.finalText = transObj[window.currentLang] || transObj['en'] || rawText;
+                        } catch(e) {
+                            p.finalText = await window.translateTextFree(rawText, window.currentLang);
+                        }
+                    } else {
+                        p.finalText = rawText;
+                    }
+                }));
                 
                 document.getElementById('social-feed-container').innerHTML = posts.map(p => {
                     const isLiked = auth.currentUser && p.likes && p.likes[auth.currentUser.uid];
                     const likes = p.likes ? Object.keys(p.likes).length : 0;
                     const comments = p.comments ? Object.keys(p.comments).length : 0;
                     
-                    let postText = p.text || (p.caption || "");
+                    let postText = p.finalText;
                     let embedHTML = "";
                     
                     // -- NUOVA LOGICA AI E WEBVIEW --
                     if (p.authorId === 'aura-ai-bot') {
-                        try {
-                            const transObj = JSON.parse(postText);
-                            postText = transObj[window.currentLang] || transObj['en'] || postText;
-                        } catch(e) {}
-                        
                         if (p.sourceLink) {
                             let btnText = 'Read Article';
                             if (window.currentLang === 'it') btnText = 'Leggi Articolo';
