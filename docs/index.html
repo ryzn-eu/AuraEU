@@ -297,6 +297,32 @@
             display: flex; align-items: center; justify-content: space-between;
             padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
+
+        /* CHAT SYSTEM CSS */
+        .chat-msg-sent { 
+            background: linear-gradient(135deg, var(--primary), #6d28d9); 
+            color: white; border-radius: 16px 16px 4px 16px; 
+            max-width: 80%; padding: 10px 14px; 
+            align-self: flex-end; font-size: 13px; 
+            word-break: break-word; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2); 
+            margin-bottom: 8px;
+        }
+        .chat-msg-received { 
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); 
+            color: white; border-radius: 16px 16px 16px 4px; 
+            max-width: 80%; padding: 10px 14px; 
+            align-self: flex-start; font-size: 13px; 
+            word-break: break-word; margin-bottom: 8px;
+        }
+        .chat-msg-container { display: flex; flex-direction: column; padding: 16px; overflow-y: auto; flex-1; }
+        .chat-msg-container::-webkit-scrollbar { display: none; }
+        
+        .chat-item-card {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px; 
+            cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.2s;
+        }
+        .chat-item-card:hover { background: rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
@@ -467,6 +493,11 @@
                     </div>
                     
                     <div class="flex items-center gap-4">
+                        <button onclick="openChatListModal()" class="text-gray-300 hover:text-white transition relative">
+                            <i data-lucide="message-square" class="w-5 h-5"></i>
+                            <div id="chat-notification-dot" class="hidden absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-[#050505]"></div>
+                        </button>
+                        
                         <button onclick="toggleSocialSearch()" class="text-gray-300 hover:text-white transition"><i data-lucide="search" class="w-5 h-5"></i></button>
                         <img id="social-mini-avatar-new" src="https://via.placeholder.com/150" class="w-7 h-7 rounded-full object-cover border border-white/20 cursor-pointer hover:scale-105 transition" onclick="showSection('profile')" alt="Profile Settings">
                     </div>
@@ -542,6 +573,70 @@
         </main>
     </div>
 
+    <div id="chat-list-modal" class="fixed inset-0 bg-[#050505] z-[450] hidden flex flex-col animate-fadeIn">
+        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-[#050505]/95 backdrop-blur-md sticky top-0 z-10">
+            <h3 class="font-bold text-white text-lg flex items-center gap-2"><i data-lucide="message-square" class="w-5 h-5 text-cyan-400"></i> Messages</h3>
+            <button onclick="closeChatListModal()"><i data-lucide="x" class="w-6 h-6 text-gray-400 hover:text-white transition"></i></button>
+        </div>
+        <div class="p-4 border-b border-white/5 flex gap-2 items-center bg-[#0a0a0c]">
+            <input type="text" id="chat-local-search" oninput="filterChatList()" placeholder="Search conversations..." class="flex-1 bg-white/5 px-4 py-2 rounded-xl text-white outline-none text-sm border border-white/10 focus:border-cyan-500/50 transition">
+        </div>
+        <div id="chat-list-content" class="flex-1 overflow-y-auto pb-24">
+            </div>
+        <button onclick="openNewChatSearchModal()" class="fixed bottom-[40px] right-6 bg-cyan-600 text-white w-14 h-14 rounded-full font-bold flex items-center justify-center shadow-[0_10px_30px_rgba(6,182,212,0.4)] z-[460] hover:scale-105 transition-transform">
+            <i data-lucide="plus" class="w-6 h-6"></i>
+        </button>
+    </div>
+
+    <div id="new-chat-search-modal" class="fixed inset-0 bg-black/95 z-[460] hidden flex flex-col backdrop-blur-xl">
+        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-[#050505]">
+            <h3 class="font-bold text-white text-lg">New Message</h3>
+            <button onclick="closeNewChatSearchModal()"><i data-lucide="x" class="w-6 h-6 text-gray-400 hover:text-white transition"></i></button>
+        </div>
+        <div class="p-4 bg-[#0a0a0c] border-b border-white/5">
+            <input type="text" id="new-chat-user-search" oninput="performNewChatSearch()" placeholder="Search followers/following..." class="w-full bg-white/5 px-4 py-3 rounded-xl text-white outline-none text-sm border border-white/10 focus:border-violet-500/50 transition">
+        </div>
+        <div id="new-chat-search-results" class="flex-1 overflow-y-auto p-2">
+            <p class="text-center text-gray-500 text-xs mt-10">Start typing to search your network.</p>
+        </div>
+    </div>
+
+    <div id="chat-room-modal" class="fixed inset-0 bg-[#050505] z-[500] hidden flex flex-col">
+        <div class="p-3 border-b border-white/10 flex justify-between items-center bg-[#050505]/95 backdrop-blur-md sticky top-0 z-20">
+            <div class="flex items-center gap-3">
+                <button onclick="closeChatRoom()" class="text-gray-400 hover:text-white transition"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+                <img id="chat-room-user-pic" src="" class="w-9 h-9 rounded-full object-cover border border-white/10">
+                <div>
+                    <h3 id="chat-room-user-name" class="font-bold text-sm text-white"></h3>
+                    <p id="chat-room-user-status" class="text-[10px] text-green-400">Online</p>
+                </div>
+            </div>
+            <div class="relative">
+                <button onclick="toggleChatRoomMenu()" class="p-2 text-gray-400 hover:text-white transition rounded-full hover:bg-white/5"><i data-lucide="more-vertical" class="w-5 h-5"></i></button>
+                <div id="chat-room-menu" class="hidden absolute right-0 top-12 w-40 bg-[#111115] border border-white/10 shadow-2xl rounded-xl py-2 z-50">
+                    <button onclick="blockChatUser()" class="w-full text-left px-4 py-2.5 text-xs text-white hover:bg-white/5 flex items-center gap-2 transition">
+                        <i data-lucide="slash" class="w-4 h-4 text-red-400"></i> Block User
+                    </button>
+                    <button onclick="reportChatUser()" class="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition border-t border-white/5">
+                        <i data-lucide="flag" class="w-4 h-4"></i> Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="chat-messages-container" class="chat-msg-container">
+            </div>
+
+        <div class="p-3 border-t border-white/10 bg-[#0a0a0c] sticky bottom-0">
+            <div id="chat-blocked-alert" class="hidden text-center text-xs text-red-400 p-2 bg-red-500/10 rounded-xl mb-2">Non puoi rispondere a questa conversazione.</div>
+            <div class="flex gap-2 items-end" id="chat-input-wrapper">
+                <textarea id="chat-message-input" rows="1" class="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white outline-none resize-none max-h-32" placeholder="Scrivi un messaggio..."></textarea>
+                <button onclick="sendChatMessage()" class="w-11 h-11 bg-cyan-600 hover:bg-cyan-500 text-white rounded-full flex items-center justify-center transition shadow-lg shrink-0">
+                    <i data-lucide="send" class="w-5 h-5 ml-0.5"></i>
+                </button>
+            </div>
+        </div>
+    </div>
     <div id="other-user-modal" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-[400] hidden flex flex-col items-center p-6 pt-12 animate-fadeIn">
         <button onclick="closeOtherUserProfile()" class="absolute top-6 right-6 p-2 bg-white/10 rounded-full z-10 hover:bg-white/20 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
         <img id="other-user-pic" src="" class="w-32 h-32 rounded-full object-cover shadow-2xl mb-4 border-2 border-white/10">
@@ -829,6 +924,12 @@
         window.myFollowers = {};
         window.myFollowing = {};
         window.myFriendRequests = {};
+        
+        // Chat state
+        window.myChats = {}; 
+        window.myBlockedUsers = {};
+        window.activeChatRoomId = null;
+        window.activeChatOtherUserId = null;
 
         const TRANSLATIONS = {
             en: { 
@@ -1529,6 +1630,165 @@
         };
         window.closeOtherUserProfile = () => document.getElementById('other-user-modal').classList.add('hidden');
 
+        // --- CHAT SYSTEM LOGIC ---
+        window.openChatListModal = () => {
+            if(!window.loggedInUser) return window.openAuthModal();
+            document.getElementById('chat-list-modal').classList.remove('hidden');
+            window.renderChatList();
+        };
+        window.closeChatListModal = () => document.getElementById('chat-list-modal').classList.add('hidden');
+        
+        window.filterChatList = () => {
+            window.renderChatList(document.getElementById('chat-local-search').value.toLowerCase().trim());
+        };
+
+        window.renderChatList = (filterText = '') => {
+            const container = document.getElementById('chat-list-content');
+            const chats = Object.entries(window.myChats || {}).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+            
+            if(chats.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-500 mt-10 text-sm">Nessuna conversazione trovata.</p>`;
+                return;
+            }
+
+            let html = '';
+            chats.forEach(([chatId, data]) => {
+                const otherUid = data.otherUid;
+                const u = window.ALL_USERS.find(x => x.uid === otherUid) || { uid: otherUid, name: 'Utente', pic: 'https://via.placeholder.com/150' };
+                
+                if (filterText && !u.name.toLowerCase().includes(filterText)) return;
+
+                const lastMsgTime = data.timestamp ? new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                const lastMsg = data.lastMessage || 'Invia un messaggio...';
+
+                html += `
+                <div class="chat-item-card" onclick="openChatRoom('${chatId}', '${u.uid}')">
+                    <img src="${u.pic}" class="w-12 h-12 rounded-full object-cover border border-white/10">
+                    <div class="flex-1 overflow-hidden">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-sm text-white truncate">${u.name}</h4>
+                            <span class="text-[10px] text-gray-500">${lastMsgTime}</span>
+                        </div>
+                        <p class="text-xs text-gray-400 truncate mt-0.5">${lastMsg}</p>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html || `<p class="text-center text-gray-500 mt-10 text-sm">Nessun risultato.</p>`;
+        };
+
+        // Nuova Chat Search Modal
+        window.openNewChatSearchModal = () => {
+            document.getElementById('new-chat-search-modal').classList.remove('hidden');
+            document.getElementById('new-chat-user-search').value = '';
+            window.performNewChatSearch(); // Mostra tutti inizialmente
+        };
+        window.closeNewChatSearchModal = () => document.getElementById('new-chat-search-modal').classList.add('hidden');
+
+        window.performNewChatSearch = () => {
+            const q = document.getElementById('new-chat-user-search').value.toLowerCase().trim();
+            const res = document.getElementById('new-chat-search-results');
+            
+            // Uniamo followers e following
+            const myNetworkIds = [...new Set([...Object.keys(window.myFollowers), ...Object.keys(window.myFollowing)])];
+            
+            let html = '';
+            const matchedUsers = window.ALL_USERS.filter(u => {
+                if(!myNetworkIds.includes(u.uid)) return false; // Solo chi mi segue o chi seguo
+                const userName = u.name ? u.name.toLowerCase() : "";
+                return userName.includes(q);
+            });
+
+            if (matchedUsers.length > 0) {
+                html += matchedUsers.map(u => `
+                    <div class="p-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer rounded-xl transition border-b border-white/5" onclick="startChat('${u.uid}')">
+                        <img src="${u.pic || 'https://via.placeholder.com/150'}" class="w-10 h-10 rounded-full object-cover border border-white/10">
+                        <div>
+                            <p class="text-sm font-bold text-white">${u.name || 'Utente Aura'}</p>
+                            <p class="text-[10px] text-gray-500">@${u.email ? u.email.split('@')[0] : 'user'}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                html = `<p class="text-center text-gray-500 text-xs mt-10">Nessun utente trovato nella tua rete.</p>`;
+            }
+            res.innerHTML = html;
+        };
+
+        window.startChat = (otherUid) => {
+            if(!window.loggedInUser) return;
+            const myUid = window.loggedInUser.uid;
+            const chatId = myUid < otherUid ? `${myUid}_${otherUid}` : `${otherUid}_${myUid}`;
+            
+            window.closeNewChatSearchModal();
+            window.openChatRoom(chatId, otherUid);
+        };
+
+        window.openChatRoom = (chatId, otherUid) => {
+            window.activeChatRoomId = chatId;
+            window.activeChatOtherUserId = otherUid;
+            
+            const u = window.ALL_USERS.find(x => x.uid === otherUid) || { name: 'Utente', pic: 'https://via.placeholder.com/150' };
+            document.getElementById('chat-room-user-name').innerText = u.name;
+            document.getElementById('chat-room-user-pic').src = u.pic;
+            document.getElementById('chat-room-menu').classList.add('hidden');
+            
+            // Check blocco
+            const inputWrapper = document.getElementById('chat-input-wrapper');
+            const alertWrapper = document.getElementById('chat-blocked-alert');
+            
+            if(window.myBlockedUsers[otherUid]) {
+                inputWrapper.classList.add('hidden');
+                alertWrapper.innerText = "Hai bloccato questo utente.";
+                alertWrapper.classList.remove('hidden');
+            } else {
+                inputWrapper.classList.remove('hidden');
+                alertWrapper.classList.add('hidden');
+            }
+
+            document.getElementById('chat-room-modal').classList.remove('hidden');
+            document.getElementById('chat-message-input').value = '';
+            
+            // Trigger Firebase load for this chat
+            if(window.loadChatMessages) window.loadChatMessages(chatId);
+        };
+
+        window.closeChatRoom = () => {
+            document.getElementById('chat-room-modal').classList.add('hidden');
+            window.activeChatRoomId = null;
+            window.activeChatOtherUserId = null;
+            if(window.stopChatMessagesListener) window.stopChatMessagesListener();
+        };
+
+        window.toggleChatRoomMenu = () => {
+            document.getElementById('chat-room-menu').classList.toggle('hidden');
+        };
+
+        window.blockChatUser = () => {
+            if(!window.loggedInUser || !window.activeChatOtherUserId) return;
+            const otherUid = window.activeChatOtherUserId;
+            
+            if(window.myBlockedUsers[otherUid]) {
+                window.showToast("Utente già bloccato.");
+            } else {
+                if(window.executeBlockUser) window.executeBlockUser(otherUid);
+                window.toggleChatRoomMenu();
+                window.closeChatRoom();
+            }
+        };
+
+        window.reportChatUser = () => {
+            if(!window.activeChatOtherUserId) return;
+            const uid = window.activeChatOtherUserId;
+            window.toggleChatRoomMenu();
+            window.showToast("Apertura app mail...");
+            const email = "report@pl-globalaura.com";
+            const subject = encodeURIComponent(`Segnalazione Utente [ID: ${uid}]`);
+            const body = encodeURIComponent(`Ciao Team di Aura,\n\nVorrei segnalare l'utente con ID: ${uid} per comportamento scorretto nella chat.\n\nMotivazione: \n[Scrivi qui il motivo...]`);
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        };
+
+
         window.openShareModal = () => {
             if (!window.currentTrackData) return showToast("Nessun brano in riproduzione");
             document.getElementById('share-card-title').innerText = window.currentTrackData.title;
@@ -1691,8 +1951,108 @@
             const data = snap.val();
             if(data) {
                 window.ALL_USERS = Object.entries(data).map(([uid, u]) => ({uid, ...u}));
+                if(!document.getElementById('chat-list-modal').classList.contains('hidden')) {
+                    window.renderChatList(document.getElementById('chat-local-search').value.toLowerCase().trim());
+                }
             }
         });
+
+        // --- SISTEMA FIREBASE CHAT ---
+        let activeChatRef = null;
+
+        window.loadChatMessages = (chatId) => {
+            if(activeChatRef) off(activeChatRef);
+            activeChatRef = ref(db, `chats/${chatId}/messages`);
+            
+            onValue(activeChatRef, (snap) => {
+                const data = snap.val();
+                const container = document.getElementById('chat-messages-container');
+                if(!data) {
+                    container.innerHTML = `<p class="text-center text-gray-500 text-xs mt-10">Nessun messaggio. Inizia la conversazione!</p>`;
+                    return;
+                }
+                
+                const messages = Object.values(data).sort((a,b) => a.timestamp - b.timestamp);
+                const myUid = auth.currentUser.uid;
+                
+                container.innerHTML = messages.map(m => {
+                    const isMine = m.senderId === myUid;
+                    const cssClass = isMine ? 'chat-msg-sent' : 'chat-msg-received';
+                    const timeStr = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    return `
+                    <div class="${cssClass}">
+                        <p>${m.text.replace(/\n/g, '<br>')}</p>
+                        <p class="text-[9px] opacity-60 text-right mt-1">${timeStr}</p>
+                    </div>`;
+                }).join('');
+                
+                // Scroll to bottom
+                container.scrollTop = container.scrollHeight;
+            });
+        };
+
+        window.stopChatMessagesListener = () => {
+            if(activeChatRef) off(activeChatRef);
+            activeChatRef = null;
+        };
+
+        window.sendChatMessage = async () => {
+            if(!auth.currentUser || !window.activeChatRoomId || !window.activeChatOtherUserId) return;
+            
+            const input = document.getElementById('chat-message-input');
+            const text = input.value.trim();
+            if(!text) return;
+            
+            const myUid = auth.currentUser.uid;
+            const otherUid = window.activeChatOtherUserId;
+            const chatId = window.activeChatRoomId;
+
+            // Controlla se l'altro utente mi ha bloccato (Security lato client)
+            const blockedCheck = await get(ref(db, `users/${otherUid}/blockedUsers/${myUid}`));
+            if(blockedCheck.exists()) {
+                window.showToast("Non puoi inviare messaggi a questo utente.");
+                input.value = "";
+                return;
+            }
+
+            const timestamp = Date.now();
+            
+            // 1. Aggiunge il messaggio
+            push(ref(db, `chats/${chatId}/messages`), {
+                senderId: myUid,
+                text: text,
+                timestamp: timestamp
+            });
+            
+            // 2. Aggiorna i metadati chat in ENTRAMBI i profili
+            update(ref(db, `users/${myUid}/chats/${chatId}`), {
+                lastMessage: text,
+                timestamp: timestamp,
+                otherUid: otherUid
+            });
+            update(ref(db, `users/${otherUid}/chats/${chatId}`), {
+                lastMessage: text,
+                timestamp: timestamp,
+                otherUid: myUid
+            });
+
+            input.value = '';
+        };
+
+        // Permetti Invio con "Enter" senza shift
+        document.getElementById('chat-message-input').addEventListener('keydown', function(e) {
+            if(e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                window.sendChatMessage();
+            }
+        });
+
+        window.executeBlockUser = async (targetUid) => {
+            if(!auth.currentUser) return;
+            await set(ref(db, `users/${auth.currentUser.uid}/blockedUsers/${targetUid}`), true);
+            window.showToast("Utente bloccato.");
+        };
 
         // --- SISTEMA FRIEND REQUEST ---
         window.sendFriendRequestFromModal = async () => {
@@ -1922,6 +2282,25 @@
                 document.getElementById('req-count').innerText = reqCount;
                 if(reqCount > 0) reqContainer.classList.remove('hidden'); else reqContainer.classList.add('hidden');
             });
+            
+            // --- Listener Chats Personali ---
+            onValue(ref(db, `users/${uid}/chats`), (s) => {
+                window.myChats = s.val() || {};
+                
+                // Opzionale: mostra un dot se ci sono chat
+                const chatDot = document.getElementById('chat-notification-dot');
+                if(Object.keys(window.myChats).length > 0) chatDot.classList.remove('hidden'); 
+                else chatDot.classList.add('hidden');
+
+                if(!document.getElementById('chat-list-modal').classList.contains('hidden')) {
+                    window.renderChatList(document.getElementById('chat-local-search').value.toLowerCase().trim());
+                }
+            });
+
+            // --- Listener Utenti Bloccati ---
+            onValue(ref(db, `users/${uid}/blockedUsers`), (s) => {
+                window.myBlockedUsers = s.val() || {};
+            });
 
             onValue(ref(db, `users/${uid}/likes`), (s) => {
                 window.likedTracks = new Set(Object.keys(s.val()||{}));
@@ -2120,7 +2499,7 @@
         window.reportPost = (pid, authorName) => {
             window.togglePostMenu(pid); 
             window.showToast("Apertura app mail...");
-            const email = "Report@aurasound.it";
+            const email = "report@pl-globalaura.com";
             const subject = encodeURIComponent("Segnalazione Post su Aura Social");
             const body = encodeURIComponent(`Ciao Team di Aura,\n\nVorrei segnalare il seguente post per violazione delle linee guida.\n\nID Post: ${pid}\nAutore: ${authorName}\n\nMotivazione della segnalazione: \n[Scrivi qui il motivo...]`);
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
@@ -2306,7 +2685,6 @@
                     const d = s.val();
                     if(!d) { c.innerHTML = '<p class="text-center text-gray-500 mt-4">No threads yet.</p>'; return; }
                     
-                    // FIX: Stessa logica per i post del profilo, garantendo la presenza dell'ID
                     const myPosts = Object.entries(d).map(([k, v]) => ({ ...v, id: k })).filter(p => p.authorId === auth.currentUser.uid);
                     
                     document.getElementById('sp-posts').innerText = myPosts.length;
