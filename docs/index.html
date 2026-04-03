@@ -1945,7 +1945,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, set, update, push, onValue, get, remove, serverTimestamp, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         
         const firebaseConfig = {
@@ -1963,18 +1963,32 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        window.loginWithGoogle = () => signInWithRedirect(auth, provider).catch(e => showToast(e.message));
-        
-        // Aggiungi questo per gestire eventuali errori quando l'utente torna alla pagina
-        getRedirectResult(auth).catch(e => {
-            if(e && e.message) window.showToast("Errore di login: " + e.message);
-        });
+        window.loginWithGoogle = async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                window.showToast("✓ Logged in successfully!");
+            } catch(e) {
+                if(e.code === 'auth/popup-blocked') {
+                    window.showToast("Pop-up blocked. Enable pop-ups and try again.");
+                } else if(e.code !== 'auth/cancelled-popup-request') {
+                    window.showToast("Login error: " + (e.message || e.code));
+                }
+                console.error('Login error:', e);
+            }
+        };
 
         window.handleLogout = () => signOut(auth).then(()=>window.location.reload());
         window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
         window.openAuthModal = () => document.getElementById('auth-modal').classList.remove('hidden');
         
-        window.handleProfileClick = () => auth.currentUser ? showSection('social') : window.openAuthModal();
+        window.handleProfileClick = () => {
+            if(auth.currentUser) {
+                showSection('social');
+                if(typeof window.loadSocialFeed === 'function') window.loadSocialFeed();
+            } else {
+                window.openAuthModal();
+            }
+        };
 
         // --- LOAD GLOBAL USERS FOR SEARCH (CON FUNZIONE DI FORZATURA) ---
         window.forceLoadAllUsers = async () => {
@@ -2252,13 +2266,17 @@
             if (user) {
                 window.loggedInUser = user;
                 document.getElementById('auth-dot').classList.remove('hidden');
-                document.getElementById('sp-avatar').src = user.photoURL || 'https://via.placeholder.com/150';
+                
+                const spAvatar = document.getElementById('sp-avatar');
+                if(spAvatar) spAvatar.src = user.photoURL || 'https://via.placeholder.com/150';
                 
                 const miniAvatar = document.getElementById('social-mini-avatar-new');
                 if(miniAvatar) miniAvatar.src = user.photoURL || 'https://via.placeholder.com/150';
 
-                document.getElementById('sp-name').innerText = user.displayName;
-                document.getElementById('sp-handle').innerText = "@" + user.email.split('@')[0];
+                const spName = document.getElementById('sp-name');
+                const spHandle = document.getElementById('sp-handle');
+                if(spName) spName.innerText = user.displayName;
+                if(spHandle) spHandle.innerText = "@" + user.email.split('@')[0];
                 
                 // Update user details for search
                 update(ref(db, `users/${user.uid}`), {
@@ -2268,9 +2286,16 @@
                 });
 
                 syncUserLibrary(user.uid);
-                closeAuthModal();
+                window.closeAuthModal();
+                
+                // Carica social feed quando l'utente è autenticato
+                if(typeof window.loadSocialFeed === 'function') {
+                    setTimeout(() => window.loadSocialFeed(), 300);
+                }
+            } else {
+                window.loggedInUser = null;
+                document.getElementById('auth-dot').classList.add('hidden');
             }
-            if(typeof window.loadSocialFeed === 'function') window.loadSocialFeed(); 
         });
 
         window.saveProfileChanges = async () => {
@@ -2547,13 +2572,21 @@
 
         // --- SISTEMA SOCIAL FEED FIXATO & TRADOTTO ---
         window.loadSocialFeed = () => {
+            if(!auth.currentUser) return; // Non caricare se non autenticato
+            
+            const feedContainer = document.getElementById('social-feed-container');
+            if(!feedContainer) return; // Non caricare se il contenitore non esiste
+            
             const postsRef = ref(db, 'posts');
             off(postsRef); // Rimuove listener precedenti per evitare duplicati
             onValue(postsRef, async (snap) => {
                 const data = snap.val();
                 const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
 
-                if(!data) { document.getElementById('social-feed-container').innerHTML = `<p class="text-center text-gray-500 mt-10">${t.loading_feed}</p>`; return; }
+                if(!data) { 
+                    feedContainer.innerHTML = `<p class="text-center text-gray-500 mt-10">${t.loading_feed}</p>`; 
+                    return; 
+                }
                 
                 // Estrae l'ID direttamente dalla chiave Firebase per assicurarsi che i post dei bot eliminando bug o id non validi
                 let posts = Object.entries(data).map(([key, val]) => ({ ...val, id: key })).sort((a,b) => b.timestamp - a.timestamp);
@@ -2583,7 +2616,7 @@
                     }
                 }));
                 
-                document.getElementById('social-feed-container').innerHTML = posts.map(p => {
+                feedContainer.innerHTML = posts.map(p => {
                     const isLiked = auth.currentUser && p.likes && p.likes[auth.currentUser.uid];
                     const likes = p.likes ? Object.keys(p.likes).length : 0;
                     const comments = p.comments ? Object.keys(p.comments).length : 0;
