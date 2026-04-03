@@ -1945,7 +1945,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, set, update, push, onValue, get, remove, serverTimestamp, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         
         const firebaseConfig = {
@@ -1963,7 +1963,13 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        window.loginWithGoogle = () => signInWithPopup(auth, provider).catch(e => showToast(e.message));
+        window.loginWithGoogle = () => signInWithRedirect(auth, provider).catch(e => showToast(e.message));
+        
+        // Aggiungi questo per gestire eventuali errori quando l'utente torna alla pagina
+        getRedirectResult(auth).catch(e => {
+            if(e && e.message) window.showToast("Errore di login: " + e.message);
+        });
+
         window.handleLogout = () => signOut(auth).then(()=>window.location.reload());
         window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
         window.openAuthModal = () => document.getElementById('auth-modal').classList.remove('hidden');
@@ -2549,7 +2555,7 @@
 
                 if(!data) { document.getElementById('social-feed-container').innerHTML = `<p class="text-center text-gray-500 mt-10">${t.loading_feed}</p>`; return; }
                 
-                // Estrae l'ID direttamente dalla chiave Firebase per assicurarsi che i post dei bot abbiano sempre un ID valido
+                // Estrae l'ID direttamente dalla chiave Firebase per assicurarsi che i post dei bot eliminando bug o id non validi
                 let posts = Object.entries(data).map(([key, val]) => ({ ...val, id: key })).sort((a,b) => b.timestamp - a.timestamp);
                 
                 // Filtra i post nascosti
