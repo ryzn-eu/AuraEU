@@ -499,7 +499,7 @@
                         </button>
                         
                         <button onclick="toggleSocialSearch()" class="text-gray-300 hover:text-white transition"><i data-lucide="search" class="w-5 h-5"></i></button>
-                        <img id="social-mini-avatar-new" src="https://via.placeholder.com/150" class="w-7 h-7 rounded-full object-cover border border-white/20 cursor-pointer hover:scale-105 transition" onclick="showSection('profile')" alt="Profile Settings">
+                        <img id="social-mini-avatar-new" src="https://via.placeholder.com/150" class="w-7 h-7 rounded-full object-cover border border-white/20 cursor-pointer hover:scale-105 transition" onclick="openSettingsModal()" alt="Profile Settings">
                     </div>
                 </div>
 
@@ -1387,6 +1387,7 @@
             document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); 
             document.getElementById(id+'-section').classList.add('active'); 
             if(id==='music') renderHistoryGrid(); 
+            if(id==='social' && typeof window.loadSocialFeed === 'function') window.loadSocialFeed();
 
             // Logica scambio Header
             const globalHeader = document.getElementById('main-global-header');
@@ -2009,6 +2010,13 @@
                 if(!document.getElementById('chat-list-modal').classList.contains('hidden')) {
                     window.renderChatList(document.getElementById('chat-local-search').value.toLowerCase().trim());
                 }
+            } else {
+                // Dati di test se non ci sono utenti nel database
+                window.ALL_USERS = [
+                    { uid: 'test-user-1', name: 'Music Lover', pic: 'https://via.placeholder.com/150', email: 'test@example.com' },
+                    { uid: 'test-user-2', name: 'DJ Producer', pic: 'https://via.placeholder.com/150', email: 'dj@example.com' },
+                    { uid: 'aura-ai-bot', name: 'Aura AI', pic: 'https://via.placeholder.com/150', email: 'ai@aura.com' }
+                ];
             }
         });
 
@@ -2352,6 +2360,17 @@
             onValue(ref(db, `users/${uid}/chats`), (s) => {
                 window.myChats = s.val() || {};
                 
+                // Aggiungi chat di test se non ce ne sono
+                if(Object.keys(window.myChats).length === 0) {
+                    window.myChats = {
+                        'test-chat-1': {
+                            otherUid: 'aura-ai-bot',
+                            lastMessage: 'Welcome to Aura! 🎵',
+                            timestamp: Date.now() - 3600000
+                        }
+                    };
+                }
+                
                 // Opzionale: mostra un dot se ci sono chat
                 const chatDot = document.getElementById('chat-notification-dot');
                 if(Object.keys(window.myChats).length > 0) chatDot.classList.remove('hidden'); 
@@ -2584,7 +2603,37 @@
                 const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
 
                 if(!data) { 
-                    feedContainer.innerHTML = `<p class="text-center text-gray-500 mt-10">${t.loading_feed}</p>`; 
+                    // Crea alcuni post di esempio se la feed è vuota
+                    feedContainer.innerHTML = `<div class="text-center mt-10">
+                        <div class="w-16 h-16 bg-gradient-to-r from-violet-500/20 to-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="rss" class="w-8 h-8 text-violet-400"></i>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-2">Welcome to Aura Social!</p>
+                        <p class="text-gray-500 text-xs mb-4">Discover music, connect with friends, and explore AI-powered content.</p>
+                        <div class="space-y-3 text-left max-w-sm mx-auto">
+                            <div class="p-3 bg-white/5 rounded-xl border border-white/10">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div class="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center">
+                                        <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-cyan-400">Aura AI</span>
+                                </div>
+                                <p class="text-sm text-gray-300">🎵 Discover new music with AI-powered recommendations!</p>
+                            </div>
+                            <div class="p-3 bg-white/5 rounded-xl border border-white/10">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div class="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center">
+                                        <i data-lucide="users" class="w-4 h-4 text-white"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-pink-400">Community</span>
+                                </div>
+                                <p class="text-sm text-gray-300">Connect with music lovers from around the world!</p>
+                            </div>
+                        </div>
+                        <button onclick="openComposeModal()" class="mt-6 px-4 py-2 bg-violet-500/20 text-violet-400 rounded-full text-sm font-bold hover:bg-violet-500/30 transition">
+                            Share Your First Post
+                        </button>
+                    </div>`; 
                     return; 
                 }
                 
@@ -2606,10 +2655,20 @@
                             } else {
                                 // Fallback a Google Translate se il bot non ha integrato la lingua selezionata
                                 const baseText = transObj['en'] || transObj[Object.keys(transObj)[0]] || rawText;
-                                p.finalText = await window.translateTextFree(baseText, window.currentLang);
+                                try {
+                                    p.finalText = await window.translateTextFree(baseText, window.currentLang);
+                                } catch(translateError) {
+                                    console.warn('Translation failed, using base text:', translateError);
+                                    p.finalText = baseText;
+                                }
                             }
                         } catch(e) {
-                            p.finalText = await window.translateTextFree(rawText, window.currentLang);
+                            try {
+                                p.finalText = await window.translateTextFree(rawText, window.currentLang);
+                            } catch(translateError) {
+                                console.warn('Translation failed, using raw text:', translateError);
+                                p.finalText = rawText;
+                            }
                         }
                     } else {
                         p.finalText = rawText;
