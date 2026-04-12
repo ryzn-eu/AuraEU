@@ -764,7 +764,7 @@
         
         <div class="flex-1 flex flex-col items-center justify-start w-full mt-4 relative z-10">
             <div id="immersive-art-wrapper" class="immersive-art-container">
-                <img id="immersive-cover" src="" class="art-square" crossorigin="anonymous">
+                <img id="immersive-cover" src="" class="art-square">
             </div>
 
             <div class="text-center w-full px-4 mb-6 mt-4">
@@ -834,7 +834,7 @@
 
     <div onclick="enterImmersiveMode()" class="player-bar-new cursor-pointer">
         <div class="flex items-center gap-3 flex-1 overflow-hidden">
-            <img id="player-cover" src="https://via.placeholder.com/64" class="w-10 h-10 rounded-lg object-cover bg-white/10" crossorigin="anonymous">
+            <img id="player-cover" src="https://via.placeholder.com/64" class="w-10 h-10 rounded-lg object-cover bg-white/10">
             <div class="flex flex-col overflow-hidden">
                 <div id="player-title-wrapper" class="w-32 overflow-hidden h-5"><p id="player-title" class="text-sm font-bold truncate text-white">Not Playing</p></div>
                 <p id="player-artist" class="text-xs text-gray-400 truncate">Tap to play</p>
@@ -962,7 +962,7 @@
                 add_session: "Hinzufügen zu...", create: "Erstellen", cancel: "Abbrechen", rec_title: "Empfohlen", trend_title: "Im Trend", 
                 chill_title: "Entspannung", class_title: "Klassiker", new_release: "Offizielle Neuerscheinung",
                 social_stories: "Geschichten", social_discover: "Entdecken", social_search: "Benutzer suchen...", new_post: "Neuer Beitrag", 
-                like: "Gefällt mir", reply: "Antworten", share: "Teilen", add_story: "Hinzufügen", loading_feed: "Wird geladen...", write_something: "Woran denkst du?", anyone_reply: "Jeder kann antworten", post_btn: "Posten"
+                like: "Gefällt mir", reply: "Antworten", share: "Teilen", add_story: "Hinzufügen", loading_feed: "Wird geladen...", write_something: "Woran denkst du?", anyone_reply: "Jeder può rispondere", post_btn: "Posten"
             },
             ro: { 
                 greeting_m: "Bună Dimineața.", greeting_a: "Bună Ziua.", greeting_e: "Bună Seara.", saved_tracks: "Piese Salvate", sessions: "Sesiuni", 
@@ -1209,7 +1209,14 @@
                 
                 AURA_MAP = rawTracks.map((t, index) => {
                     let coverUrl = "https://via.placeholder.com/300";
-                    if(t.cover) { coverUrl = t.cover; } else if(t.albumId) { coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png"; } else if (t.categoryID) { coverUrl = GITHUB_RAW_BASE + "Covers/" + t.categoryID + ".png"; }
+                    if(t.cover) { 
+                        coverUrl = t.cover; 
+                    } else if(t.albumId) { 
+                        coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png"; 
+                    } else if (t.categoryID) { 
+                        // Codifica correttamente il categoryID per gestire gli spazi
+                        coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.categoryID.trim()) + ".png"; 
+                    }
                     const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
                     const safeId = t.id ? String(t.id) : `track_${index}_${(t.title||'').replace(/[^a-zA-Z0-9]/g, '')}`;
                     return { ...t, internalId: safeId, title: t.title || "Unknown", artist: artistMap[t.artistId] || t.artist || "Unknown", audioUrl: rawAudioUrl, cover: coverUrl, status: t.Status, metadataExtracted: false };
