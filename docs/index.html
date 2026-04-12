@@ -962,7 +962,7 @@
                 add_session: "Hinzufügen zu...", create: "Erstellen", cancel: "Abbrechen", rec_title: "Empfohlen", trend_title: "Im Trend", 
                 chill_title: "Entspannung", class_title: "Klassiker", new_release: "Offizielle Neuerscheinung",
                 social_stories: "Geschichten", social_discover: "Entdecken", social_search: "Benutzer suchen...", new_post: "Neuer Beitrag", 
-                like: "Gefällt mir", reply: "Antworten", share: "Teilen", add_story: "Hinzufügen", loading_feed: "Wird geladen...", write_something: "Woran denkst du?", anyone_reply: "Jeder può rispondere", post_btn: "Posten"
+                like: "Gefällt mir", reply: "Antworten", share: "Teilen", add_story: "Hinzufügen", loading_feed: "Wird geladen...", write_something: "Woran denkst du?", anyone_reply: "Jeder kann antworten", post_btn: "Posten"
             },
             ro: { 
                 greeting_m: "Bună Dimineața.", greeting_a: "Bună Ziua.", greeting_e: "Bună Seara.", saved_tracks: "Piese Salvate", sessions: "Sesiuni", 
@@ -1165,6 +1165,22 @@
             });
         }
 
+        // --- DEBOUNCER PER AGGIORNAMENTI UI FLUIDI ---
+        let metadataDebounceTimer = null;
+        function debouncedUIRefresh() {
+            clearTimeout(metadataDebounceTimer);
+            metadataDebounceTimer = setTimeout(() => {
+                renderHistoryGrid();
+                renderHomePageWidgets();
+                if(document.getElementById('library-section').classList.contains('active')) { 
+                    window.renderGenericList(window.currentViewList); 
+                }
+                if(document.getElementById('playlists-section').classList.contains('active')) {
+                    window.renderPlaylists();
+                }
+            }, 500); // Aggiorna l'interfaccia 500ms dopo l'ultima modifica trovata
+        }
+
         function extractMetadataFromMP3(track) {
             if(!window.jsmediatags || track.metadataExtracted) return;
             window.jsmediatags.read(track.audioUrl, {
@@ -1181,13 +1197,18 @@
                     }
                     track.metadataExtracted = true; 
                     if(needsUIUpdate) {
-                        if(window.currentTrackData && window.currentTrackData.internalId === track.internalId) { updateUI(track); window.updateMediaSession(); }
-                        renderHistoryGrid();
-                        if(document.getElementById('library-section').classList.contains('active')) { window.renderGenericList(window.currentViewList); }
-                        renderHomePageWidgets();
+                        if(window.currentTrackData && window.currentTrackData.internalId === track.internalId) { 
+                            updateUI(track); 
+                            window.updateMediaSession(); 
+                        }
+                        // Chiamata ritardata intelligente per non far laggare il telefono
+                        debouncedUIRefresh();
                     }
                 },
-                onError: function(error) { console.warn("Nessun tag ID3 valido trovato in: " + track.title, error.info); track.metadataExtracted = true; }
+                onError: function(error) { 
+                    // Se non trova tag, marchiamo come estratto per non riprovare all'infinito
+                    track.metadataExtracted = true; 
+                }
             });
         }
 
@@ -1214,14 +1235,30 @@
                     } else if(t.albumId) { 
                         coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.albumId.trim()) + ".png"; 
                     } else if (t.categoryID) { 
-                        // Codifica correttamente il categoryID per gestire gli spazi
                         coverUrl = GITHUB_RAW_BASE + "Covers/" + encodeURIComponent(t.categoryID.trim()) + ".png"; 
                     }
                     const rawAudioUrl = GITHUB_RAW_BASE + "audio/" + encodeURIComponent(t.file.replace(/\s(\.[a-z0-9]+)$/i, '$1'));
                     const safeId = t.id ? String(t.id) : `track_${index}_${(t.title||'').replace(/[^a-zA-Z0-9]/g, '')}`;
                     return { ...t, internalId: safeId, title: t.title || "Unknown", artist: artistMap[t.artistId] || t.artist || "Unknown", audioUrl: rawAudioUrl, cover: coverUrl, status: t.Status, metadataExtracted: false };
                 });
-                window.renderStories(); renderHomePageWidgets(); renderHistoryGrid();
+                
+                // Disegna immediatamente l'interfaccia con i dati e copertine di default
+                window.renderStories(); 
+                renderHomePageWidgets(); 
+                renderHistoryGrid();
+
+                // --- SISTEMA DI ESTRAZIONE MP3 IN BACKGROUND ---
+                // Adesso appena i dati base sono caricati, scansioniamo i file per le copertine
+                AURA_MAP.forEach((track, index) => {
+                    // Scaglioniamo l'estrazione di 100 millisecondi tra un file e l'altro
+                    // Questo impedisce al browser di bloccarsi e gestisce il traffico di rete fluidamente
+                    setTimeout(() => {
+                        if (!track.metadataExtracted) {
+                            extractMetadataFromMP3(track);
+                        }
+                    }, index * 100); 
+                });
+
             } catch (e) { 
                 console.error("Data Load Error", e); 
             }
