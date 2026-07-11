@@ -16,7 +16,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
@@ -314,7 +313,7 @@
             align-self: flex-start; font-size: 13px; 
             word-break: break-word; margin-bottom: 8px;
         }
-        .chat-msg-container { display: flex; flex-direction: column; padding: 16px; overflow-y: auto; flex: 1; }
+        .chat-msg-container { display: flex; flex-direction: column; padding: 16px; overflow-y: auto; flex-1; }
         .chat-msg-container::-webkit-scrollbar { display: none; }
         
         .chat-item-card {
@@ -334,7 +333,7 @@
     <div id="install-blocker" class="hidden">
         <div class="min-h-screen flex flex-col items-center justify-center p-6 text-center relative">
             <div class="absolute inset-0 bg-gradient-to-b from-violet-900/20 via-[#050505] to-[#050505] pointer-events-none z-0"></div>
-            <img src="./logo.png" class="w-20 h-auto mb-6 z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" alt="Aura Logo" onerror="this.src='https://via.placeholder.com/150'">
+            <img src="./logo.png" class="w-20 h-auto mb-6 z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" alt="Aura Logo">
             <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400 mb-4 z-10">
                 Experience Aura
             </h1>
@@ -436,7 +435,7 @@
     <div class="container-app max-w-4xl mx-auto px-4 pt-6">
         <header id="main-global-header" class="flex justify-between items-center mb-4 transition-opacity">
             <div class="flex items-center gap-3 cursor-pointer" onclick="showSection('music')">
-                <img src="./logo.png" class="h-8 w-auto object-contain" alt="Aura Logo" onerror="this.src='https://via.placeholder.com/150'">
+                <img src="./logo.png" class="h-8 w-auto object-contain" alt="Aura Logo">
             </div>
             <div class="flex gap-2">
                 <button onclick="showSection('playlists')" class="p-2.5 glass-panel rounded-full hover:bg-white/10"><i data-lucide="list-music" class="w-5 h-5"></i></button>
@@ -464,7 +463,7 @@
                 <h2 id="home-greeting" class="text-2xl font-bold mb-4 px-1">Good Evening</h2>
                 <div id="home-history-grid" class="yt-grid-mobile-fix mb-8"></div>
                 <div id="home-widgets-container" class="space-y-8 pb-24">
-                    <p class="text-center text-gray-500">Loading Music...</p>
+                    <p class="text-center text-gray-500">Loading Top Charts...</p>
                 </div>
             </section>
 
@@ -489,7 +488,7 @@
                 
                 <div id="social-header" class="sticky top-0 bg-[#050505]/95 backdrop-blur-md z-30 py-3 px-4 flex justify-between items-center border-b border-white/5 mx--4">
                     <div class="flex items-center gap-2 cursor-pointer transition hover:scale-105" onclick="showSection('music')">
-                        <img src="./logo.png" class="h-6 w-auto object-contain" alt="Aura" onerror="this.src='https://via.placeholder.com/150'">
+                        <img src="./logo.png" class="h-6 w-auto object-contain" alt="Aura">
                     </div>
                     
                     <div class="flex items-center gap-4">
@@ -889,7 +888,6 @@
         window.openInstallGuideModal = () => document.getElementById('install-guide-modal').classList.remove('hidden');
         window.closeInstallGuideModal = () => document.getElementById('install-guide-modal').classList.add('hidden');
 
-        // Funzioni per aprire e chiudere il webview
         window.openWebView = (url) => {
             document.getElementById('webview-frame').src = url;
             document.getElementById('webview-modal').classList.remove('hidden');
@@ -899,12 +897,20 @@
             document.getElementById('webview-modal').classList.add('hidden');
         };
 
-        const API_VIDEOS = "https://pub-cbd786ebc7e3457ebfee1177b396f887.r2.dev/User_videos.json"; 
-        
+        // --- NEW API CONFIGURATION (ITUNES & INVIDIOUS) ---
+        const INVIDIOUS_INSTANCES = [
+            "https://vid.puffyan.us",
+            "https://yewtu.be",
+            "https://invidious.flokinet.to",
+            "https://invidious.nerdvpn.de",
+            "https://inv.tux.pizza",
+            "https://invidious.lunar.icu",
+            "https://invidious.privacydev.net"
+        ];
         const STORY_EMOJIS = {1: "💻", 2: "🎬", 3: "🚀", 4: "🪐", 5: "🧘"};
         
         var AURA_MAP = [], ARTISTS_FULL_LIST = [], USER_VIDEOS = [];
-        var currentTrackData = null, audioPlayer = null, isLooping = false, likedTracks = new Set(), userPlaylists = [], listeningHistory = [], loggedInUser = null;
+        var currentTrackData = null, isLooping = false, likedTracks = new Set(), userPlaylists = [], listeningHistory = [], loggedInUser = null;
         var isLyricsMode = false, currentLyrics = [], currentTranslationLyrics = [];
         var isTranslationEnabled = false, currentAmbientMode = null, gyroEnabled = false, currentLang = 'en';
         var viewer360 = null; 
@@ -913,119 +919,30 @@
         var currentViewList = [];     
         var activePlaybackQueue = []; 
 
-        window.ALL_USERS = [];
-        window.FIREBASE_STORIES = [];
-        window.myFriends = {};
-        window.myFollowers = {};
-        window.myFollowing = {};
-        window.myFriendRequests = {};
-        
-        // Chat state
-        window.myChats = {}; 
-        window.myBlockedUsers = {};
-        window.activeChatRoomId = null;
-        window.activeChatOtherUserId = null;
+        window.ALL_USERS = []; window.FIREBASE_STORIES = []; window.myFriends = {}; window.myFollowers = {}; window.myFollowing = {}; window.myFriendRequests = {};
+        window.myChats = {}; window.myBlockedUsers = {}; window.activeChatRoomId = null; window.activeChatOtherUserId = null;
+
+        var audioPlayer; // Restore native audio player
 
         const TRANSLATIONS = {
-            en: { 
-                greeting_m: "Good Morning.", greeting_a: "Good Afternoon.", greeting_e: "Good Evening.", saved_tracks: "Saved Tracks", sessions: "Sessions", 
-                caps_title: "Time Capsule", caps_desc: "Seal this track.", btn_seal: "Seal", btn_cancel: "Cancel", new_session: "New Session", 
-                add_session: "Add to Session", create: "Create", cancel: "Cancel", rec_title: "Recommended", trend_title: "Trending Now", 
-                chill_title: "Relax & Chill", class_title: "Classics", new_release: "Official New Release",
-                social_stories: "Aura Stories", social_discover: "Discover Feed", social_search: "Search users...", new_post: "New Post", 
-                like: "Like", reply: "Reply", share: "Share", add_story: "Add Story", loading_feed: "Loading feed...", write_something: "What's playing in your mind?", anyone_reply: "Anyone can reply", post_btn: "Post"
-            },
-            it: { 
-                greeting_m: "Buongiorno.", greeting_a: "Buon Pomeriggio.", greeting_e: "Buonasera.", saved_tracks: "Brani Salvati", sessions: "Sessioni", 
-                caps_title: "Capsula Temporale", caps_desc: "Sigilla il brano.", btn_seal: "Sigilla", btn_cancel: "Annulla", new_session: "Nuova Sessione", 
-                add_session: "Aggiungi a...", create: "Crea", cancel: "Annulla", rec_title: "Consigliati", trend_title: "In Tendenza", 
-                chill_title: "Relax", class_title: "Classici", new_release: "Ultima Uscita Ufficiale",
-                social_stories: "Storie", social_discover: "Esplora Feed", social_search: "Cerca utenti...", new_post: "Nuovo Post", 
-                like: "Mi Piace", reply: "Rispondi", share: "Condividi", add_story: "Aggiungi", loading_feed: "Caricamento feed...", write_something: "A cosa stai pensando?", anyone_reply: "Chiunque può rispondere", post_btn: "Pubblica"
-            },
-            es: { 
-                greeting_m: "Buenos Días.", greeting_a: "Buenas Tardes.", greeting_e: "Buenas Noches.", saved_tracks: "Canciones Guardadas", sessions: "Sesiones", 
-                caps_title: "Cápsula del Tiempo", caps_desc: "Sellar esta pista.", btn_seal: "Sellar", btn_cancel: "Cancelar", new_session: "Nueva Sesión", 
-                add_session: "Añadir a...", create: "Crear", cancel: "Cancelar", rec_title: "Recomendados", trend_title: "Tendencias", 
-                chill_title: "Relax", class_title: "Clásicos", new_release: "Nuevo Lanzamiento Oficial",
-                social_stories: "Historias", social_discover: "Descubrir", social_search: "Buscar usuarios...", new_post: "Nuevo Post", 
-                like: "Me Gusta", reply: "Responder", share: "Compartir", add_story: "Añadir", loading_feed: "Cargando...", write_something: "¿Qué tienes en mente?", anyone_reply: "Cualquiera puede responder", post_btn: "Publicar"
-            },
-            de: { 
-                greeting_m: "Guten Morgen.", greeting_a: "Guten Tag.", greeting_e: "Guten Abend.", saved_tracks: "Gespeicherte Titel", sessions: "Sitzungen", 
-                caps_title: "Zeitkapsel", caps_desc: "Diesen Titel versiegeln.", btn_seal: "Versiegeln", btn_cancel: "Abbrechen", new_session: "Neue Sitzung", 
-                add_session: "Hinzufügen zu...", create: "Erstellen", cancel: "Abbrechen", rec_title: "Empfohlen", trend_title: "Im Trend", 
-                chill_title: "Entspannung", class_title: "Klassiker", new_release: "Offizielle Neuerscheinung",
-                social_stories: "Geschichten", social_discover: "Entdecken", social_search: "Benutzer suchen...", new_post: "Neuer Beitrag", 
-                like: "Gefällt mir", reply: "Antworten", share: "Teilen", add_story: "Hinzufügen", loading_feed: "Wird geladen...", write_something: "Woran denkst du?", anyone_reply: "Jeder kann antworten", post_btn: "Posten"
-            },
-            ro: { 
-                greeting_m: "Bună Dimineața.", greeting_a: "Bună Ziua.", greeting_e: "Bună Seara.", saved_tracks: "Piese Salvate", sessions: "Sesiuni", 
-                caps_title: "Capsula Timpului", caps_desc: "Sigilează această piesă.", btn_seal: "Sigilează", btn_cancel: "Anulează", new_session: "Sesiune Nouă", 
-                add_session: "Adaugă la...", create: "Creează", cancel: "Anulează", rec_title: "Recomandate", trend_title: "În Tendințe", 
-                chill_title: "Relaxare", class_title: "Clasice", new_release: "Lansare Oficială Nouă",
-                social_stories: "Povești", social_discover: "Descoperă", social_search: "Caută utilizatori...", new_post: "Postare Nouă", 
-                like: "Îmi place", reply: "Răspunde", share: "Distribuie", add_story: "Adaugă", loading_feed: "Se încarcă...", write_something: "La ce te gândești?", anyone_reply: "Oricine poate răspunde", post_btn: "Postează"
-            },
-            ar: { 
-                greeting_m: "صباح الخير", greeting_a: "مساء الخير", greeting_e: "مساء النور", saved_tracks: "الأغاني المحفوظة", sessions: "جلسات", 
-                caps_title: "كبسولة الزمن", caps_desc: "ختم هذا المسار", btn_seal: "ختم", btn_cancel: "إلغاء", new_session: "جلسة جديدة", 
-                add_session: "إضافة إلى...", create: "إنشاء", cancel: "إلغاء", rec_title: "موصى به", trend_title: "رائج الآن", 
-                chill_title: "استرخاء", class_title: "كلاسيكيات", new_release: "إصدار رسمي جديد",
-                social_stories: "قصص", social_discover: "اكتشف", social_search: "البحث عن المستخدمين...", new_post: "منشور جديد", 
-                like: "إعجاب", reply: "رد", share: "مشاركة", add_story: "إضافة", loading_feed: "جار التحميل...", write_something: "بم تفكر؟", anyone_reply: "يمكن لأي شخص الرد", post_btn: "نشر"
-            }
+            en: { greeting_m: "Good Morning.", greeting_a: "Good Afternoon.", greeting_e: "Good Evening.", saved_tracks: "Saved Tracks", sessions: "Sessions", caps_title: "Time Capsule", caps_desc: "Seal this track.", btn_seal: "Seal", btn_cancel: "Cancel", new_session: "New Session", add_session: "Add to Session", create: "Create", cancel: "Cancel", rec_title: "Recommended", trend_title: "Trending Now", chill_title: "Relax & Chill", class_title: "Classics", new_release: "Official New Release", social_stories: "Aura Stories", social_discover: "Discover Feed", social_search: "Search users...", new_post: "New Post", like: "Like", reply: "Reply", share: "Share", add_story: "Add Story", loading_feed: "Loading feed...", write_something: "What's playing in your mind?", anyone_reply: "Anyone can reply", post_btn: "Post" },
+            it: { greeting_m: "Buongiorno.", greeting_a: "Buon Pomeriggio.", greeting_e: "Buonasera.", saved_tracks: "Brani Salvati", sessions: "Sessioni", caps_title: "Capsula Temporale", caps_desc: "Sigilla il brano.", btn_seal: "Sigilla", btn_cancel: "Annulla", new_session: "Nuova Sessione", add_session: "Aggiungi a...", create: "Crea", cancel: "Annulla", rec_title: "Consigliati", trend_title: "In Tendenza", chill_title: "Relax", class_title: "Classici", new_release: "Ultima Uscita Ufficiale", social_stories: "Storie", social_discover: "Esplora Feed", social_search: "Cerca utenti...", new_post: "Nuovo Post", like: "Mi Piace", reply: "Rispondi", share: "Condividi", add_story: "Aggiungi", loading_feed: "Caricamento feed...", write_something: "A cosa stai pensando?", anyone_reply: "Chiunque può rispondere", post_btn: "Pubblica" },
+            es: { greeting_m: "Buenos Días.", greeting_a: "Buenas Tardes.", greeting_e: "Buenas Noches.", saved_tracks: "Canciones Guardadas", sessions: "Sesiones", caps_title: "Cápsula del Tiempo", caps_desc: "Sellar esta pista.", btn_seal: "Sellar", btn_cancel: "Cancelar", new_session: "Nueva Sesión", add_session: "Añadir a...", create: "Crear", cancel: "Cancelar", rec_title: "Recomendados", trend_title: "Tendencias", chill_title: "Relax", class_title: "Clásicos", new_release: "Nuevo Lanzamiento Oficial", social_stories: "Historias", social_discover: "Descubrir", social_search: "Buscar usuarios...", new_post: "Nuevo Post", like: "Me Gusta", reply: "Responder", share: "Compartir", add_story: "Añadir", loading_feed: "Cargando...", write_something: "¿Qué tienes en mente?", anyone_reply: "Cualquiera puede responder", post_btn: "Publicar" }
         };
 
         const LEGAL_TEXTS = {
-            terms: {
-                title: "Termini e Condizioni di Servizio",
-                content: `<p><strong>1. Accettazione dei Termini</strong><br>Scaricando, accedendo o utilizzando l'applicazione "Aura by Horizon" (di seguito "Aura" o l'"App"), accetti di essere legalmente vincolato dai presenti Termini di Servizio. Se non sei d'accordo con una qualsiasi delle disposizioni qui contenute, ti preghiamo di interrompere immediatamente l'utilizzo dell'applicazione. Aura è un prodotto gestito da AURA Music di Horizon Global (Conglomerato).</p>
-                <p><strong>2. Informazioni Aziendali</strong><br>AURA Music fa capo a Horizon Global (Conglomerato).<br>Sede Operativa (esclusivamente logistica/operativa, non aperta al pubblico): Vicolo Ritorto 5, 25050 San Gervasio Bresciano (BS), Italia.<br>Sede Centrale Legale: Drumul Onceștiului 4, Stanesti, Giurgiu, Romania.</p>
-                <p><strong>3. Descrizione del Servizio e Streaming Musicale</strong><br>Aura fornisce un servizio di streaming musicale immersivo, testi sincronizzati e funzionalità social. I contenuti musicali e i brani resi disponibili sulla piattaforma sono ricevuti, gestiti e distribuiti in collaborazione con <strong>Ryzn Music Group</strong>, la piattaforma ufficiale per il ricevimento e la gestione dei diritti dei brani su Aura. L'ascolto è concesso per uso strettamente personale e non commerciale.</p>
-                <p><strong>4. Funzionalità Social Network</strong><br>L'App integra un social network ("Aura Social") che permette agli utenti di creare post, condividere brani, interagire tramite commenti e "mi piace", e aggiungere altri utenti agli amici. L'utente è l'unico responsabile dei contenuti testuali, multimediali o link che pubblica. È severamente vietato pubblicare contenuti offensivi, diffamatori, illegali o che violino i diritti d'autore di terzi. Horizon Global si riserva il diritto di rimuovere qualsiasi contenuto e sospendere account senza preavviso in caso di violazioni.</p>
-                <p><strong>5. Proprietà Intellettuale</strong><br>Tutti i diritti sui brani musicali, loghi, design e codice dell'App appartengono ai rispettivi proprietari, inclusi Horizon Global e Ryzn Music Group. L'utente non acquisisce alcun diritto di proprietà sui brani ascoltati o scaricati temporaneamente nella cache dell'App.</p>
-                <p><strong>6. Modifiche e Risoluzione</strong><br>Ci riserviamo il diritto di modificare o interrompere il servizio, o di aggiornare questi termini in qualsiasi momento. L'uso continuato dell'App costituisce accettazione delle modifiche.</p>`
-            },
-            privacy: {
-                title: "Privacy Policy",
-                content: `<p><strong>1. Titolare del Trattamento</strong><br>I tuoi dati personali sono raccolti e gestiti da AURA Music di Horizon Global (Conglomerato), con sede centrale in Drumul Onceștiului 4, Stanesti, Giurgiu, Romania e sede operativa in Vicolo Ritorto 5, 25050 San Gervasio Bresciano (BS), Italia.</p>
-                <p><strong>2. Dati Raccolti</strong><br>Quando utilizzi Aura, raccogliamo le seguenti informazioni:<br>- <strong>Dati di base del profilo:</strong> Se effettui l'accesso tramite Google, riceviamo il tuo indirizzo email, il nome visualizzato e la foto del profilo.<br>- <strong>Dati di utilizzo e streaming:</strong> Raccogliamo la tua cronologia di ascolto, i brani salvati, le playlist create per personalizzare la tua esperienza e per scopi di reportistica interna con Ryzn Music Group.<br>- <strong>Dati Social:</strong> Qualsiasi testo, link, immagine o commento pubblicato nella sezione social di Aura, oltre alle interazioni (like, amicizie).</p>
-                <p><strong>3. Finalità del Trattamento</strong><br>Utilizziamo i tuoi dati per: fornire e migliorare il servizio di streaming musicale; mantenere e moderare la piattaforma social integrata; sincronizzare il tuo profilo cross-device; fornire raccomandazioni musicali accurate.</p>
-                <p><strong>4. Condivisione dei Dati</strong><br>I tuoi dati non vengono venduti a terzi. Possono essere condivisi con fornitori di servizi cloud (es. Google Firebase) necessari per il funzionamento dell'App, e dati aggregati (non personalmente identificabili) possono essere condivisi con Ryzn Music Group per il calcolo delle royalties e le statistiche di ascolto.</p>
-                <p><strong>5. Sicurezza dei Dati</strong><br>Adottiamo misure tecniche e organizzative rigorose per proteggere i tuoi dati da accessi non autorizzati, alterazioni o distruzioni.</p>`
-            },
-            data: {
-                title: "Trattamento dei Dati (GDPR)",
-                content: `<p><strong>1. Conformità al GDPR</strong><br>AURA Music di Horizon Global, operando anche sul territorio dell'Unione Europea (Sedi in Italia e Romania), gestisce i tuoi dati personali in totale conformità con il Regolamento Generale sulla Protezione dei Dati (GDPR - Regolamento UE 2016/679).</p>
-                <p><strong>2. Basi Giuridiche del Trattamento</strong><br>Trattiamo i tuoi dati sulla base di: <em>consenso esplicito</em> (quando ti registri ed entri nella piattaforma social); <em>esecuzione di un contratto</em> (per fornirti lo streaming musicale richiesto); <em>legittimo interesse</em> (per migliorare i nostri servizi e prevenire frodi informatiche).</p>
-                <p><strong>3. I tuoi Diritti (Articoli 15-22 GDPR)</strong><br>In qualità di utente, hai il diritto di:<br>- <strong>Accesso:</strong> Richiedere una copia dei dati personali che conserviamo su di te.<br>- <strong>Rettifica:</strong> Correggere dati inaccurati o incompleti (modificabili anche via App).<br>- <strong>Cancellazione (Diritto all'oblio):</strong> Richiedere l'eliminazione permanente del tuo account e dei dati associati (inclusi i post sul social network).<br>- <strong>Portabilità:</strong> Ricevere i tuoi dati in un formato strutturato e leggibile da dispositivo automatico.<br>- <strong>Opposizione:</strong> Opporti al trattamento dei tuoi dati per finalità specifiche.</p>
-                <p><strong>4. Contatti per la Privacy</strong><br>Per esercitare i tuoi diritti o per qualsiasi domanda riguardante il trattamento dei tuoi dati da parte di AURA Music o Ryzn Music Group, puoi indirizzare le tue richieste per iscritto alla sede legale in Romania o alla sede operativa in Italia (Vicolo Ritorto 5, San Gervasio Bresciano).</p>`
-            }
+            terms: { title: "Termini e Condizioni di Servizio", content: `<p><strong>1. Accettazione dei Termini</strong><br>Scaricando, accedendo o utilizzando l'applicazione "Aura by Horizon" (di seguito "Aura" o l'"App"), accetti di essere legalmente vincolato dai presenti Termini di Servizio. Se non sei d'accordo con una qualsiasi delle disposizioni qui contenute, ti preghiamo di interrompere immediatamente l'utilizzo dell'applicazione. Aura è un prodotto gestito da AURA Music di Horizon Global (Conglomerato).</p><p><strong>2. Informazioni Aziendali</strong><br>AURA Music fa capo a Horizon Global (Conglomerato).<br>Sede Operativa (esclusivamente logistica/operativa, non aperta al pubblico): Vicolo Ritorto 5, 25050 San Gervasio Bresciano (BS), Italia.<br>Sede Centrale Legale: Drumul Onceștiului 4, Stanesti, Giurgiu, Romania.</p><p><strong>3. Descrizione del Servizio e Streaming Musicale</strong><br>Aura fornisce un servizio di streaming musicale immersivo, testi sincronizzati e funzionalità social. L'ascolto è concesso per uso strettamente personale e non commerciale.</p>` },
+            privacy: { title: "Privacy Policy", content: `<p><strong>1. Titolare del Trattamento</strong><br>I tuoi dati personali sono raccolti e gestiti da AURA Music di Horizon Global.</p><p><strong>2. Dati Raccolti</strong><br>Dati di base del profilo, cronologia, dati social.</p>` },
+            data: { title: "Trattamento dei Dati (GDPR)", content: `<p><strong>1. Conformità al GDPR</strong><br>AURA Music gestisce i tuoi dati personali in totale conformità con il Regolamento Generale sulla Protezione dei Dati (GDPR).</p>` }
         };
 
-        window.openLegalModal = (type) => {
-            const data = LEGAL_TEXTS[type];
-            if(!data) return;
-            document.getElementById('legal-modal-title').innerText = data.title;
-            document.getElementById('legal-modal-content').innerHTML = data.content;
-            document.getElementById('legal-modal').classList.remove('hidden');
-        };
+        window.openLegalModal = (type) => { const data = LEGAL_TEXTS[type]; if(!data) return; document.getElementById('legal-modal-title').innerText = data.title; document.getElementById('legal-modal-content').innerHTML = data.content; document.getElementById('legal-modal').classList.remove('hidden'); };
         window.closeLegalModal = () => document.getElementById('legal-modal').classList.add('hidden');
 
         function detectOSForInstallGuide() {
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            const guideIos = document.getElementById('guide-ios');
-            const guideAndroid = document.getElementById('guide-android');
-            const guideDesktop = document.getElementById('guide-desktop');
-
-            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-                if(guideIos) guideIos.classList.remove('hidden');
-            } else if (/android/i.test(userAgent)) {
-                if(guideAndroid) guideAndroid.classList.remove('hidden');
-            } else {
-                if(guideDesktop) guideDesktop.classList.remove('hidden');
-            }
+            const guideIos = document.getElementById('guide-ios'), guideAndroid = document.getElementById('guide-android'), guideDesktop = document.getElementById('guide-desktop');
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) { if(guideIos) guideIos.classList.remove('hidden'); } else if (/android/i.test(userAgent)) { if(guideAndroid) guideAndroid.classList.remove('hidden'); } else { if(guideDesktop) guideDesktop.classList.remove('hidden'); }
             if(window.lucide) lucide.createIcons();
         }
 
@@ -1041,304 +958,224 @@
             showSection('music');
         });
 
-        // --- SERVER TICKER (IP based) ---
-        function initServerTicker() {
-            const tickerEl = document.getElementById('server-location-text');
-            if(!tickerEl) return;
-            
-            fetch('https://ipapi.co/json/')
-                .then(res => res.json())
-                .then(data => {
-                    const serverNodes = {
-                        "IT": "Brescia",
-                        "FR": "Parigi",
-                        "DE": "Francoforte",
-                        "ES": "Madrid",
-                        "US": "New York",
-                        "GB": "Londra",
-                        "RO": "Bucarest",
-                        "CH": "Zurigo"
-                    };
-                    let node = serverNodes[data.country_code] || (data.country_name ? data.country_name : "Globale");
-                    tickerEl.innerText = `● SERVER IN USO: NODO DI ${node.toUpperCase()} - LATENZA OTTIMALE - AURA MUSIC LIVE`;
-                })
-                .catch(err => {
-                    tickerEl.innerText = `● SERVER IN USO: NODO GLOBALE - LATENZA OTTIMALE - AURA MUSIC LIVE`;
-                });
-        }
-
-        function initClock() {
-            const timeEl = document.getElementById('digital-clock-time');
-            const dateEl = document.getElementById('digital-clock-date');
-            if(!timeEl || !dateEl) return;
-            
-            const update = () => {
-                const now = new Date();
-                timeEl.innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                dateEl.innerText = now.toLocaleDateString(currentLang, {weekday: 'long', month: 'long', day: 'numeric'});
-            };
-            update();
-            setInterval(update, 1000);
-        }
-
-        window.openLikedSongs = () => {
-            const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
-            document.getElementById('txt-saved-tracks').innerText = t.saved_tracks;
-            window.currentViewList = Array.from(window.likedTracks);
-            window.showSection('library');
-            window.renderGenericList(window.currentViewList);
-        };
-
-        window.openPlaylist = (pid) => {
-            const p = window.userPlaylists.find(x => String(x.id) === String(pid));
-            if(!p) return;
-            document.getElementById('txt-saved-tracks').innerText = p.name;
-            window.currentViewList = p.tracks || [];
-            window.showSection('library');
-            window.renderGenericList(window.currentViewList);
-        };
-
-        window.renderGenericList = (idList) => {
-            const list = idList.map(id => window.AURA_MAP.find(t=>t.internalId === id)).filter(Boolean);
-            document.getElementById('liked-tracks-list').innerHTML = list.length ? list.map(t => `<div onclick="playTrackFromList('${t.internalId}')" class="yt-card"><img src="${t.cover}" loading="eager" decoding="sync" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('') : '<p class="text-xs text-gray-500 col-span-2 mt-4">No tracks found.</p>';
-            
-            const fab = document.getElementById('fab-play-list');
-            if(list.length > 0 && document.getElementById('library-section').classList.contains('active')) { 
-                fab.classList.remove('hidden'); 
-            } else { 
-                fab.classList.add('hidden'); 
-            }
-        };
-
-        window.playTrackFromList = (internalId) => {
-            window.activePlaybackQueue = [...window.currentViewList]; 
-            window.playTrack(internalId, true);
-        };
-
-        window.playCurrentList = () => {
-            if(!window.currentViewList || !window.currentViewList.length) return;
-            window.activePlaybackQueue = [...window.currentViewList]; 
-            window.playTrack(window.activePlaybackQueue[0], true);
-        };
-
-        function init360Joystick() {
-            const artWrapper = document.getElementById('immersive-art-wrapper');
-            let startX = 0, startY = 0, isDragging360 = false, isScrollingPage = false, initialYaw = 0, initialPitch = 0, autoRotateTimeout = null;
-
-            artWrapper.addEventListener('touchstart', (e) => {
-                if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return;
-                startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                isDragging360 = false; isScrollingPage = false;
-                initialYaw = window.viewer360.getYaw(); initialPitch = window.viewer360.getPitch();
-                clearTimeout(autoRotateTimeout);
-            }, {passive: true});
-
-            artWrapper.addEventListener('touchmove', (e) => {
-                if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return;
-                let currentX = e.touches[0].clientX, currentY = e.touches[0].clientY;
-                let deltaX = currentX - startX, deltaY = currentY - startY;
-
-                if(!isDragging360 && !isScrollingPage) {
-                    if(Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-                        if(Math.abs(deltaX) > Math.abs(deltaY)) { isDragging360 = true; } else { isScrollingPage = true; }
-                    }
-                }
-                if(isDragging360) {
-                    e.preventDefault(); 
-                    let fov = window.viewer360.getHfov();
-                    let yawFactor = fov / artWrapper.clientWidth;
-                    let pitchFactor = fov / artWrapper.clientHeight;
-                    window.viewer360.setYaw(initialYaw - (deltaX * yawFactor));
-                    window.viewer360.setPitch(initialPitch + (deltaY * pitchFactor));
-                }
-            }, {passive: false});
-
-            artWrapper.addEventListener('touchend', () => {
-                if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return;
-                clearTimeout(autoRotateTimeout);
-                autoRotateTimeout = setTimeout(() => { if(window.viewer360) window.viewer360.setPitch(0); }, 3000);
-            });
-        }
-
-        // --- FETCH DATI BLINDATO E SICURO ---
-        async function fetchData() {
-            try {
-                fetch(API_VIDEOS)
-                    .then(r => r.json())
-                    .then(vr => {
-                        USER_VIDEOS = vr || [];
-                        window.renderStories();
-                    }).catch(e => console.log(e));
-
-                const widgetsContainer = document.getElementById('home-widgets-container');
-                if(widgetsContainer) widgetsContainer.innerHTML = '<p class="text-center text-cyan-400 mt-10 animate-pulse">Sincronizzazione Aura Network in corso...</p>';
-
-                // API PUBBLICA E STABILE
-                const res = await fetch(`https://saavn.dev/api/search/songs?query=top+hits+${currentLang}`);
-                
-                if (!res.ok) throw new Error("Connessione API fallita");
-                
-                const chartsData = await res.json();
-                
-                let rawTracks = [];
-                if (chartsData.data && chartsData.data.results) {
-                    rawTracks = chartsData.data.results;
-                } else if (chartsData.data) {
-                    rawTracks = Array.isArray(chartsData.data) ? chartsData.data : Object.values(chartsData.data);
-                } else if (Array.isArray(chartsData)) {
-                    rawTracks = chartsData;
-                }
-
-                if(rawTracks.length === 0) {
-                    throw new Error("Dati API vuoti.");
-                }
-
-                // MAPPING PROFONDO E SICURO (evita che link non validi spacchino l'app)
-                AURA_MAP = rawTracks.map((t, index) => {
-                    let coverUrl = "https://via.placeholder.com/300";
-                    if(Array.isArray(t.image) && t.image.length > 0) {
-                        coverUrl = t.image[t.image.length-1].link || t.image[t.image.length-1].url;
-                    } else if(t.image) {
-                        coverUrl = typeof t.image === 'string' ? t.image : coverUrl;
-                    } else if (t.image_url) {
-                        coverUrl = t.image_url;
-                    }
-
-                    let audioUrl = "";
-                    if(Array.isArray(t.downloadUrl) && t.downloadUrl.length > 0) {
-                        audioUrl = t.downloadUrl[t.downloadUrl.length-1].link || t.downloadUrl[t.downloadUrl.length-1].url;
-                    } else if (Array.isArray(t.download_url) && t.download_url.length > 0) {
-                        audioUrl = t.download_url[t.download_url.length-1].link || t.download_url[t.download_url.length-1].url;
-                    } else {
-                        audioUrl = t.media_url || t.url || t.preview_url || "";
-                    }
-
-                    let artistName = "Unknown Artist";
-                    if (t.primaryArtists) {
-                        artistName = typeof t.primaryArtists === 'string' ? t.primaryArtists : (t.primaryArtists[0]?.name || "Unknown");
-                    } else if (t.singers) {
-                        artistName = t.singers;
-                    }
-
-                    return {
-                        internalId: String(t.id || index),
-                        title: t.name || t.song || t.title || "Unknown",
-                        artist: artistName,
-                        cover: coverUrl,
-                        audioUrl: audioUrl,
-                        metadataExtracted: true
-                    };
-                }).filter(t => t.audioUrl && t.audioUrl !== ""); // FILTRO SALVAVITA: scarta brani rotti
-
-                if (AURA_MAP.length === 0) {
-                    throw new Error("Nessun link audio valido estratto dall'API.");
-                }
-
-                ARTISTS_FULL_LIST = []; 
-                
-                renderHomePageWidgets(); 
-                renderHistoryGrid();
-
-            } catch (e) { 
-                console.error("Data Load Error", e); 
-                // FALLBACK LOCALE per garantire all'utente un'app che si avvia sempre
-                AURA_MAP = [{
-                    internalId: "aura_safe_1",
-                    title: "Aura System Online",
-                    artist: "Aura Network",
-                    cover: "https://via.placeholder.com/300/8b5cf6/ffffff?text=Aura",
-                    audioUrl: "https://assets.mixkit.co/active_storage/sfx/2515/2515-preview.m4a",
-                    metadataExtracted: true
-                }];
-                renderHomePageWidgets(); 
-                renderHistoryGrid();
-                const widgetsContainer = document.getElementById('home-widgets-container');
-                if(widgetsContainer) widgetsContainer.insertAdjacentHTML('afterbegin', `<p class="text-center text-red-500 mt-2 text-xs">Connessione server musicale lenta. Riprovare tra poco.</p>`);
-            }
-        }
-
         function getDOMElements() {
             audioPlayer = document.getElementById('audioPlayer');
-            audioPlayer.addEventListener('timeupdate', () => { updateProgress(); syncLyrics(); });
-            audioPlayer.addEventListener('ended', () => { if(!isLooping) skipForward(); else { audioPlayer.currentTime=0; audioPlayer.play(); } });
-            audioPlayer.addEventListener('play', () => { document.querySelector('.player-bar-new').classList.add('active'); document.querySelectorAll('#play-icon, #immersive-play-icon').forEach(i=>i.setAttribute('data-lucide','pause')); lucide.createIcons(); });
-            audioPlayer.addEventListener('pause', () => { document.querySelectorAll('#play-icon, #immersive-play-icon').forEach(i=>i.setAttribute('data-lucide','play')); lucide.createIcons(); });
+            audioPlayer.addEventListener('timeupdate', () => { updateProgress(); window.syncLyrics(audioPlayer.currentTime); });
+            audioPlayer.addEventListener('ended', () => { if(!isLooping) window.skipForward(); else { audioPlayer.currentTime=0; audioPlayer.play(); } });
+            audioPlayer.addEventListener('play', () => { document.querySelector('.player-bar-new').classList.add('active'); document.querySelectorAll('#play-icon, #immersive-play-icon').forEach(i=>i.setAttribute('data-lucide','pause')); if(window.lucide) lucide.createIcons(); });
+            audioPlayer.addEventListener('pause', () => { document.querySelectorAll('#play-icon, #immersive-play-icon').forEach(i=>i.setAttribute('data-lucide','play')); if(window.lucide) lucide.createIcons(); });
             const pBar = document.getElementById('progress-bar-immersive-container');
             pBar.addEventListener('click', (e) => { const rect = pBar.getBoundingClientRect(); if(audioPlayer.duration) audioPlayer.currentTime = ((e.clientX - rect.left) / rect.width) * audioPlayer.duration; });
         }
 
+        function initServerTicker() {
+            const tickerEl = document.getElementById('server-location-text');
+            if(!tickerEl) return;
+            fetch('https://ipapi.co/json/').then(res => res.json()).then(data => { const serverNodes = { "IT": "Brescia", "FR": "Parigi", "DE": "Francoforte", "ES": "Madrid", "US": "New York", "GB": "Londra", "RO": "Bucarest", "CH": "Zurigo" }; let node = serverNodes[data.country_code] || (data.country_name ? data.country_name : "Globale"); tickerEl.innerText = `● SERVER IN USO: NODO DI ${node.toUpperCase()} - LATENZA OTTIMALE - AURA MUSIC LIVE`; }).catch(err => { tickerEl.innerText = `● SERVER IN USO: NODO GLOBALE - LATENZA OTTIMALE - AURA MUSIC LIVE`; });
+        }
+
+        function initClock() {
+            const timeEl = document.getElementById('digital-clock-time'), dateEl = document.getElementById('digital-clock-date');
+            if(!timeEl || !dateEl) return;
+            const update = () => { const now = new Date(); timeEl.innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); dateEl.innerText = now.toLocaleDateString(currentLang, {weekday: 'long', month: 'long', day: 'numeric'}); };
+            update(); setInterval(update, 1000);
+        }
+
+        // --- NEW ITUNES MAPPER FUNCTIONS ---
+        function mapITunesRssTrack(t) {
+            let coverUrl = "https://via.placeholder.com/300";
+            if (t['im:image'] && t['im:image'].length > 0) {
+                // Prendi l'immagine e forzala a 600x600 per avere la massima qualità possibile
+                coverUrl = t['im:image'][t['im:image'].length - 1].label.replace(/170x170|55x55|60x60|100x100/g, '600x600');
+            }
+            return {
+                internalId: t.id.attributes['im:id'],
+                title: t['im:name'].label,
+                artist: t['im:artist'].label,
+                cover: coverUrl,
+                audioUrl: null, // Viene fetchata dinamicamente da Invidious al momento del click
+                status: "Standard",
+                categoryID: "Top Charts"
+            };
+        }
+
+        function mapITunesSearchTrack(t) {
+            let coverUrl = "https://via.placeholder.com/300";
+            if (t.artworkUrl100) {
+                coverUrl = t.artworkUrl100.replace('100x100', '600x600');
+            }
+            return {
+                internalId: String(t.trackId),
+                title: t.trackName,
+                artist: t.artistName,
+                cover: coverUrl,
+                audioUrl: null, // Viene fetchata dinamicamente da Invidious al momento del click
+                status: "Standard",
+                categoryID: "Search Results"
+            };
+        }
+
+        async function fetchData() {
+            try {
+                // Recupera l'IP dell'utente per capire le tendenze da caricare
+                let country = 'US';
+                try {
+                    const ipRes = await fetch('https://ipapi.co/json/');
+                    const ipData = await ipRes.json();
+                    if(ipData.country_code) country = ipData.country_code.toLowerCase();
+                } catch(e) { console.log('IP fetch failed, defaulting to US'); }
+
+                // Fetch Classifiche iTunes basate sulla nazione
+                const res = await fetch(`https://itunes.apple.com/${country}/rss/topsongs/limit=50/json`);
+                const data = await res.json();
+                
+                let tracks = data.feed.entry || [];
+                AURA_MAP = tracks.map(mapITunesRssTrack);
+                
+                if (AURA_MAP.length > 0) {
+                    AURA_MAP[0].status = "New"; // Mark the first one as top release
+                }
+                
+                window.renderStories(); 
+                renderHomePageWidgets(); 
+                renderHistoryGrid();
+            } catch (e) { 
+                console.error("Data Load Error from API", e); 
+                document.getElementById('home-widgets-container').innerHTML = '<p class="text-center text-red-500">Failed to load Top Charts.</p>';
+            }
+        }
+
+        window.performSearch = async () => {
+            const q = document.getElementById('search-input').value.trim();
+            if(!q) return;
+            try {
+                // Fetch ricerca su iTunes
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=20`);
+                const data = await res.json();
+                let results = data.results || [];
+                
+                const mappedResults = results.map(mapITunesSearchTrack);
+                
+                // Aggiunge alla mappa globale per abilitare il playback
+                mappedResults.forEach(r => {
+                    if(!AURA_MAP.find(t => t.internalId === r.internalId)) { AURA_MAP.push(r); }
+                });
+                
+                let html = mappedResults.map(t => `<div onclick="playTrack('${t.internalId}');closeSearchModal()" class="flex items-center gap-3 p-2 border-b border-white/10 cursor-pointer"><img src="${t.cover}" class="w-8 h-8 rounded"><p class="text-sm">${t.title}</p></div>`).join('');
+                document.getElementById('search-results').innerHTML = html || '<p class="text-xs text-gray-500 p-2">No results found.</p>';
+            } catch(e) {
+                console.error(e);
+                document.getElementById('search-results').innerHTML = '<p class="text-xs text-red-500 p-2">Search failed.</p>';
+            }
+        };
+
+        window.openLikedSongs = () => { const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en']; document.getElementById('txt-saved-tracks').innerText = t.saved_tracks; window.currentViewList = Array.from(window.likedTracks); window.showSection('library'); window.renderGenericList(window.currentViewList); };
+        window.openPlaylist = (pid) => { const p = window.userPlaylists.find(x => String(x.id) === String(pid)); if(!p) return; document.getElementById('txt-saved-tracks').innerText = p.name; window.currentViewList = p.tracks || []; window.showSection('library'); window.renderGenericList(window.currentViewList); };
+
+        window.renderGenericList = (idList) => {
+            const list = idList.map(id => window.AURA_MAP.find(t=>t.internalId === id)).filter(Boolean);
+            document.getElementById('liked-tracks-list').innerHTML = list.length ? list.map(t => `<div onclick="playTrackFromList('${t.internalId}')" class="yt-card"><img src="${t.cover}" loading="eager" decoding="sync" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('') : '<p class="text-xs text-gray-500 col-span-2 mt-4">No tracks found.</p>';
+            const fab = document.getElementById('fab-play-list');
+            if(list.length > 0 && document.getElementById('library-section').classList.contains('active')) { fab.classList.remove('hidden'); } else { fab.classList.add('hidden'); }
+        };
+
+        window.playTrackFromList = (internalId) => { window.activePlaybackQueue = [...window.currentViewList]; window.playTrack(internalId, true); };
+        window.playCurrentList = () => { if(!window.currentViewList || !window.currentViewList.length) return; window.activePlaybackQueue = [...window.currentViewList]; window.playTrack(window.activePlaybackQueue[0], true); };
+
+        function init360Joystick() {
+            const artWrapper = document.getElementById('immersive-art-wrapper'); let startX = 0, startY = 0, isDragging360 = false, isScrollingPage = false, initialYaw = 0, initialPitch = 0, autoRotateTimeout = null;
+            artWrapper.addEventListener('touchstart', (e) => { if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return; startX = e.touches[0].clientX; startY = e.touches[0].clientY; isDragging360 = false; isScrollingPage = false; initialYaw = window.viewer360.getYaw(); initialPitch = window.viewer360.getPitch(); clearTimeout(autoRotateTimeout); }, {passive: true});
+            artWrapper.addEventListener('touchmove', (e) => { if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return; let currentX = e.touches[0].clientX, currentY = e.touches[0].clientY, deltaX = currentX - startX, deltaY = currentY - startY; if(!isDragging360 && !isScrollingPage) { if(Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) { if(Math.abs(deltaX) > Math.abs(deltaY)) { isDragging360 = true; } else { isScrollingPage = true; } } } if(isDragging360) { e.preventDefault(); let fov = window.viewer360.getHfov(), yawFactor = fov / artWrapper.clientWidth, pitchFactor = fov / artWrapper.clientHeight; window.viewer360.setYaw(initialYaw - (deltaX * yawFactor)); window.viewer360.setPitch(initialPitch + (deltaY * pitchFactor)); } }, {passive: false});
+            artWrapper.addEventListener('touchend', () => { if(!window.viewer360 || !artWrapper.classList.contains('spacer-mode')) return; clearTimeout(autoRotateTimeout); autoRotateTimeout = setTimeout(() => { if(window.viewer360) window.viewer360.setPitch(0); }, 3000); });
+        }
+
         window.updateMediaSession = function() {
             if (!('mediaSession' in navigator)) return;
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: currentTrackData.title, artist: currentTrackData.artist, album: "Aura Music",
-                artwork: [ { src: currentTrackData.cover, sizes: '96x96', type: 'image/png' }, { src: currentTrackData.cover, sizes: '128x128', type: 'image/png' }, { src: currentTrackData.cover, sizes: '192x192', type: 'image/png' }, { src: currentTrackData.cover, sizes: '256x256', type: 'image/png' }, { src: currentTrackData.cover, sizes: '384x384', type: 'image/png' }, { src: currentTrackData.cover, sizes: '512x512', type: 'image/png' } ]
-            });
-            
-            navigator.mediaSession.setActionHandler('previoustrack', null);
-            navigator.mediaSession.setActionHandler('nexttrack', null);
-            navigator.mediaSession.setActionHandler('seekto', null);
-            navigator.mediaSession.setActionHandler('seekbackward', null);
-            navigator.mediaSession.setActionHandler('seekforward', null);
-            
-            navigator.mediaSession.setActionHandler('play', () => { audioPlayer.play(); });
-            navigator.mediaSession.setActionHandler('pause', () => { audioPlayer.pause(); });
+            navigator.mediaSession.metadata = new MediaMetadata({ title: currentTrackData.title, artist: currentTrackData.artist, album: "Aura Music", artwork: [ { src: currentTrackData.cover, sizes: '96x96', type: 'image/png' }, { src: currentTrackData.cover, sizes: '512x512', type: 'image/png' } ] });
+            navigator.mediaSession.setActionHandler('previoustrack', () => window.skipBackward()); navigator.mediaSession.setActionHandler('nexttrack', () => window.skipForward()); navigator.mediaSession.setActionHandler('seekto', null); navigator.mediaSession.setActionHandler('seekbackward', null); navigator.mediaSession.setActionHandler('seekforward', null);
+            navigator.mediaSession.setActionHandler('play', () => { audioPlayer.play(); }); navigator.mediaSession.setActionHandler('pause', () => { audioPlayer.pause(); });
         };
 
         window.updatePlayerButtonsState = () => {
             if(!window.currentTrackData) return;
             const trackId = window.currentTrackData.internalId;
-            
-            const likeBtn = document.getElementById('like-button-immersive');
-            if(likeBtn) {
-                if(window.likedTracks && window.likedTracks.has(trackId)) {
-                    likeBtn.classList.add('liked');
-                } else {
-                    likeBtn.classList.remove('liked');
-                }
-            }
-            
-            const plBtn = document.getElementById('playlist-button-immersive');
-            if(plBtn) {
-                const inAnyPlaylist = window.userPlaylists && window.userPlaylists.some(p => p.tracks && p.tracks.includes(trackId));
-                if(inAnyPlaylist) {
-                    plBtn.classList.add('in-playlist');
-                } else {
-                    plBtn.classList.remove('in-playlist');
-                }
-            }
+            const likeBtn = document.getElementById('like-button-immersive'); if(likeBtn) { if(window.likedTracks && window.likedTracks.has(trackId)) { likeBtn.classList.add('liked'); } else { likeBtn.classList.remove('liked'); } }
+            const plBtn = document.getElementById('playlist-button-immersive'); if(plBtn) { const inAnyPlaylist = window.userPlaylists && window.userPlaylists.some(p => p.tracks && p.tracks.includes(trackId)); if(inAnyPlaylist) { plBtn.classList.add('in-playlist'); } else { plBtn.classList.remove('in-playlist'); } }
         };
 
-        window.playTrack = (internalId, keepQueue = false) => {
+        // Timeout utility veloce per lo skipping istantaneo
+        async function fetchWithTimeout(resource, options = {}) {
+            const { timeout = 2500 } = options; // Straveloce: scatta dopo 2.5s e balza alla prossima
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            const response = await fetch(resource, { ...options, signal: controller.signal });
+            clearTimeout(id);
+            return response;
+        }
+
+        // Risolutore backend Invidious che rimbalza tra le API in base a stabilità e velocità
+        async function resolveInvidiousAudio(query) {
+            for (const instance of INVIDIOUS_INSTANCES) {
+                try {
+                    // Cerca il video
+                    const searchRes = await fetchWithTimeout(`${instance}/api/v1/search?q=${encodeURIComponent(query)}&type=video`, { timeout: 2500 });
+                    if (!searchRes.ok) continue;
+                    const searchData = await searchRes.json();
+                    if (!searchData || searchData.length === 0) continue;
+
+                    // Prova ad estrarre l'audio puro dai primi risultati (massimo 2 per non sprecare tempo)
+                    for (let i = 0; i < Math.min(2, searchData.length); i++) {
+                        const videoId = searchData[i].videoId;
+                        const videoRes = await fetchWithTimeout(`${instance}/api/v1/videos/${videoId}`, { timeout: 2500 });
+                        if (!videoRes.ok) continue;
+                        const videoInfo = await videoRes.json();
+                        
+                        // Trova solo gli stream audio
+                        let audioStreams = videoInfo.adaptiveFormats?.filter(f => f.type && f.type.startsWith('audio')) || [];
+                        if (audioStreams.length > 0) {
+                            // Prendi l'audio con il bitrate più alto
+                            audioStreams.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+                            return audioStreams[0].url;
+                        }
+                    }
+                } catch (e) {
+                    console.warn(`Instance ${instance} failed to resolve audio or timed out.`);
+                }
+            }
+            return null; // Tutte le istanze hanno fallito
+        }
+
+        window.playTrack = async (internalId, keepQueue = false) => {
             if (!keepQueue) window.activePlaybackQueue = []; 
-            const t = AURA_MAP.find(x => String(x.internalId) === String(internalId));
+            const t = AURA_MAP.find(x => x.internalId === internalId);
             if(!t) return;
-            currentTrackData = t; audioPlayer.src = t.audioUrl;
+            currentTrackData = t;
             
+            // Stato di caricamento UI visivo immediato per rassicurare l'utente
+            document.querySelectorAll('#player-title, #immersive-title').forEach(e => e.innerText = "Attendere...");
+            document.querySelectorAll('#player-artist, #immersive-artist').forEach(e => e.innerText = "Ricerca stream audio Invidious...");
+            
+            let audioUrl = t.audioUrl;
+            if (!audioUrl) {
+                const query = `${t.artist} ${t.title} audio`; // Aggiunto "audio" per forzare risultati migliori
+                audioUrl = await resolveInvidiousAudio(query);
+                if (audioUrl) {
+                    t.audioUrl = audioUrl; // Cache per non ricaricarla la volta successiva
+                } else {
+                    window.showToast("Impossibile trovare uno stream audio valido. Riprova con un altro brano.");
+                    updateUI(t); // Resetta la UI per evitare glitch
+                    return;
+                }
+            }
+
+            audioPlayer.src = audioUrl;
+            audioPlayer.play().catch(e => console.log("Playback error", e));
             window.updateMediaSession();
-            audioPlayer.play().catch(e => console.log("Play error", e));
             
             currentLyrics = []; 
             document.getElementById('lyrics-content-scroll').innerHTML = '<p class="text-sm text-white/50 text-center mt-10">Loading lyrics...</p>';
             document.getElementById('spotify-lyrics-card').classList.remove('active');
-            
-            const artWrapper = document.getElementById('immersive-art-wrapper');
-            const panoContainer = document.getElementById('panorama');
-            const panoOverlay = document.getElementById('panorama-overlay');
-            const coverImg = document.getElementById('immersive-cover');
-
-            if(window.viewer360) { window.viewer360.destroy(); window.viewer360 = null; }
-            panoContainer.innerHTML = ''; 
-
-            if(t.image360) {
-                artWrapper.classList.add('spacer-mode'); coverImg.classList.add('hidden'); panoContainer.classList.remove('hidden'); panoOverlay.classList.remove('hidden');
-                if (!document.getElementById('immersive-mode').classList.contains('hidden')) {
-                    setTimeout(() => { try { window.viewer360 = pannellum.viewer('panorama', { "type": "equirectangular", "panorama": t.image360, "autoLoad": true, "autoRotate": -2, "showControls": false, "draggable": false, "mouseZoom": false, "disableKeyboardCtrl": true }); } catch(e) {} }, 150);
-                }
-            } else {
-                artWrapper.classList.remove('spacer-mode'); coverImg.classList.remove('hidden'); panoContainer.classList.add('hidden'); panoOverlay.classList.add('hidden');
-            }
-
-            if(t.lrcUrl) { isLyricsMode = true; fetchSmartLyrics(t); } else { isLyricsMode = false; document.getElementById('spotify-lyrics-card').style.display = 'none'; }
+            document.getElementById('spotify-lyrics-card').style.display = 'none';
             
             updateUI(t);
             window.updatePlayerButtonsState();
@@ -1347,182 +1184,71 @@
             saveLocalData(); renderHistoryGrid();
         };
 
-        window.enterImmersiveMode = () => {
-            document.getElementById('immersive-mode').classList.remove('hidden');
-            if (currentTrackData && currentTrackData.image360 && !window.viewer360) {
-                setTimeout(() => { try { document.getElementById('panorama').innerHTML = ''; window.viewer360 = pannellum.viewer('panorama', { "type": "equirectangular", "panorama": currentTrackData.image360, "autoLoad": true, "autoRotate": -2, "showControls": false, "draggable": false, "mouseZoom": false, "disableKeyboardCtrl": true }); } catch(e) {} }, 150);
-            } else if (window.viewer360) { window.viewer360.resize(); }
-            window.updatePlayerButtonsState();
-        };
+        window.enterImmersiveMode = () => { document.getElementById('immersive-mode').classList.remove('hidden'); window.updatePlayerButtonsState(); };
+        window.updateProgress = () => { if(audioPlayer.duration) document.querySelectorAll('#progress-bar, #progress-bar-immersive').forEach(e=>e.style.width=(audioPlayer.currentTime/audioPlayer.duration*100)+'%'); };
 
         function updateUI(t) {
             document.querySelectorAll('#player-title, #immersive-title').forEach(e => e.innerText = t.title);
             document.querySelectorAll('#player-artist, #immersive-artist').forEach(e => e.innerText = t.artist);
             document.querySelectorAll('#player-cover, #immersive-cover').forEach(e => e.src = t.cover);
-            
             const img = new Image(); img.crossOrigin = "anonymous"; img.src = t.cover;
-            img.onload = () => { 
-                try { 
-                    const c = new ColorThief().getColor(img); 
-                    const rgb = `rgb(${c[0]},${c[1]},${c[2]})`; const rgba = `rgba(${c[0]},${c[1]},${c[2]}, 0.5)`;
-                    document.documentElement.style.setProperty('--primary', rgb); 
-                    document.getElementById('spotify-lyrics-card').style.backgroundColor = rgba;
-                } catch(e){} 
-            };
+            img.onload = () => { try { const c = new ColorThief().getColor(img); const rgb = `rgb(${c[0]},${c[1]},${c[2]})`; const rgba = `rgba(${c[0]},${c[1]},${c[2]}, 0.5)`; document.documentElement.style.setProperty('--primary', rgb); document.getElementById('spotify-lyrics-card').style.backgroundColor = rgba; } catch(e){} };
         }
 
-        function parseLrc(txt) {
-            const regex = /\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
-            return txt.split('\n').map(l => { const m=l.match(regex); return m ? {time: parseInt(m[1])*60+parseInt(m[2])+parseInt(m[3])/100, text: m[4].trim()} : null; }).filter(Boolean);
-        }
-
-        async function fetchSmartLyrics(track) {
-            try {
-                const originalRes = await fetch(track.lrcUrl);
-                if (!originalRes.ok) throw new Error("No lyric");
-                currentLyrics = parseLrc(await originalRes.text()); 
-                if (currentLang !== (track.originalLang || 'en')) {
-                    const transRes = await fetch(track.lrcUrl.replace('.lrc', `_${currentLang}.lrc`));
-                    if(transRes.ok) currentTranslationLyrics = parseLrc(await transRes.text());
-                }
-                renderLyrics(); 
-            } catch(e) { document.getElementById('spotify-lyrics-card').style.display = 'none'; }
-        }
-        
-        function renderLyrics() {
-            if(!currentLyrics.length) return;
-            const card = document.getElementById('spotify-lyrics-card');
-            card.style.display = 'block'; card.classList.add('active');
-            document.getElementById('lyrics-content-scroll').innerHTML = '<div style="height:30%"></div>' + currentLyrics.map((l,i) => {
-                let transHTML = (isTranslationEnabled && currentTranslationLyrics[i]) ? `<br><span class="lyric-translation">${currentTranslationLyrics[i].text}</span>` : "";
-                return `<p id="lyric-${i}" class="lyric-line" onclick="audioPlayer.currentTime=${l.time}">${l.text}${transHTML}</p>`;
-            }).join('') + '<div style="height:50%"></div>';
-        }
-
-        function syncLyrics() {
+        window.syncLyrics = (currentTime) => {
             if(!isLyricsMode || !currentLyrics.length) return;
-            const t = audioPlayer.currentTime;
-            let idx = currentLyrics.findIndex(l => l.time > t) - 1;
-            if(idx < 0) idx = currentLyrics.length - 1; 
-            document.querySelectorAll('.lyric-line').forEach(e => e.classList.remove('active'));
-            const el = document.getElementById(`lyric-${idx}`);
-            const container = document.getElementById('lyrics-content-scroll');
-            if(el && container) {
-                el.classList.add('active');
-                const offset = el.offsetTop - container.offsetTop - (container.clientHeight / 2) + (el.clientHeight / 2);
-                container.scrollTo({ top: offset, behavior: 'smooth' });
-            }
-        }
+            let idx = currentLyrics.findIndex(l => l.time > currentTime) - 1; if(idx < 0) idx = currentLyrics.length - 1; 
+            document.querySelectorAll('.lyric-line').forEach(e => e.classList.remove('active')); const el = document.getElementById(`lyric-${idx}`); const container = document.getElementById('lyrics-content-scroll');
+            if(el && container) { el.classList.add('active'); const offset = el.offsetTop - container.offsetTop - (container.clientHeight / 2) + (el.clientHeight / 2); container.scrollTo({ top: offset, behavior: 'smooth' }); }
+        };
 
         window.showSection=(id)=>{ 
-            document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); 
-            document.getElementById(id+'-section').classList.add('active'); 
-            if(id==='music') renderHistoryGrid(); 
-            if(id==='social' && typeof window.loadSocialFeed === 'function') window.loadSocialFeed();
-
-            const globalHeader = document.getElementById('main-global-header');
-            if (globalHeader) {
-                if(id === 'social' || id === 'profile') globalHeader.classList.add('hidden');
-                else globalHeader.classList.remove('hidden');
-            }
-
-            const fab = document.getElementById('fab-play-list');
-            if(id === 'library' && window.currentViewList && window.currentViewList.length > 0) {
-                fab.classList.remove('hidden');
-            } else {
-                fab.classList.add('hidden');
-            }
+            document.querySelectorAll('.section-page').forEach(e=>e.classList.remove('active')); document.getElementById(id+'-section').classList.add('active'); 
+            if(id==='music') renderHistoryGrid(); if(id==='social' && typeof window.loadSocialFeed === 'function') window.loadSocialFeed();
+            const globalHeader = document.getElementById('main-global-header'); if (globalHeader) { if(id === 'social' || id === 'profile') globalHeader.classList.add('hidden'); else globalHeader.classList.remove('hidden'); }
+            const fab = document.getElementById('fab-play-list'); if(id === 'library' && window.currentViewList && window.currentViewList.length > 0) { fab.classList.remove('hidden'); } else { fab.classList.add('hidden'); }
         };
 
         window.exitImmersiveMode=()=>document.getElementById('immersive-mode').classList.add('hidden');
-        window.updateProgress=()=>{ if(audioPlayer.duration) document.querySelectorAll('#progress-bar, #progress-bar-immersive').forEach(e=>e.style.width=(audioPlayer.currentTime/audioPlayer.duration*100)+'%'); };
         
         window.skipForward=()=>{ 
             if(currentTrackData){ 
-                let list = window.activePlaybackQueue && window.activePlaybackQueue.length > 0 ? window.activePlaybackQueue : AURA_MAP.map(t=>t.internalId);
+                let list = window.activePlaybackQueue && window.activePlaybackQueue.length > 0 ? window.activePlaybackQueue.map(x=>x.internalId || x) : AURA_MAP.map(t=>t.internalId);
                 const i = list.indexOf(currentTrackData.internalId); 
                 if (i !== -1) { window.playTrack(list[(i+1) % list.length], true); } else { window.playTrack(AURA_MAP[0].internalId, true); }
             } 
         };
         window.skipBackward=()=>{ 
             if(currentTrackData){ 
-                let list = window.activePlaybackQueue && window.activePlaybackQueue.length > 0 ? window.activePlaybackQueue : AURA_MAP.map(t=>t.internalId);
+                let list = window.activePlaybackQueue && window.activePlaybackQueue.length > 0 ? window.activePlaybackQueue.map(x=>x.internalId || x) : AURA_MAP.map(t=>t.internalId);
                 const i = list.indexOf(currentTrackData.internalId); 
                 if (i !== -1) { window.playTrack(list[(i-1+list.length) % list.length], true); } else { window.playTrack(AURA_MAP[0].internalId, true); }
             } 
         };
 
-        window.togglePlayPause=()=>audioPlayer.paused?audioPlayer.play():audioPlayer.pause();
+        window.togglePlayPause=()=>{ audioPlayer.paused?audioPlayer.play():audioPlayer.pause(); };
         window.toggleLoop=()=>{ isLooping=!isLooping; showToast(isLooping?"Loop On":"Loop Off"); };
         window.showToast=(m)=>{ const t=document.createElement('div'); t.className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold border border-white/20 z-[999999]"; t.innerText=m; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.remove(),2000); };
         
         function saveLocalData(){ localStorage.setItem('aura_hist',JSON.stringify(listeningHistory)); localStorage.setItem('aura_lang', currentLang); }
-        
-        function loadLocalData(){ 
-            listeningHistory=JSON.parse(localStorage.getItem('aura_hist')||'[]'); 
-            currentLang = localStorage.getItem('aura_lang') || 'en'; 
-            updateLanguageUI(); 
-        }
+        function loadLocalData(){ listeningHistory=JSON.parse(localStorage.getItem('aura_hist')||'[]'); currentLang = localStorage.getItem('aura_lang') || 'en'; updateLanguageUI(); }
 
         window.renderStories = function() {
-            const container = document.getElementById('stories-container');
-            if(!container) return;
-            const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
-            
+            const container = document.getElementById('stories-container'); if(!container) return; const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
             let html = `<div class="story-wrapper" onclick="window.promptAddStory()"><div class="story-ring"><div class="story-inner"><i data-lucide="plus" class="w-6 h-6 text-white"></i></div></div><span class="text-[10px] text-white">${t.add_story}</span></div>`;
-            
-            if(USER_VIDEOS && USER_VIDEOS.length) { 
-                html += USER_VIDEOS.map(s => `<div class="story-wrapper" onclick="openStory('${s.id}')"><div class="story-ring"><div class="story-inner" style="font-size:24px;">${STORY_EMOJIS[s.id]||"✨"}</div></div><span class="text-[10px] text-gray-300 max-w-[65px] truncate block text-center">${s.userName}</span></div>`).join('');
-            }
-
-            if(window.FIREBASE_STORIES && window.FIREBASE_STORIES.length) {
-                html += window.FIREBASE_STORIES.map(s => `<div class="story-wrapper" onclick="openStory('${s.id}', true)"><div class="story-ring"><img src="${s.userPic || 'https://via.placeholder.com/150'}" class="story-inner object-cover"></div><span class="text-[10px] text-gray-300 max-w-[65px] truncate block text-center">${s.userName}</span></div>`).join('');
-            }
-            
-            container.innerHTML = html;
-            if(window.lucide) lucide.createIcons();
+            if(USER_VIDEOS && USER_VIDEOS.length) { html += USER_VIDEOS.map(s => `<div class="story-wrapper" onclick="openStory('${s.id}')"><div class="story-ring"><div class="story-inner" style="font-size:24px;">${STORY_EMOJIS[s.id]||"✨"}</div></div><span class="text-[10px] text-gray-300 max-w-[65px] truncate block text-center">${s.userName}</span></div>`).join(''); }
+            if(window.FIREBASE_STORIES && window.FIREBASE_STORIES.length) { html += window.FIREBASE_STORIES.map(s => `<div class="story-wrapper" onclick="openStory('${s.id}', true)"><div class="story-ring"><img src="${s.userPic || 'https://via.placeholder.com/150'}" class="story-inner object-cover"></div><span class="text-[10px] text-gray-300 max-w-[65px] truncate block text-center">${s.userName}</span></div>`).join(''); }
+            container.innerHTML = html; if(window.lucide) lucide.createIcons();
         };
         
         window.openStory = (id, isFirebase = false) => {
-            let s;
-            if(isFirebase) {
-                s = window.FIREBASE_STORIES.find(x => x.id === id);
-            } else {
-                s = USER_VIDEOS.find(x => String(x.id) === String(id));
-            }
-            if(!s) return;
-            
-            const modal = document.getElementById('story-modal');
-            const v = document.getElementById('story-video');
-            const iframe = document.getElementById('story-iframe');
-
-            document.getElementById('story-viewer-username').innerText = s.userName;
-            document.getElementById('story-viewer-time').innerText = isFirebase ? new Date(s.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : s.timestamp;
-            document.getElementById('story-viewer-text').innerText = s.text || "";
-            document.getElementById('story-viewer-emoji').innerText = STORY_EMOJIS[s.id] || "✨";
-            
-            if (isFirebase && s.videoId) {
-                v.classList.add('hidden');
-                iframe.classList.remove('hidden');
-                iframe.src = `https://www.youtube-nocookie.com/embed/${s.videoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1`;
-            } else {
-                iframe.classList.add('hidden');
-                iframe.src = "";
-                v.classList.remove('hidden');
-                v.src = s.videoUrl;
-                v.play().catch(e => console.log(e));
-            }
-
+            let s; if(isFirebase) { s = window.FIREBASE_STORIES.find(x => x.id === id); } else { s = USER_VIDEOS.find(x => String(x.id) === String(id)); } if(!s) return;
+            const modal = document.getElementById('story-modal'), v = document.getElementById('story-video'), iframe = document.getElementById('story-iframe');
+            document.getElementById('story-viewer-username').innerText = s.userName; document.getElementById('story-viewer-time').innerText = isFirebase ? new Date(s.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : s.timestamp; document.getElementById('story-viewer-text').innerText = s.text || ""; document.getElementById('story-viewer-emoji').innerText = STORY_EMOJIS[s.id] || "✨";
+            if (isFirebase && s.videoId) { v.classList.add('hidden'); iframe.classList.remove('hidden'); iframe.src = `https://www.youtube-nocookie.com/embed/${s.videoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1`; } else { iframe.classList.add('hidden'); iframe.src = ""; v.classList.remove('hidden'); v.src = s.videoUrl; v.play().catch(e => console.log(e)); }
             modal.classList.remove('hidden');
         };
-        
-        window.closeStory = () => { 
-            const v = document.getElementById('story-video');
-            const iframe = document.getElementById('story-iframe');
-            v.pause();
-            iframe.src = "";
-            document.getElementById('story-modal').classList.add('hidden'); 
-        };
+        window.closeStory = () => { const v = document.getElementById('story-video'), iframe = document.getElementById('story-iframe'); v.pause(); iframe.src = ""; document.getElementById('story-modal').classList.add('hidden'); };
 
         function renderHistoryGrid() {
             const list = listeningHistory.map(id => AURA_MAP.find(x => x.internalId === id)).filter(Boolean);
@@ -1531,1206 +1257,22 @@
         }
         
         function renderHomePageWidgets() {
-            const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
-            let html = "";
-            
-            const visitors = Math.floor(Math.random() * 15000) + 10200; 
-            const globalLikes = (2840000 + Math.floor(Date.now() / 5000)).toLocaleString();
-            html += `<div class="ios-widget-row">
-                        <div class="ios-card community-card-big cursor-pointer" onclick="handleProfileClick()"><div class="ios-content"><div class="p-2 bg-white/20 rounded-full w-max"><i data-lucide="users" class="w-5 h-5 text-white"></i></div><div><p class="text-2xl font-bold text-white">Community & Friends</p><p class="text-xs text-white/80">Join the conversation</p></div></div></div>
-                        <div class="ios-card"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="globe" class="w-4 h-4 text-green-400"></i></div><div><p class="text-2xl font-bold">${visitors.toLocaleString()}</p><p class="text-[10px] text-gray-400"><span class="live-dot"></span>Online</p></div></div></div>
-                        <div class="ios-card" onclick="openLikedSongs()"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i></div><div><p class="text-2xl font-bold">${globalLikes}</p><p class="text-[10px] text-gray-400">Global Likes</p></div></div></div>
-                     </div>`;
-
-            html += createWidgetBlock(t.trend_title, AURA_MAP.slice(0, 10));
-            if(AURA_MAP.length > 10) {
-                html += createWidgetBlock(t.rec_title, AURA_MAP.slice(10, 20));
-            }
-
-            document.getElementById('home-widgets-container').innerHTML = html;
-            if(window.lucide) lucide.createIcons();
+            const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en']; let html = "";
+            const newRelease = AURA_MAP[0];
+            if (newRelease) html += `<div class="mb-8"><h3 class="widget-block-title">${t.new_release}</h3><div onclick="playTrack('${newRelease.internalId}')" class="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer shadow-lg"><img src="${newRelease.cover}" loading="eager" decoding="sync" class="absolute inset-0 w-full h-full object-cover opacity-60 blur-sm"><div class="absolute inset-0 p-5 flex items-center gap-5"><img src="${newRelease.cover}" loading="eager" decoding="sync" class="w-32 h-32 rounded-xl shadow-2xl z-10"><div class="z-10"><h4 class="text-2xl font-bold text-white mb-1">${newRelease.title}</h4><p class="text-gray-300">${newRelease.artist}</p></div></div></div></div>`;
+            const visitors = Math.floor(Math.random() * 15000) + 10200, globalLikes = (2840000 + Math.floor(Date.now() / 5000)).toLocaleString();
+            html += `<div class="ios-widget-row"><div class="ios-card community-card-big cursor-pointer" onclick="handleProfileClick()"><div class="ios-content"><div class="p-2 bg-white/20 rounded-full w-max"><i data-lucide="users" class="w-5 h-5 text-white"></i></div><div><p class="text-2xl font-bold text-white">Community & Friends</p><p class="text-xs text-white/80">Join the conversation</p></div></div></div><div class="ios-card"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="globe" class="w-4 h-4 text-green-400"></i></div><div><p class="text-2xl font-bold">${visitors.toLocaleString()}</p><p class="text-[10px] text-gray-400"><span class="live-dot"></span>Online</p></div></div></div><div class="ios-card" onclick="openLikedSongs()"><div class="ios-content"><div class="p-2 bg-white/10 rounded-full w-max"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i></div><div><p class="text-2xl font-bold">${globalLikes}</p><p class="text-[10px] text-gray-400">Global Likes</p></div></div></div></div>`;
+            html += createWidgetBlock(t.trend_title, AURA_MAP.slice(1, 10));
+            document.getElementById('home-widgets-container').innerHTML = html; if(window.lucide) lucide.createIcons();
         }
 
-        function createWidgetBlock(title, tracks) {
-            return `<div class="mb-6"><h3 class="widget-block-title">${title}</h3><div class="horizontal-scroll">${tracks.map(t => `<div onclick="playTrack('${t.internalId}')" class="flex-none w-36 cursor-pointer group"><img src="${t.cover}" loading="eager" decoding="sync" class="w-36 h-36 rounded-xl object-cover mb-2 shadow-lg"><p class="text-xs font-bold truncate">${t.title}</p><p class="text-[10px] text-gray-400 truncate">${t.artist}</p></div>`).join('')}</div></div>`;
-        }
+        function createWidgetBlock(title, tracks) { return `<div class="mb-6"><h3 class="widget-block-title">${title}</h3><div class="horizontal-scroll">${tracks.map(t => `<div onclick="playTrack('${t.internalId}')" class="flex-none w-36 cursor-pointer group"><img src="${t.cover}" loading="eager" decoding="sync" class="w-36 h-36 rounded-xl object-cover mb-2 shadow-lg"><p class="text-xs font-bold truncate">${t.title}</p><p class="text-[10px] text-gray-400 truncate">${t.artist}</p></div>`).join('')}</div></div>`; }
 
-        function checkPWAStatus() {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-            document.getElementById('install-blocker').classList.toggle('hidden', isStandalone);
-            document.body.style.overflow = isStandalone ? 'auto' : 'hidden';
-        }
+        function checkPWAStatus() { const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; document.getElementById('install-blocker').classList.toggle('hidden', isStandalone); document.body.style.overflow = isStandalone ? 'auto' : 'hidden'; }
         window.forceRecheckPWA = () => window.location.reload();
 
-        window.openSearchModal=()=>document.getElementById('search-modal').classList.remove('hidden'); window.closeSearchModal=()=>document.getElementById('search-modal').classList.add('hidden');
-        
-        window.toggleSocialSearch = () => {
-            const bar = document.getElementById('social-search-bar');
-            bar.classList.toggle('hidden');
-            if(!bar.classList.contains('hidden')) document.getElementById('social-user-search').focus();
-        };
-
-        window.performSocialSearch = async () => {
-            const q = document.getElementById('social-user-search').value.toLowerCase().trim();
-            const res = document.getElementById('social-search-results');
-            if(q.length < 2) { res.innerHTML = ''; res.classList.add('hidden'); return; }
-
-            if (!window.ALL_USERS || window.ALL_USERS.length === 0) {
-                if (window.forceLoadAllUsers) await window.forceLoadAllUsers();
-            }
-            
-            let html = ``;
-            if(window.ALL_USERS && window.ALL_USERS.length > 0) {
-                const currentUid = (window.loggedInUser && window.loggedInUser.uid) ? window.loggedInUser.uid : '';
-                const matchedUsers = window.ALL_USERS.filter(u => {
-                    if (u.uid === currentUid) return false;
-                    if (!u || typeof u !== 'object') return false; 
-                    const userName = u.name ? String(u.name).toLowerCase() : "";
-                    const userEmail = u.email ? String(u.email).toLowerCase() : "";
-                    const userHandle = userEmail.split('@')[0];
-                    return userName.includes(q) || userHandle.includes(q) || userEmail.includes(q);
-                });
-
-                if (matchedUsers.length > 0) {
-                    html += matchedUsers.map(u => `
-                        <div class="p-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer rounded-xl transition" onclick="openOtherUserProfile('${u.uid}')">
-                            <img src="${u.pic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full object-cover border border-white/10">
-                            <div>
-                                <p class="text-sm font-bold text-white">${u.name || 'Utente Sconosciuto'}</p>
-                                <p class="text-[10px] text-gray-500">@${u.email ? u.email.split('@')[0] : 'user'}</p>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    html = `<p class="text-xs text-gray-500 p-2">Nessun utente trovato per "${q}".</p>`;
-                }
-            } else {
-                html = `<p class="text-xs text-gray-500 p-2">Nessun utente caricato. Controlla le regole Firebase.</p>`;
-            }
-
-            res.innerHTML = html;
-            res.classList.remove('hidden');
-        };
-
-        let currentViewedUserId = null;
-        window.openOtherUserProfile = (uid) => {
-            const u = window.ALL_USERS.find(x => x.uid === uid);
-            if(!u) return;
-            currentViewedUserId = uid;
-            
-            document.getElementById('other-user-name').innerText = u.name;
-            document.getElementById('other-user-pic').src = u.pic || 'https://via.placeholder.com/150';
-            document.getElementById('other-user-bio').innerText = u.bio || 'No bio available.';
-            document.getElementById('other-user-modal').classList.remove('hidden');
-            
-            const btnFollow = document.getElementById('btn-follow');
-            const btnFriend = document.getElementById('btn-add-friend');
-            
-            if(window.loggedInUser && window.myFollowing && window.myFollowing[uid]) {
-                btnFollow.innerHTML = `<i data-lucide="user-minus" class="w-5 h-5"></i> Unfollow`;
-                btnFollow.classList.replace('bg-cyan-600', 'bg-gray-600');
-                btnFollow.classList.replace('hover:bg-cyan-500', 'hover:bg-gray-500');
-            } else {
-                btnFollow.innerHTML = `<i data-lucide="user-plus" class="w-5 h-5"></i> Follow`;
-                btnFollow.classList.replace('bg-gray-600', 'bg-cyan-600');
-                btnFollow.classList.replace('hover:bg-gray-500', 'hover:bg-cyan-500');
-            }
-
-            if(window.loggedInUser && window.myFriends && window.myFriends[uid]) {
-                btnFriend.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> Friends`;
-                btnFriend.classList.remove('bg-violet-600', 'hover:bg-violet-500', 'bg-yellow-600', 'hover:bg-yellow-500');
-                btnFriend.classList.add('bg-green-600', 'hover:bg-green-500');
-            } else {
-                btnFriend.innerHTML = `<i data-lucide="user-plus" class="w-5 h-5"></i> Add Friend`;
-                btnFriend.classList.remove('bg-green-600', 'hover:bg-green-500', 'bg-yellow-600', 'hover:bg-yellow-500');
-                btnFriend.classList.add('bg-violet-600', 'hover:bg-violet-500');
-            }
-            if(window.lucide) lucide.createIcons();
-            
-            document.getElementById('social-search-bar').classList.add('hidden');
-            document.getElementById('social-user-search').value = '';
-            document.getElementById('social-search-results').innerHTML = '';
-        };
-        window.closeOtherUserProfile = () => document.getElementById('other-user-modal').classList.add('hidden');
-
-        window.openChatListModal = () => {
-            if(!window.loggedInUser) return window.openAuthModal();
-            document.getElementById('chat-list-modal').classList.remove('hidden');
-            window.renderChatList();
-        };
-        window.closeChatListModal = () => document.getElementById('chat-list-modal').classList.add('hidden');
-        
-        window.filterChatList = () => {
-            window.renderChatList(document.getElementById('chat-local-search').value.toLowerCase().trim());
-        };
-
-        window.renderChatList = (filterText = '') => {
-            const container = document.getElementById('chat-list-content');
-            const chats = Object.entries(window.myChats || {}).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
-            
-            if(chats.length === 0) {
-                container.innerHTML = `<p class="text-center text-gray-500 mt-10 text-sm">Nessuna conversazione trovata.</p>`;
-                return;
-            }
-
-            let html = '';
-            chats.forEach(([chatId, data]) => {
-                const otherUid = data.otherUid;
-                const u = window.ALL_USERS.find(x => x.uid === otherUid) || { uid: otherUid, name: 'Utente', pic: 'https://via.placeholder.com/150' };
-                if (filterText && !u.name.toLowerCase().includes(filterText)) return;
-                const lastMsgTime = data.timestamp ? new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                const lastMsg = data.lastMessage || 'Invia un messaggio...';
-
-                html += `
-                <div class="chat-item-card" onclick="openChatRoom('${chatId}', '${u.uid}')">
-                    <img src="${u.pic}" class="w-12 h-12 rounded-full object-cover border border-white/10">
-                    <div class="flex-1 overflow-hidden">
-                        <div class="flex justify-between items-center">
-                            <h4 class="font-bold text-sm text-white truncate">${u.name}</h4>
-                            <span class="text-[10px] text-gray-500">${lastMsgTime}</span>
-                        </div>
-                        <p class="text-xs text-gray-400 truncate mt-0.5">${lastMsg}</p>
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html || `<p class="text-center text-gray-500 mt-10 text-sm">Nessun risultato.</p>`;
-        };
-
-        window.openNewChatSearchModal = () => {
-            document.getElementById('new-chat-search-modal').classList.remove('hidden');
-            document.getElementById('new-chat-user-search').value = '';
-            window.performNewChatSearch();
-        };
-        window.closeNewChatSearchModal = () => document.getElementById('new-chat-search-modal').classList.add('hidden');
-
-        window.performNewChatSearch = () => {
-            const q = document.getElementById('new-chat-user-search').value.toLowerCase().trim();
-            const res = document.getElementById('new-chat-search-results');
-            const myNetworkIds = [...new Set([...Object.keys(window.myFollowers), ...Object.keys(window.myFollowing)])];
-            
-            let html = '';
-            const matchedUsers = window.ALL_USERS.filter(u => {
-                if(!myNetworkIds.includes(u.uid)) return false; 
-                if (!u || typeof u !== 'object') return false; 
-                const userName = u.name ? String(u.name).toLowerCase() : "";
-                return userName.includes(q);
-            });
-
-            if (matchedUsers.length > 0) {
-                html += matchedUsers.map(u => `
-                    <div class="p-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer rounded-xl transition border-b border-white/5" onclick="startChat('${u.uid}')">
-                        <img src="${u.pic || 'https://via.placeholder.com/150'}" class="w-10 h-10 rounded-full object-cover border border-white/10">
-                        <div>
-                            <p class="text-sm font-bold text-white">${u.name || 'Utente Sconosciuto'}</p>
-                            <p class="text-[10px] text-gray-500">@${u.email ? u.email.split('@')[0] : 'user'}</p>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                html = `<p class="text-center text-gray-500 text-xs mt-10">Nessun utente trovato nella tua rete.</p>`;
-            }
-            res.innerHTML = html;
-        };
-
-        window.startChat = (otherUid) => {
-            if(!window.loggedInUser) return;
-            const myUid = window.loggedInUser.uid;
-            const chatId = myUid < otherUid ? `${myUid}_${otherUid}` : `${otherUid}_${myUid}`;
-            window.closeNewChatSearchModal();
-            window.openChatRoom(chatId, otherUid);
-        };
-
-        window.openChatRoom = (chatId, otherUid) => {
-            window.activeChatRoomId = chatId;
-            window.activeChatOtherUserId = otherUid;
-            
-            const u = window.ALL_USERS.find(x => x.uid === otherUid) || { name: 'Utente', pic: 'https://via.placeholder.com/150' };
-            document.getElementById('chat-room-user-name').innerText = u.name;
-            document.getElementById('chat-room-user-pic').src = u.pic;
-            document.getElementById('chat-room-menu').classList.add('hidden');
-            
-            const inputWrapper = document.getElementById('chat-input-wrapper');
-            const alertWrapper = document.getElementById('chat-blocked-alert');
-            
-            if(window.myBlockedUsers[otherUid]) {
-                inputWrapper.classList.add('hidden');
-                alertWrapper.innerText = "Hai bloccato questo utente.";
-                alertWrapper.classList.remove('hidden');
-            } else {
-                inputWrapper.classList.remove('hidden');
-                alertWrapper.classList.add('hidden');
-            }
-
-            document.getElementById('chat-room-modal').classList.remove('hidden');
-            document.getElementById('chat-message-input').value = '';
-            
-            if(window.loadChatMessages) window.loadChatMessages(chatId);
-        };
-
-        window.closeChatRoom = () => {
-            document.getElementById('chat-room-modal').classList.add('hidden');
-            window.activeChatRoomId = null;
-            window.activeChatOtherUserId = null;
-            if(window.stopChatMessagesListener) window.stopChatMessagesListener();
-        };
-
-        window.toggleChatRoomMenu = () => { document.getElementById('chat-room-menu').classList.toggle('hidden'); };
-
-        window.blockChatUser = () => {
-            if(!window.loggedInUser || !window.activeChatOtherUserId) return;
-            const otherUid = window.activeChatOtherUserId;
-            if(window.myBlockedUsers[otherUid]) {
-                window.showToast("Utente già bloccato.");
-            } else {
-                if(window.executeBlockUser) window.executeBlockUser(otherUid);
-                window.toggleChatRoomMenu();
-                window.closeChatRoom();
-            }
-        };
-
-        window.reportChatUser = () => {
-            if(!window.activeChatOtherUserId) return;
-            const uid = window.activeChatOtherUserId;
-            window.toggleChatRoomMenu();
-            window.showToast("Apertura app mail...");
-            const email = "report@pl-globalaura.com";
-            const subject = encodeURIComponent(`Segnalazione Utente [ID: ${uid}]`);
-            const body = encodeURIComponent(`Ciao Team di Aura,\n\nVorrei segnalare l'utente con ID: ${uid} per comportamento scorretto nella chat.\n\nMotivazione: \n[Scrivi qui il motivo...]`);
-            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-        };
-
-        window.openShareModal = () => {
-            if (!window.currentTrackData) return showToast("Nessun brano in riproduzione");
-            document.getElementById('share-card-title').innerText = window.currentTrackData.title;
-            document.getElementById('share-card-cover').src = window.currentTrackData.cover;
-            
-            const qrContainer = document.getElementById('share-qr-container');
-            qrContainer.innerHTML = '';
-            new QRCode(qrContainer, {
-                text: "https://aura-music.app/track/" + window.currentTrackData.internalId, 
-                width: 120, height: 120, colorDark : "#000000", colorLight : "#ffffff",
-            });
-            document.getElementById('share-modal').classList.remove('hidden');
-        };
-        window.closeShareModal=()=>document.getElementById('share-modal').classList.add('hidden');
-        window.openCapsuleModal=()=>document.getElementById('capsule-modal').classList.remove('hidden'); window.closeCapsuleModal=()=>document.getElementById('capsule-modal').classList.add('hidden');
-        window.openLanguageModal=()=>document.getElementById('language-modal').classList.remove('hidden'); window.closeLanguageModal=()=>document.getElementById('language-modal').classList.add('hidden');
-        
-        window.changeLanguage = async (val) => { 
-            currentLang = val; 
-            saveLocalData(); 
-            updateLanguageUI(); 
-            await fetchData(); 
-        }
-        
-        window.updateLanguageUI = () => {
-            const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
-            const h = new Date().getHours();
-            const greetingEl = document.getElementById('home-greeting');
-            if(greetingEl) greetingEl.innerText = h < 12 ? t.greeting_m : h < 18 ? t.greeting_a : t.greeting_e;
-            
-            const savedTitle = document.getElementById('txt-saved-tracks');
-            if(savedTitle) {
-                const knownSavedTitles = Object.values(TRANSLATIONS).map(x => x.saved_tracks);
-                if(savedTitle.innerText === "Saved Tracks" || knownSavedTitles.includes(savedTitle.innerText)) {
-                    savedTitle.innerText = t.saved_tracks;
-                }
-            }
-            const elSessions = document.getElementById('txt-sessions');
-            if(elSessions) elSessions.innerText = t.sessions;
-
-            const elStories = document.getElementById('txt-aura-stories');
-            if (elStories) elStories.innerText = t.social_stories;
-            const elFeed = document.getElementById('txt-discover-feed');
-            if (elFeed) elFeed.innerText = t.social_discover;
-            const elSearch = document.getElementById('social-user-search');
-            if (elSearch) elSearch.placeholder = t.social_search;
-            const elNewPost = document.getElementById('txt-new-post-btn-text');
-            if (elNewPost) { elNewPost.innerHTML = `<i data-lucide="plus" class="w-4 h-4"></i> ${t.new_post}`; if(window.lucide) lucide.createIcons(); }
-            
-            const elThreadTitle = document.getElementById('txt-new-thread-title');
-            if (elThreadTitle) elThreadTitle.innerText = t.new_post;
-            const elCompose = document.getElementById('compose-text');
-            if (elCompose) elCompose.placeholder = t.write_something + " (Paste YouTube/Instagram links to embed)";
-            const elAnyone = document.getElementById('txt-anyone-reply');
-            if (elAnyone) elAnyone.innerText = t.anyone_reply;
-            const elPublish = document.getElementById('btn-publish-thread');
-            if (elPublish) elPublish.innerText = t.post_btn;
-            
-            window.renderStories();
-            if(typeof window.loadSocialFeed === 'function') window.loadSocialFeed();
-        };
-
-        // --- SISTEMA DI RICERCA BLINDATO ---
-        window.performSearch = async () => { 
-            const q = document.getElementById('search-input').value.toLowerCase().trim(); 
-            const resContainer = document.getElementById('search-results');
-            if(q.length < 2) { resContainer.innerHTML = ''; return; }
-
-            resContainer.innerHTML = '<p class="text-center text-gray-500 text-xs mt-4">Ricerca in corso...</p>';
-
-            try {
-                const response = await fetch(`https://saavn.dev/api/search/songs?query=${encodeURIComponent(q)}`);
-                const chartsData = await response.json();
-                
-                let rawTracks = [];
-                if (chartsData.data && chartsData.data.results) {
-                    rawTracks = chartsData.data.results;
-                }
-
-                if(rawTracks.length === 0) {
-                    resContainer.innerHTML = '<p class="text-center text-gray-500 text-xs mt-4">Nessun risultato trovato.</p>';
-                    return;
-                }
-
-                let html = rawTracks.map(t => {
-                    const safeId = String(t.id);
-                    const title = t.name || t.song || t.title || "Unknown";
-                    
-                    let artistName = "Unknown";
-                    if (t.primaryArtists) {
-                        artistName = typeof t.primaryArtists === 'string' ? t.primaryArtists : (t.primaryArtists[0]?.name || "Unknown");
-                    }
-
-                    let coverUrl = "https://via.placeholder.com/300";
-                    if(Array.isArray(t.image) && t.image.length > 0) {
-                        coverUrl = t.image[t.image.length-1].link || t.image[t.image.length-1].url;
-                    }
-
-                    let audioUrl = "";
-                    if(Array.isArray(t.downloadUrl) && t.downloadUrl.length > 0) {
-                        audioUrl = t.downloadUrl[t.downloadUrl.length-1].link || t.downloadUrl[t.downloadUrl.length-1].url;
-                    }
-
-                    // Se non c'è audio riproducibile, nascondi il risultato visivamente
-                    if(!audioUrl) return '';
-
-                    if(!AURA_MAP.find(x => x.internalId === safeId)) {
-                        AURA_MAP.push({ internalId: safeId, title: title, artist: artistName, cover: coverUrl, audioUrl: audioUrl, metadataExtracted: true });
-                    }
-
-                    return `<div onclick="playTrack('${safeId}');closeSearchModal()" class="flex items-center gap-3 p-2 border-b border-white/10 cursor-pointer hover:bg-white/5 transition"><img src="${coverUrl}" class="w-10 h-10 rounded-lg object-cover"><div class="flex-1 overflow-hidden"><p class="text-sm font-bold text-white truncate">${title}</p><p class="text-[10px] text-gray-400 truncate">${artistName}</p></div></div>`;
-                }).join(''); 
-                
-                resContainer.innerHTML = html || '<p class="text-center text-gray-500 text-xs mt-4">Nessun brano riproducibile trovato.</p>';
-            } catch (e) {
-                resContainer.innerHTML = '<p class="text-center text-red-500 text-xs mt-4">Errore di connessione alla libreria musicale.</p>';
-            }
-        };
-
-        window.openArtistProfile = (id=null) => {
-            let artist = id ? ARTISTS_FULL_LIST.find(a => a.id === id) : ARTISTS_FULL_LIST.find(a => (currentTrackData.artistId && a.id === currentTrackData.artistId) || a.name === currentTrackData.artist);
-            if(!artist) return showToast("Artist info unavailable via this proxy currently.");
-            document.getElementById('artist-modal-name').innerText = artist.name;
-            document.getElementById('artist-modal-bio').innerText = artist.bio;
-            document.getElementById('artist-modal-genre').innerText = artist.genre;
-            document.getElementById('artist-modal-image').src = artist.imageUrl;
-            
-            const tracks = AURA_MAP.filter(t => (t.artistId && t.artistId === artist.id) || t.artist === artist.name);
-            const singles = tracks.filter(t => !t.albumId);
-            
-            document.getElementById('artist-singles-container').classList.remove('hidden');
-            document.getElementById('artist-singles-list').innerHTML = singles.map(t => `<div onclick="playTrack('${t.internalId}'); closeArtistModal()" class="flex items-center gap-3 p-3 bg-white/5 rounded-xl cursor-pointer"><img src="${t.cover}" class="w-10 h-10 rounded-lg"><div class="flex-1"><p class="text-sm font-bold">${t.title}</p></div></div>`).join('');
-            document.getElementById('artist-modal').classList.remove('hidden');
-        };
-        window.closeArtistModal = () => document.getElementById('artist-modal').classList.add('hidden');
-
-        window.toggleAmbientMenu = () => { 
-            const r = document.getElementById('ambientPlayerRain'); 
-            if(currentAmbientMode) { r.pause(); currentAmbientMode = null; } else { r.volume = 0.5; r.play(); currentAmbientMode = 'rain'; } 
-            document.getElementById('btn-ambient').classList.toggle('active', currentAmbientMode); 
-        };
-        window.toggleGyro = () => { if (typeof DeviceOrientationEvent.requestPermission === 'function') DeviceOrientationEvent.requestPermission().then(s => s==='granted'?enableGyro():null); else enableGyro(); };
-        function enableGyro() { if(!gyroEnabled) { window.addEventListener('deviceorientation', handleGyro); gyroEnabled=true; } else { window.removeEventListener('deviceorientation', handleGyro); gyroEnabled=false; } document.getElementById('btn-gyro').classList.toggle('active', gyroEnabled); }
-        function handleGyro(e) { if(gyroEnabled) audioPlayer.volume = Math.max(0, Math.min(1, (e.gamma + 45) / 90)); }
-        window.toggleTranslation = () => { isTranslationEnabled = !isTranslationEnabled; document.getElementById('btn-translate').classList.toggle('active', isTranslationEnabled); renderLyrics(); };
-
-        window.translateTextFree = async (text, lang) => {
-            if (!text || lang === 'en') return text;
-            let safeKey = "";
-            try { safeKey = btoa(unescape(encodeURIComponent(text))).slice(0,30); } 
-            catch(e) { safeKey = text.substring(0, 20).replace(/[^a-zA-Z0-9]/g, ''); }
-            const cacheKey = `trans_${lang}_${safeKey}`;
-            const cache = JSON.parse(localStorage.getItem('aura_trans_cache') || '{}');
-            if (cache[cacheKey]) return cache[cacheKey];
-
-            try {
-                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`;
-                const res = await fetch(url);
-                const data = await res.json();
-                let translated = "";
-                if (data && data[0]) {
-                    data[0].forEach(item => { if (item[0]) translated += item[0]; });
-                }
-                if (translated) {
-                    cache[cacheKey] = translated;
-                    localStorage.setItem('aura_trans_cache', JSON.stringify(cache));
-                    return translated;
-                }
-            } catch(e) { console.log(e); }
-            return text;
-        };
-    </script>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, update, push, onValue, get, remove, serverTimestamp, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyBjQC2dOKySeHPEJCVjjEEHyHEUy19DRPY",
-            authDomain: "auramusic-hrz.firebaseapp.com",
-            databaseURL: "https://auramusic-hrz-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "auramusic-hrz",
-            storageBucket: "auramusic-hrz.appspot.com",
-            messagingSenderId: "185420108806",
-            appId: "1:185420108806:web:947edf581c9f7bbb661f87"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const provider = new GoogleAuthProvider();
-
-        window.loginWithGoogle = async () => {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                window.showToast("✓ Logged in successfully!");
-            } catch(e) {
-                if(e.code === 'auth/popup-blocked') {
-                    window.showToast("Pop-up blocked. Enable pop-ups and try again.");
-                } else if(e.code !== 'auth/cancelled-popup-request') {
-                    window.showToast("Login error: " + (e.message || e.code));
-                }
-                console.error('Login error:', e);
-            }
-        };
-
-        window.handleLogout = () => signOut(auth).then(()=>window.location.reload());
-        window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
-        window.openAuthModal = () => document.getElementById('auth-modal').classList.remove('hidden');
-        
-        window.handleProfileClick = () => {
-            if(auth.currentUser) {
-                showSection('social');
-                if(typeof window.loadSocialFeed === 'function') window.loadSocialFeed();
-            } else {
-                window.openAuthModal();
-            }
-        };
-
-        window.forceLoadAllUsers = async () => {
-            try {
-                const snap = await get(ref(db, 'users'));
-                if (snap.exists()) {
-                    window.ALL_USERS = Object.entries(snap.val()).map(([uid, u]) => ({uid, ...u}));
-                }
-            } catch(e) {
-                console.error("Errore lettura utenti:", e);
-            }
-        };
-
-        onValue(ref(db, 'users'), (snap) => {
-            const data = snap.val();
-            if(data) {
-                window.ALL_USERS = Object.entries(data).map(([uid, u]) => ({uid, ...u}));
-                if(!document.getElementById('chat-list-modal').classList.contains('hidden')) {
-                    window.renderChatList(document.getElementById('chat-local-search').value.toLowerCase().trim());
-                }
-            } else {
-                window.ALL_USERS = [
-                    { uid: 'test-user-1', name: 'Music Lover', pic: 'https://via.placeholder.com/150', email: 'test@example.com' },
-                    { uid: 'test-user-2', name: 'DJ Producer', pic: 'https://via.placeholder.com/150', email: 'dj@example.com' },
-                    { uid: 'aura-ai-bot', name: 'Aura AI', pic: 'https://via.placeholder.com/150', email: 'ai@aura.com' }
-                ];
-            }
-        });
-
-        let activeChatRef = null;
-
-        window.loadChatMessages = (chatId) => {
-            if(activeChatRef) off(activeChatRef);
-            activeChatRef = ref(db, `chats/${chatId}/messages`);
-            
-            onValue(activeChatRef, (snap) => {
-                const data = snap.val();
-                const container = document.getElementById('chat-messages-container');
-                if(!data) {
-                    container.innerHTML = `<p class="text-center text-gray-500 text-xs mt-10">Nessun messaggio. Inizia la conversazione!</p>`;
-                    return;
-                }
-                
-                const messages = Object.values(data).sort((a,b) => a.timestamp - b.timestamp);
-                const myUid = auth.currentUser.uid;
-                
-                container.innerHTML = messages.map(m => {
-                    const isMine = m.senderId === myUid;
-                    const cssClass = isMine ? 'chat-msg-sent' : 'chat-msg-received';
-                    const timeStr = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    
-                    return `
-                    <div class="${cssClass}">
-                        <p>${m.text.replace(/\n/g, '<br>')}</p>
-                        <p class="text-[9px] opacity-60 text-right mt-1">${timeStr}</p>
-                    </div>`;
-                }).join('');
-                container.scrollTop = container.scrollHeight;
-            });
-        };
-
-        window.stopChatMessagesListener = () => {
-            if(activeChatRef) off(activeChatRef);
-            activeChatRef = null;
-        };
-
-        window.sendChatMessage = async () => {
-            if(!auth.currentUser || !window.activeChatRoomId || !window.activeChatOtherUserId) return;
-            
-            const input = document.getElementById('chat-message-input');
-            const text = input.value.trim();
-            if(!text) return;
-            
-            const myUid = auth.currentUser.uid;
-            const otherUid = window.activeChatOtherUserId;
-            const chatId = window.activeChatRoomId;
-
-            const blockedCheck = await get(ref(db, `users/${otherUid}/blockedUsers/${myUid}`));
-            if(blockedCheck.exists()) {
-                window.showToast("Non puoi inviare messaggi a questo utente.");
-                input.value = "";
-                return;
-            }
-
-            const timestamp = Date.now();
-            
-            push(ref(db, `chats/${chatId}/messages`), { senderId: myUid, text: text, timestamp: timestamp });
-            
-            update(ref(db, `users/${myUid}/chats/${chatId}`), { lastMessage: text, timestamp: timestamp, otherUid: otherUid });
-            update(ref(db, `users/${otherUid}/chats/${chatId}`), { lastMessage: text, timestamp: timestamp, otherUid: myUid });
-
-            input.value = '';
-        };
-
-        document.getElementById('chat-message-input').addEventListener('keydown', function(e) {
-            if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.sendChatMessage(); }
-        });
-
-        window.executeBlockUser = async (targetUid) => {
-            if(!auth.currentUser) return;
-            await set(ref(db, `users/${auth.currentUser.uid}/blockedUsers/${targetUid}`), true);
-            window.showToast("Utente bloccato.");
-        };
-
-        window.sendFriendRequestFromModal = async () => {
-            if(!auth.currentUser) return window.openAuthModal();
-            if(!currentViewedUserId) return;
-            const myUid = auth.currentUser.uid;
-            
-            if(window.myFriends && window.myFriends[currentViewedUserId]) {
-                await remove(ref(db, `users/${myUid}/friends/${currentViewedUserId}`));
-                await remove(ref(db, `users/${currentViewedUserId}/friends/${myUid}`));
-                window.showToast("Amicizia rimossa");
-            } else {
-                await set(ref(db, `users/${currentViewedUserId}/friendRequests/${myUid}`), { timestamp: Date.now() });
-                window.showToast("Richiesta inviata!");
-            }
-            window.openOtherUserProfile(currentViewedUserId); 
-        };
-
-        window.acceptFriendRequest = async (requesterUid) => {
-            if(!auth.currentUser) return;
-            const myUid = auth.currentUser.uid;
-            await set(ref(db, `users/${myUid}/friends/${requesterUid}`), true);
-            await set(ref(db, `users/${requesterUid}/friends/${myUid}`), true);
-            await remove(ref(db, `users/${myUid}/friendRequests/${requesterUid}`));
-            window.showToast("Richiesta accettata!");
-            if(!document.getElementById('user-list-modal').classList.contains('hidden')) { window.openUserListModal('requests'); }
-        };
-
-        window.rejectFriendRequest = async (requesterUid) => {
-            if(!auth.currentUser) return;
-            await remove(ref(db, `users/${auth.currentUser.uid}/friendRequests/${requesterUid}`));
-            window.showToast("Richiesta rifiutata");
-            if(!document.getElementById('user-list-modal').classList.contains('hidden')) { window.openUserListModal('requests'); }
-        };
-
-        window.toggleFollowFromModal = async () => {
-            if(!auth.currentUser) return window.openAuthModal();
-            if(!currentViewedUserId) return;
-            const targetUid = currentViewedUserId;
-            await window.executeFollowToggle(targetUid);
-            window.openOtherUserProfile(targetUid);
-        };
-
-        window.executeFollowToggle = async (targetUid) => {
-            if(!auth.currentUser) return;
-            const myUid = auth.currentUser.uid;
-            const isFollowing = window.myFollowing && window.myFollowing[targetUid];
-            
-            if(isFollowing) {
-                await remove(ref(db, `users/${myUid}/following/${targetUid}`));
-                await remove(ref(db, `users/${targetUid}/followers/${myUid}`));
-                window.showToast("Unfollowed");
-            } else {
-                await set(ref(db, `users/${myUid}/following/${targetUid}`), true);
-                await set(ref(db, `users/${targetUid}/followers/${myUid}`), true);
-                window.showToast("Following");
-            }
-        };
-
-        window.toggleFollowFromList = async (targetUid) => {
-            await window.executeFollowToggle(targetUid);
-            const title = document.getElementById('user-list-title').innerText.toLowerCase();
-            window.openUserListModal(title);
-        };
-
-        window.openUserListModal = (type) => {
-            if(!auth.currentUser) return;
-            const modal = document.getElementById('user-list-modal');
-            const content = document.getElementById('user-list-content');
-            const title = document.getElementById('user-list-title');
-            
-            content.innerHTML = '';
-            let dataIds = [];
-            
-            if(type === 'followers') {
-                title.innerText = 'Followers';
-                dataIds = Object.keys(window.myFollowers || {});
-            } else if (type === 'following') {
-                title.innerText = 'Following';
-                dataIds = Object.keys(window.myFollowing || {});
-            } else if (type === 'requests') {
-                title.innerText = 'Requests';
-                dataIds = Object.keys(window.myFriendRequests || {});
-            }
-
-            if(dataIds.length === 0) {
-                content.innerHTML = `<p class="text-center text-gray-500 mt-4 text-sm">Nessun utente.</p>`;
-            } else {
-                let html = '';
-                dataIds.forEach(uid => {
-                    const u = window.ALL_USERS.find(x => x.uid === uid) || { uid: uid, name: 'Utente Sconosciuto', pic: 'https://via.placeholder.com/150' };
-                    
-                    if (type === 'requests') {
-                        html += `
-                        <div class="user-list-item">
-                            <div class="flex items-center gap-3 cursor-pointer" onclick="openOtherUserProfile('${u.uid}')">
-                                <img src="${u.pic}" class="w-10 h-10 rounded-full object-cover border border-white/10">
-                                <span class="font-bold text-sm text-white">${u.name}</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="acceptFriendRequest('${u.uid}')" class="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30"><i data-lucide="check" class="w-4 h-4"></i></button>
-                                <button onclick="rejectFriendRequest('${u.uid}')" class="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"><i data-lucide="x" class="w-4 h-4"></i></button>
-                            </div>
-                        </div>`;
-                    } else {
-                        const isFollowing = window.myFollowing && window.myFollowing[uid];
-                        const btnText = isFollowing ? 'Unfollow' : 'Follow';
-                        const btnClass = isFollowing ? 'bg-gray-600 hover:bg-gray-500' : 'bg-cyan-600 hover:bg-cyan-500';
-                        
-                        html += `
-                        <div class="user-list-item">
-                            <div class="flex items-center gap-3 cursor-pointer" onclick="openOtherUserProfile('${u.uid}')">
-                                <img src="${u.pic}" class="w-10 h-10 rounded-full object-cover border border-white/10">
-                                <span class="font-bold text-sm text-white">${u.name}</span>
-                            </div>
-                            <button onclick="toggleFollowFromList('${u.uid}')" class="px-4 py-1.5 rounded-full text-xs font-bold text-white transition ${btnClass}">${btnText}</button>
-                        </div>`;
-                    }
-                });
-                content.innerHTML = html;
-                if(window.lucide) lucide.createIcons();
-            }
-
-            modal.classList.remove('hidden');
-        };
-        window.closeUserListModal = () => document.getElementById('user-list-modal').classList.add('hidden');
-
-        window.loadStoriesData = () => {
-            onValue(ref(db, 'stories'), (snap) => {
-                const data = snap.val();
-                window.FIREBASE_STORIES = data ? Object.values(data).sort((a,b) => b.timestamp - a.timestamp) : [];
-                window.renderStories();
-            });
-        };
-        window.loadStoriesData();
-        
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.loggedInUser = user;
-                document.getElementById('auth-dot').classList.remove('hidden');
-                
-                const spAvatar = document.getElementById('sp-avatar');
-                if(spAvatar) spAvatar.src = user.photoURL || 'https://via.placeholder.com/150';
-                
-                const miniAvatar = document.getElementById('social-mini-avatar-new');
-                if(miniAvatar) miniAvatar.src = user.photoURL || 'https://via.placeholder.com/150';
-
-                const spName = document.getElementById('sp-name');
-                const spHandle = document.getElementById('sp-handle');
-                if(spName) spName.innerText = user.displayName;
-                if(spHandle) spHandle.innerText = "@" + user.email.split('@')[0];
-                
-                update(ref(db, `users/${user.uid}`), { name: user.displayName, pic: user.photoURL, email: user.email });
-
-                syncUserLibrary(user.uid);
-                window.closeAuthModal();
-                
-                if(typeof window.loadSocialFeed === 'function') { setTimeout(() => window.loadSocialFeed(), 300); }
-            } else {
-                window.loggedInUser = null;
-                document.getElementById('auth-dot').classList.add('hidden');
-            }
-        });
-
-        window.saveProfileChanges = async () => {
-             if(!auth.currentUser) return;
-             const newName = document.getElementById('edit-name').value;
-             const newBio = document.getElementById('edit-bio').value;
-             const newPic = document.getElementById('edit-pic').value || auth.currentUser.photoURL;
-
-             try {
-                await updateProfile(auth.currentUser, { displayName: newName, photoURL: newPic });
-                await update(ref(db, `users/${auth.currentUser.uid}`), { name: newName, bio: newBio, pic: newPic });
-                
-                document.getElementById('sp-name').innerText = newName;
-                document.getElementById('sp-bio').innerText = newBio;
-                document.getElementById('sp-avatar').src = newPic;
-                
-                const miniAvatar = document.getElementById('social-mini-avatar-new');
-                if(miniAvatar) miniAvatar.src = newPic;
-                
-                document.getElementById('settings-modal').classList.add('hidden');
-                showToast("Profile Updated");
-             } catch(e) { showToast("Error updating profile"); }
-        };
-        
-        window.openSettingsModal = () => { 
-            document.getElementById('settings-modal').classList.remove('hidden'); 
-            document.getElementById('edit-name').value = auth.currentUser.displayName;
-            document.getElementById('edit-pic').value = auth.currentUser.photoURL || ''; 
-        };
-        window.closeSettingsModal = () => document.getElementById('settings-modal').classList.add('hidden');
-
-        function syncUserLibrary(uid) {
-            onValue(ref(db, `users/${uid}/friends`), (s) => { window.myFriends = s.val() || {}; });
-            
-            onValue(ref(db, `users/${uid}/followers`), (s) => { 
-                window.myFollowers = s.val() || {}; 
-                document.getElementById('sp-followers').innerText = Object.keys(window.myFollowers).length;
-            });
-            onValue(ref(db, `users/${uid}/following`), (s) => { 
-                window.myFollowing = s.val() || {}; 
-                document.getElementById('sp-following').innerText = Object.keys(window.myFollowing).length;
-            });
-            onValue(ref(db, `users/${uid}/friendRequests`), (s) => { 
-                window.myFriendRequests = s.val() || {}; 
-                const reqCount = Object.keys(window.myFriendRequests).length;
-                document.getElementById('req-count').innerText = reqCount;
-            });
-            
-            onValue(ref(db, `users/${uid}/chats`), (s) => {
-                window.myChats = s.val() || {};
-                
-                if(Object.keys(window.myChats).length === 0) {
-                    window.myChats = { 'test-chat-1': { otherUid: 'aura-ai-bot', lastMessage: 'Welcome to Aura! 🎵', timestamp: Date.now() - 3600000 } };
-                }
-                
-                const chatDot = document.getElementById('chat-notification-dot');
-                if(Object.keys(window.myChats).length > 0) chatDot.classList.remove('hidden'); 
-                else chatDot.classList.add('hidden');
-
-                if(!document.getElementById('chat-list-modal').classList.contains('hidden')) {
-                    window.renderChatList(document.getElementById('chat-local-search').value.toLowerCase().trim());
-                }
-            });
-
-            onValue(ref(db, `users/${uid}/blockedUsers`), (s) => { window.myBlockedUsers = s.val() || {}; });
-
-            onValue(ref(db, `users/${uid}/likes`), (s) => {
-                window.likedTracks = new Set(Object.keys(s.val()||{}));
-                window.renderPlaylists();
-                window.updatePlayerButtonsState();
-                
-                if (document.getElementById('library-section').classList.contains('active')) {
-                    const savedTitle = document.getElementById('txt-saved-tracks').innerText;
-                    const knownSavedTitles = Object.values(TRANSLATIONS).map(x => x.saved_tracks);
-                    if (savedTitle === "Saved Tracks" || knownSavedTitles.includes(savedTitle)) {
-                        window.openLikedSongs();
-                    }
-                }
-            });
-            onValue(ref(db, `users/${uid}/playlists`), (s) => { 
-                window.userPlaylists = Object.values(s.val()||{}); 
-                window.renderPlaylists(); 
-                window.updatePlayerButtonsState();
-
-                if (document.getElementById('library-section').classList.contains('active')) {
-                    const currentName = document.getElementById('txt-saved-tracks').innerText;
-                    const p = window.userPlaylists.find(x => x.name === currentName);
-                    if(p) window.openPlaylist(p.id);
-                }
-            });
-            onValue(ref(db, `users/${uid}`), (s)=>{ if(s.val()?.bio) document.getElementById('sp-bio').innerText = s.val().bio; });
-        }
-        
-        window.toggleLike = () => {
-            if(!auth.currentUser) return showToast("Login required");
-            if(!window.currentTrackData) return;
-            const refStr = `users/${auth.currentUser.uid}/likes/${window.currentTrackData.internalId}`;
-            if(window.likedTracks.has(window.currentTrackData.internalId)) { remove(ref(db, refStr)); showToast("Removed"); }
-            else { set(ref(db, refStr), true); showToast("Saved"); }
-        };
-
-        window.renderLikedTracks = () => {
-             const list = Array.from(window.likedTracks).map(id => window.AURA_MAP.find(t=>t.internalId === id)).filter(Boolean);
-             document.getElementById('liked-tracks-list').innerHTML = list.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card"><img src="${t.cover}" loading="eager" decoding="sync" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('');
-        };
-
-        window.openCreatePlaylistModal=()=>document.getElementById('create-playlist-modal').classList.remove('hidden'); 
-        window.closeCreatePlaylistModal=()=>document.getElementById('create-playlist-modal').classList.add('hidden');
-        window.createPlaylist = () => {
-            if(!auth.currentUser) return window.openAuthModal();
-            const name = document.getElementById('playlist-name-input').value;
-            if(name) { const r = push(ref(db, `users/${auth.currentUser.uid}/playlists`)); set(r, { id: r.key, name: name, tracks: [] }); closeCreatePlaylistModal(); }
-        };
-
-        window.renderPlaylists = () => {
-            let html = `<div onclick="openLikedSongs()" class="p-4 glass-panel rounded-xl cursor-pointer relative bg-gradient-to-br from-violet-900/40 to-fuchsia-900/40 border-violet-500/30">
-                            <h3 class="font-bold flex items-center gap-2"><i data-lucide="heart" class="w-4 h-4 fill-pink-500 text-pink-500"></i> Liked Songs</h3>
-                            <p class="text-xs text-gray-400">${window.likedTracks.size} tracks</p>
-                        </div>`;
-            html += window.userPlaylists.map(p=>`<div onclick="openPlaylist('${p.id}')" class="p-4 glass-panel rounded-xl cursor-pointer relative"><h3 class="font-bold">${p.name}</h3><p class="text-xs text-gray-400">${(p.tracks||[]).length} tracks</p></div>`).join('');
-            document.getElementById('playlists-list').innerHTML = html;
-            if(window.lucide) lucide.createIcons();
-        };
-
-        window.openAddToPlaylistModal=()=>{ 
-            if(!window.currentTrackData) return; 
-            const list=document.getElementById('playlist-selection-list'); 
-            list.innerHTML=window.userPlaylists.length ? window.userPlaylists.map(p=>`<div onclick="toggleTrackInPlaylist('${p.id}')" class="p-3 mb-2 rounded-lg cursor-pointer flex justify-between bg-white/5"><span class="text-sm">${p.name}</span><i data-lucide="plus"></i></div>`).join('') : '<p class="text-xs text-center text-gray-500">No sessions.</p>';
-            document.getElementById('add-to-playlist-modal').classList.remove('hidden'); 
-            if(window.lucide) lucide.createIcons();
-        };
-        window.closeAddToPlaylistModal=()=>document.getElementById('add-to-playlist-modal').classList.add('hidden');
-        
-        window.toggleTrackInPlaylist=(pid)=>{
-            const p = window.userPlaylists.find(x => String(x.id) === String(pid));
-            if(!p) return;
-            if(!p.tracks) p.tracks = [];
-            if(!p.tracks.includes(window.currentTrackData.internalId)) { p.tracks.push(window.currentTrackData.internalId); update(ref(db, `users/${auth.currentUser.uid}/playlists/${pid}`), { tracks: p.tracks }); showToast("Added to Session"); } 
-            else { showToast("Already in Session"); }
-            closeAddToPlaylistModal();
-        };
-
-        window.openComposeModal = (preserveAttachment = false) => {
-            if(!auth.currentUser) return window.openAuthModal();
-            document.getElementById('compose-modal').classList.remove('hidden');
-            document.getElementById('compose-avatar').src = auth.currentUser.photoURL || 'https://via.placeholder.com/150';
-            document.getElementById('compose-text').value = "";
-            document.getElementById('compose-image-link').value = "";
-            if (!preserveAttachment) { window.pendingTrackAttachment = null; }
-            updateAttachmentPreview();
-        };
-        
-        window.openComposeWithTrack = () => {
-             if(!window.currentTrackData) return;
-             closeShareModal();
-             window.pendingTrackAttachment = window.currentTrackData;
-             window.openComposeModal(true);
-        };
-        
-        window.closeComposeModal = () => document.getElementById('compose-modal').classList.add('hidden');
-        
-        function updateAttachmentPreview() {
-            const preview = document.getElementById('compose-song-preview');
-            if(window.pendingTrackAttachment) {
-                preview.classList.remove('hidden');
-                document.getElementById('compose-song-img').src = window.pendingTrackAttachment.cover;
-                document.getElementById('compose-song-title').innerText = window.pendingTrackAttachment.title;
-                document.getElementById('compose-song-artist').innerText = window.pendingTrackAttachment.artist;
-            } else {
-                preview.classList.add('hidden');
-            }
-        }
-        window.removeAttachment = () => { window.pendingTrackAttachment = null; updateAttachmentPreview(); };
-
-        window.publishThread = async () => {
-            if(!auth.currentUser) return window.openAuthModal();
-            const text = document.getElementById('compose-text').value;
-            const imageLink = document.getElementById('compose-image-link').value.trim();
-
-            if(!text.trim() && !window.pendingTrackAttachment && !imageLink) return;
-            
-            const postData = {
-                authorId: auth.currentUser.uid,
-                authorName: auth.currentUser.displayName,
-                authorPic: auth.currentUser.photoURL || 'https://via.placeholder.com/150',
-                text: text,
-                timestamp: Date.now(),
-                type: window.pendingTrackAttachment ? 'share' : 'text'
-            };
-
-            if(window.pendingTrackAttachment) {
-                postData.trackId = window.pendingTrackAttachment.internalId;
-                postData.trackTitle = window.pendingTrackAttachment.title;
-                postData.trackArtist = window.pendingTrackAttachment.artist;
-                postData.trackCover = window.pendingTrackAttachment.cover;
-            }
-
-            if(imageLink) { postData.fileType = 'image'; postData.fileUrl = imageLink; }
-
-            try {
-                const newPostRef = push(ref(db, 'posts'));
-                await set(newPostRef, { id: newPostRef.key, ...postData });
-                window.closeComposeModal();
-                window.showToast("Thread pubblicato!");
-            } catch(e) { window.showToast("Errore durante la pubblicazione"); }
-        };
-
-        window.promptAddStory = () => {
-            if(!auth.currentUser) return window.openAuthModal();
-            const link = prompt("Inserisci il link del video YouTube o Short per la tua storia:");
-            
-            if(link) {
-                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
-                const match = link.match(regExp);
-                const videoId = (match && match[2].length === 11) ? match[2] : null;
-                
-                if(videoId) {
-                    const storyRef = push(ref(db, 'stories'));
-                    set(storyRef, {
-                        id: storyRef.key,
-                        userId: auth.currentUser.uid,
-                        userName: auth.currentUser.displayName,
-                        userPic: auth.currentUser.photoURL || 'https://via.placeholder.com/150',
-                        videoId: videoId,
-                        timestamp: Date.now()
-                    });
-                    window.showToast("Storia aggiunta con successo!");
-                } else {
-                    window.showToast("Link YouTube non valido. Assicurati di copiare il link corretto.");
-                }
-            }
-        };
-
-        window.togglePostMenu = (pid) => { const menu = document.getElementById(`post-menu-${pid}`); if(menu) menu.classList.toggle('hidden'); };
-
-        window.hidePost = (pid) => {
-            let hiddenPosts = JSON.parse(localStorage.getItem('aura_hidden_posts') || '[]');
-            if(!hiddenPosts.includes(pid)) {
-                hiddenPosts.push(pid);
-                localStorage.setItem('aura_hidden_posts', JSON.stringify(hiddenPosts));
-            }
-            const postCard = document.getElementById(`post-card-${pid}`);
-            if(postCard) postCard.style.display = 'none';
-            window.showToast("Post nascosto");
-        };
-
-        window.reportPost = (pid, authorName) => {
-            window.togglePostMenu(pid); 
-            window.showToast("Apertura app mail...");
-            const email = "report@pl-globalaura.com";
-            const subject = encodeURIComponent("Segnalazione Post su Aura Social");
-            const body = encodeURIComponent(`Ciao Team di Aura,\n\nVorrei segnalare il seguente post per violazione delle linee guida.\n\nID Post: ${pid}\nAutore: ${authorName}\n\nMotivazione della segnalazione: \n[Scrivi qui il motivo...]`);
-            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-        };
-
-        window.loadSocialFeed = () => {
-            if(!auth.currentUser) return; 
-            const feedContainer = document.getElementById('social-feed-container');
-            if(!feedContainer) return; 
-            
-            const postsRef = ref(db, 'posts');
-            off(postsRef); 
-            onValue(postsRef, async (snap) => {
-                const data = snap.val();
-                const t = TRANSLATIONS[window.currentLang] || TRANSLATIONS['en'];
-
-                if(!data) { 
-                    feedContainer.innerHTML = `<div class="text-center mt-10">
-                        <div class="w-16 h-16 bg-gradient-to-r from-violet-500/20 to-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i data-lucide="rss" class="w-8 h-8 text-violet-400"></i>
-                        </div>
-                        <p class="text-gray-400 text-sm mb-2">Welcome to Aura Social!</p>
-                        <p class="text-gray-500 text-xs mb-4">Discover music, connect with friends, and explore AI-powered content.</p>
-                        <button onclick="openComposeModal()" class="mt-6 px-4 py-2 bg-violet-500/20 text-violet-400 rounded-full text-sm font-bold hover:bg-violet-500/30 transition">
-                            Share Your First Post
-                        </button>
-                    </div>`; 
-                    return; 
-                }
-                
-                let posts = Object.entries(data).map(([key, val]) => ({ ...val, id: key })).sort((a,b) => b.timestamp - a.timestamp);
-                const hiddenPosts = JSON.parse(localStorage.getItem('aura_hidden_posts') || '[]');
-                posts = posts.filter(p => !hiddenPosts.includes(p.id));
-
-                await Promise.all(posts.map(async (p) => {
-                    let rawText = p.text || p.caption || "";
-                    if (p.authorId === 'aura-ai-bot') {
-                        try {
-                            const transObj = JSON.parse(rawText);
-                            if (transObj[window.currentLang]) {
-                                p.finalText = transObj[window.currentLang];
-                            } else {
-                                const baseText = transObj['en'] || transObj[Object.keys(transObj)[0]] || rawText;
-                                try { p.finalText = await window.translateTextFree(baseText, window.currentLang); } 
-                                catch(e) { p.finalText = baseText; }
-                            }
-                        } catch(e) {
-                            try { p.finalText = await window.translateTextFree(rawText, window.currentLang); } 
-                            catch(e) { p.finalText = rawText; }
-                        }
-                    } else { p.finalText = rawText; }
-                }));
-                
-                feedContainer.innerHTML = posts.map(p => {
-                    const isLiked = auth.currentUser && p.likes && p.likes[auth.currentUser.uid];
-                    const likes = p.likes ? Object.keys(p.likes).length : 0;
-                    const comments = p.comments ? Object.keys(p.comments).length : 0;
-                    
-                    let postText = p.finalText;
-                    let embedHTML = "";
-                    let attachmentHTML = "";
-                    let actionsHTML = "";
-                    
-                    if (p.authorId === 'aura-ai-bot' && p.sourceLink) {
-                        let btnText = 'Read Article';
-                        if (window.currentLang === 'it') btnText = 'Leggi Articolo';
-                        else if (window.currentLang === 'es') btnText = 'Leer Artículo';
-                        else if (window.currentLang === 'de') btnText = 'Artikel lesen';
-                        else if (window.currentLang === 'ro') btnText = 'Citește Articolul';
-                        else if (window.currentLang === 'ar') btnText = 'اقرأ المقال';
-
-                        embedHTML += `
-                        <button onclick="openWebView('${p.sourceLink}')" class="mt-4 w-full bg-gradient-to-r from-cyan-500/10 to-violet-500/10 border border-cyan-500/30 text-cyan-400 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-cyan-500/20 transition shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-                            <i data-lucide="external-link" class="w-4 h-4"></i> ${btnText}
-                        </button>`;
-                    }
-                    
-                    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
-                    const ytMatch = postText.match(ytRegex);
-                    if(ytMatch) {
-                        embedHTML += `<div class="mt-3 rounded-xl overflow-hidden aspect-video border border-white/10 w-full bg-black relative"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
-                        postText = postText.replace(ytMatch[0], '').trim();
-                    }
-                    
-                    const igRegex = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)/i;
-                    const igMatch = postText.match(igRegex);
-                    if(igMatch) {
-                        embedHTML += `<div class="mt-3 rounded-xl overflow-hidden border border-white/10 w-full bg-black"><iframe src="https://www.instagram.com/${igMatch[1]}/${igMatch[2]}/embed" width="100%" height="450" frameborder="0" scrolling="no" allowtransparency="true"></iframe></div>`;
-                        postText = postText.replace(igMatch[0], '').trim();
-                    }
-
-                    if(p.type === 'share' && p.trackId) {
-                        attachmentHTML = `
-                        <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-3 relative mb-4 hover:bg-white/10 transition cursor-pointer" onclick="playTrack('${p.trackId}')">
-                            <img src="${p.trackCover}" class="w-12 h-12 rounded object-cover shadow-md">
-                            <div class="flex-1">
-                                <h4 class="font-bold text-sm text-white">${p.trackTitle}</h4>
-                                <p class="text-xs text-gray-400">${p.trackArtist}</p>
-                            </div>
-                            <button class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-2"><i data-lucide="play" class="w-4 h-4 fill-current text-white ml-0.5"></i></button>
-                            <div class="floating-heart-btn" onclick="event.stopPropagation(); togglePostLike('${p.id}')">
-                                <i data-lucide="heart" class="w-4 h-4 text-white ${isLiked?'fill-current':''}"></i>
-                            </div>
-                        </div>`;
-
-                        actionsHTML = `
-                        <div class="flex gap-6 text-gray-400 mt-2">
-                            <button onclick="togglePostLike('${p.id}')" class="flex items-center gap-1.5 text-xs hover:text-red-500 transition ${isLiked?'text-red-500':''}"><i data-lucide="heart" class="w-4 h-4 ${isLiked?'fill-current':''}"></i> ${likes||t.like}</button>
-                            <button onclick="openComments('${p.id}')" class="flex items-center gap-1.5 text-xs hover:text-white transition"><i data-lucide="message-circle" class="w-4 h-4"></i> ${comments||t.reply}</button>
-                        </div>`;
-                    } else {
-                        if (p.fileType === 'audio') { 
-                             attachmentHTML = `<div class="p-4 bg-white/5 rounded-xl mt-3 flex items-center gap-3 cursor-pointer"><div class="p-3 bg-white text-black rounded-full"><i data-lucide="play" class="fill-current w-4 h-4"></i></div><span class="text-xs">Play Audio Clip</span></div>`;
-                        } else if (p.fileType === 'image' && p.fileUrl) { 
-                             attachmentHTML = `<img src="${p.fileUrl}" class="rounded-xl mt-3 w-full max-h-60 object-cover border border-white/5">`;
-                        }
-
-                        actionsHTML = `
-                        <div class="flex gap-6 mb-4 text-gray-400 mt-2">
-                            <button onclick="togglePostLike('${p.id}')" class="flex items-center gap-1.5 text-xs hover:text-red-500 transition ${isLiked?'text-red-500':''}"><i data-lucide="heart" class="w-4 h-4 ${isLiked?'fill-current':''}"></i> ${likes||t.like}</button>
-                            <button onclick="openComments('${p.id}')" class="flex items-center gap-1.5 text-xs hover:text-white transition"><i data-lucide="message-circle" class="w-4 h-4"></i> ${comments||t.reply}</button>
-                            <button class="flex items-center gap-1.5 text-xs hover:text-white transition ml-auto"><i data-lucide="share" class="w-4 h-4"></i> ${t.share}</button>
-                        </div>`;
-                    }
-                    
-                    return `
-                    <div id="post-card-${p.id}" class="social-card-new relative">
-                        <div class="flex justify-between items-center mb-3 relative">
-                             <div class="flex items-center gap-2 cursor-pointer" onclick="openOtherUserProfile('${p.authorId}')">
-                                 <img src="${p.authorPic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full border border-white/10 object-cover ${p.authorId === 'aura-ai-bot' ? 'ring-2 ring-cyan-400' : ''}">
-                                 <span class="font-bold text-sm text-white ${p.authorId === 'aura-ai-bot' ? 'text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400' : ''}">${p.authorName}</span>
-                                 ${p.authorId === 'aura-ai-bot' ? '<span class="bg-cyan-500/20 text-cyan-400 text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider font-bold border border-cyan-500/30 ml-1">AI</span>' : ''}
-                             </div>
-                             
-                             <div>
-                                 <button onclick="togglePostMenu('${p.id}')" class="p-2 text-gray-500 hover:text-white transition rounded-full hover:bg-white/5">
-                                     <i data-lucide="more-horizontal" class="w-4 h-4"></i>
-                                 </button>
-                                 
-                                 <div id="post-menu-${p.id}" class="hidden absolute right-0 top-10 w-36 bg-[#111115] border border-white/10 shadow-2xl rounded-xl py-2 z-50">
-                                     <button onclick="hidePost('${p.id}')" class="w-full text-left px-4 py-2.5 text-xs text-white hover:bg-white/5 flex items-center gap-2 transition">
-                                         <i data-lucide="eye-off" class="w-3.5 h-3.5"></i> Nascondi
-                                     </button>
-                                     <button onclick="reportPost('${p.id}', '${p.authorName.replace(/'/g, "\\'")}')" class="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition">
-                                         <i data-lucide="flag" class="w-3.5 h-3.5"></i> Segnala
-                                     </button>
-                                 </div>
-                             </div>
-                        </div>
-                        ${postText ? `<p class="text-sm mb-3 text-gray-200 leading-relaxed whitespace-pre-wrap">${postText}</p>` : ''}
-                        ${embedHTML}
-                        ${attachmentHTML}
-                        ${actionsHTML}
-                    </div>`;
-                }).join('');
-                if(window.lucide) lucide.createIcons();
-            });
-        };
-
-        window.togglePostLike = (pid) => {
-             if(!auth.currentUser) return openAuthModal();
-             const r = ref(db, `posts/${pid}/likes/${auth.currentUser.uid}`);
-             get(r).then(s => s.exists() ? remove(r) : set(r, true));
-        };
-
-        let currentPostId = null;
-        window.openComments = (pid) => {
-            currentPostId = pid;
-            document.getElementById('comments-modal').classList.remove('hidden');
-            onValue(ref(db, `posts/${pid}/comments`), (s) => {
-                const d = s.val();
-                document.getElementById('comments-list').innerHTML = d ? Object.values(d).map(c => `<div class="flex gap-3 mb-4"><img src="${c.userPic || 'https://via.placeholder.com/150'}" class="w-8 h-8 rounded-full mt-1"><div><p class="text-xs font-bold">${c.userName}</p><p class="text-sm text-gray-200">${c.text}</p></div></div>`).join('') : '<p class="text-center text-gray-500 text-xs">No replies yet.</p>';
-            });
-        };
-        window.closeCommentsModal = () => document.getElementById('comments-modal').classList.add('hidden');
-        window.submitComment = () => {
-            const txt = document.getElementById('comment-input').value;
-            if(!txt || !currentPostId || !auth.currentUser) return;
-            push(ref(db, `posts/${currentPostId}/comments`), { userId: auth.currentUser.uid, userName: auth.currentUser.displayName, userPic: auth.currentUser.photoURL || 'https://via.placeholder.com/150', text: txt, timestamp: Date.now() });
-            document.getElementById('comment-input').value = "";
-        };
-
-        window.switchProfileTab = (tab) => {
-            const c = document.getElementById('profile-content-area');
-            document.getElementById('tab-drops').style.borderColor = tab==='drops'?'#06b6d4':'transparent';
-            document.getElementById('tab-likes').style.borderColor = tab==='likes'?'#06b6d4':'transparent';
-            
-            if(tab === 'likes') { 
-                const list = Array.from(window.likedTracks).map(id => window.AURA_MAP.find(t=>t.internalId === id)).filter(Boolean);
-                c.innerHTML = list.length ? list.map(t => `<div onclick="playTrack('${t.internalId}')" class="yt-card mb-2 bg-white/5 border border-white/10"><img src="${t.cover}" loading="eager" decoding="sync" class="yt-img"><div class="yt-info"><div class="yt-title">${t.title}</div><div class="yt-artist">${t.artist}</div></div></div>`).join('') : '<p class="text-center text-gray-500 mt-4">No liked tracks.</p>';
-            } else {
-                get(ref(db, 'posts')).then(s => {
-                    const d = s.val();
-                    if(!d) { c.innerHTML = '<p class="text-center text-gray-500 mt-4">No threads yet.</p>'; return; }
-                    const myPosts = Object.entries(d).map(([k, v]) => ({ ...v, id: k })).filter(p => p.authorId === auth.currentUser.uid);
-                    document.getElementById('sp-posts').innerText = myPosts.length;
-                    c.innerHTML = myPosts.map(p => `<div class="p-4 border-b border-white/10"><p class="text-sm">${p.text || "Shared a post"}</p><p class="text-[10px] text-gray-500 mt-1">${new Date(p.timestamp).toLocaleDateString()}</p></div>`).join('');
-                });
-            }
-        };
+        window.openSearchModal=()=>document.getElementById('search-modal').classList.remove('hidden');
+        window.closeSearchModal=()=>document.getElementById('search-modal').classList.add('hidden');
     </script>
 </body>
 </html>
