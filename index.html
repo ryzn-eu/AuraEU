@@ -313,6 +313,135 @@
             <p class="subtitle">Scarica l'app ufficiale e unisciti all'universo Horizon oggi stesso.</p>
             
             <div class="download-section">
+                <!-- BOTTONE DOWNLOAD ANDROID (SFONDO / INVISIBILE) -->
+                <button class="btn btn-android" onclick="downloadAndroid()">
+                    <svg style="width:20px;height:20px;margin-right:8px;" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4483-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 0 0-.1521-.5676.416.416 0 0 0-.5676.1521l-2.0223 3.503C15.5902 8.244 13.8533 7.8512 12 7.8512s-3.5902.3928-5.1367 1.099l-2.0223-3.503a.4158.4158 0 0 0-.5676-.1521.416.416 0 0 0-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/>
+                    </svg>
+                    Scarica per Android
+                </button>
+                
+                <button class="btn btn-secondary" onclick="showComingSoon('iOS')">Scarica per iOS</button>
+                <button class="btn btn-secondary" onclick="showComingSoon('Windows')">Scarica per Windows</button>
+                <button class="btn btn-secondary" onclick="showComingSoon('Linux')">Scarica per Linux</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast" class="toast">Versione in arrivo!</div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const slides = document.querySelectorAll('.slide');
+            let currentSlide = 0;
+            let slideInterval;
+
+            const nextSlide = () => {
+                slides[currentSlide].classList.remove('active');
+                currentSlide++;
+
+                // Stop at the last slide
+                if (currentSlide >= slides.length - 1) {
+                    currentSlide = slides.length - 1;
+                    slides[currentSlide].classList.add('active');
+                    clearInterval(slideInterval);
+                    return;
+                }
+
+                slides[currentSlide].classList.add('active');
+            };
+
+            // 4.5 seconds interval
+            slideInterval = setInterval(nextSlide, 4500);
+
+            let toastTimeout;
+
+            // Funzione per mostrare notifiche generiche (toast)
+            const showToast = (message) => {
+                const toast = document.getElementById('toast');
+                toast.innerText = message;
+                clearTimeout(toastTimeout);
+                toast.classList.add('show');
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2800);
+            };
+
+            window.showComingSoon = function(platform) {
+                showToast(`La versione per ${platform} è in arrivo (Coming Soon)!`);
+            };
+
+            // Funzione per scaricare l'APK in background senza cambiare schermata
+            window.downloadAndroid = function() {
+                const mediafireUrl = "https://www.mediafire.com/file/hazk3h6rpetykpf/Aura-8.1.2.apk/file?dkey=z99ead8w9sq&r=589";
+
+                // Crea un iframe nascosto se non esiste già
+                let hiddenIframe = document.getElementById('hidden-download-frame');
+                if (!hiddenIframe) {
+                    hiddenIframe = document.createElement('iframe');
+                    hiddenIframe.id = 'hidden-download-frame';
+                    hiddenIframe.style.display = 'none';
+                    document.body.appendChild(hiddenIframe);
+                }
+
+                // Avvia il caricamento del link nell'iframe invisibile
+                hiddenIframe.src = mediafireUrl;
+
+                // Notifica visiva all'utente
+                showToast("Download di Aura APK avviato in background...");
+            };
+        });
+    </script>
+</body>
+</html>
+ cx="180" cy="130" r="1.5" class="star star-2" />
+                            <circle cx="40" cy="80" r="1.5" class="star star-4" />
+                            
+                            <!-- Distant small stars -->
+                            <circle cx="170" cy="60" r="1" class="star star-1" />
+                            <circle cx="30" cy="170" r="1" class="star star-5" />
+                            <circle cx="90" cy="175" r="1" class="star star-2" />
+                        </g>
+                    </svg>
+                </div>
+
+                <h1 class="aura-logotext">AURA</h1>
+                <p class="subtitle" style="font-size: 0.95rem; max-width: 250px;">Music by Horizon Global</p>
+                
+            </div>
+        </div>
+
+        <!-- Slide 2: UI & Backend -->
+        <div class="slide">
+            <h2 class="title">Design iconico.<br><span class="gradient-horizon">Motore nuovo.</span></h2>
+            <p class="subtitle">L'inconfondibile UI/UX di ViMusic si fonde con l'infrastruttura backend di Horizon. Più veloce, più scalabile.</p>
+        </div>
+
+        <!-- Slide 3: Database e Aura+ -->
+        <div class="slide">
+            <h2 class="title">Aura Archive<br>& <span class="gradient-aura">Aura+</span>.</h2>
+            <p class="subtitle">Streaming globale senza limiti. Archivi proprietari ultrarapidi ed esclusive riservate alla community.</p>
+        </div>
+
+        <!-- Slide 4: Evento di Lancio -->
+        <div class="slide">
+            <h2 class="title">Una nuova era.</h2>
+            <p class="subtitle">Rivivi le emozioni dell'<strong>Evento di Lancio</strong> dei servizi Aura. Il futuro dell'audio è qui.</p>
+        </div>
+
+        <!-- Slide 5: Aura Xmas Night -->
+        <div class="slide">
+            <h2 class="title gradient-xmas">Aura Xmas Night.</h2>
+            <p class="subtitle">Magia e musica per le feste. L'evento speciale invernale che ha illuminato le nostre notti.</p>
+        </div>
+
+        <!-- Slide 6: Installazione -->
+        <div class="slide">
+            <h2 class="title">Inizia l'ascolto.</h2>
+            <p class="subtitle">Scarica l'app ufficiale e unisciti all'universo Horizon oggi stesso.</p>
+            
+            <div class="download-section">
                 <!-- INSERISCI URL APK ANDROID -->
                 <a href="INSERISCI_QUI_URL_APK" class="btn btn-android">
                     <svg style="width:20px;height:20px;margin-right:8px;" viewBox="0 0 24 24" fill="currentColor">
