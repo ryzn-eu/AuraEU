@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aura (Music) - Horizon Global</title>
     
-    <!-- Importing Nunito for the main logo and Inter for the rest of the text -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Nunito:wght@800&display=swap" rel="stylesheet">
@@ -111,11 +110,9 @@
         .aura-logotext {
             font-family: 'Nunito', sans-serif;
             font-size: 4rem;
-            font-weight: 800; /* Bold */
-            letter-spacing: -0.02em; /* Modern, tight spacing */
+            font-weight: 800;
+            letter-spacing: -0.02em;
             margin-bottom: 0.5rem;
-            
-            /* Sottile gradiente metallico moderno */
             background: linear-gradient(180deg, #ffffff 0%, #d4d4d4 50%, #9e9e9e 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -136,7 +133,6 @@
             animation: appearStar 1s ease forwards, twinkle 3s infinite ease-in-out alternate;
         }
         
-        /* Different delays for natural twinkling */
         .star-1 { animation-delay: 1.0s, 1.0s; }
         .star-2 { animation-delay: 1.2s, 1.5s; }
         .star-3 { animation-delay: 1.4s, 2.0s; }
@@ -171,7 +167,7 @@
             align-items: center;
             justify-content: center;
             padding: 1rem 1.5rem;
-            border-radius: 20px; /* Apple style rounded */
+            border-radius: 20px;
             font-size: 1.1rem;
             font-weight: 600;
             text-decoration: none;
@@ -205,7 +201,7 @@
             bottom: -100px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(30, 30, 30, 0.85);
+            background: rgba(30, 30, 30, 0.9);
             color: #fff;
             padding: 14px 28px;
             border-radius: 50px;
@@ -214,7 +210,7 @@
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
-            z-index: 100;
+            z-index: 9999;
             transition: bottom 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             pointer-events: none;
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
@@ -229,44 +225,152 @@
 
     <div class="slider-container">
         
-        <!-- Slide 1: Constellation Logo & Nunito Text -->
+        <!-- Slide 1 -->
         <div class="slide active">
             <div class="brand-container">
-                
                 <div class="constellation-wrapper">
-                    <!-- SVG Constellation shaping an abstract 'A' -->
                     <svg viewBox="0 0 200 200" width="100%" height="100%">
-                        <!-- Lines connecting the stars -->
                         <g class="constellation-line">
-                            <!-- Left leg of A -->
                             <line x1="100" y1="40" x2="50" y2="150" />
-                            <!-- Right leg of A -->
                             <line x1="100" y1="40" x2="150" y2="150" />
-                            <!-- Crossbar of A -->
                             <line x1="72" y1="100" x2="128" y2="100" />
-                            
-                            <!-- Connecting background stars for constellation effect -->
                             <line x1="100" y1="40" x2="140" y2="20" stroke-width="0.5" stroke-dasharray="2 4"/>
                             <line x1="50" y1="150" x2="20" y2="120" stroke-width="0.5" stroke-dasharray="2 4"/>
                             <line x1="150" y1="150" x2="180" y2="130" stroke-width="0.5" stroke-dasharray="2 4"/>
                             <line x1="72" y1="100" x2="40" y2="80" stroke-width="0.5" stroke-dasharray="2 4"/>
                         </g>
-
-                        <!-- The Stars (Glowing Dots) -->
                         <g>
-                            <!-- Main 'A' vertex points -->
                             <circle cx="100" cy="40" r="2.5" class="star star-main star-1" />
                             <circle cx="50" cy="150" r="2.5" class="star star-main star-2" />
                             <circle cx="150" cy="150" r="2.5" class="star star-main star-3" />
-                            
-                            <!-- Crossbar points -->
                             <circle cx="72" cy="100" r="2" class="star star-1" />
                             <circle cx="128" cy="100" r="2" class="star star-4" />
-                            
-                            <!-- Secondary constellation stars -->
                             <circle cx="140" cy="20" r="1.5" class="star star-5" />
                             <circle cx="20" cy="120" r="1.5" class="star star-3" />
                             <circle cx="180" cy="130" r="1.5" class="star star-2" />
+                            <circle cx="40" cy="80" r="1.5" class="star star-4" />
+                            <circle cx="170" cy="60" r="1" class="star star-1" />
+                            <circle cx="30" cy="170" r="1" class="star star-5" />
+                            <circle cx="90" cy="175" r="1" class="star star-2" />
+                        </g>
+                    </svg>
+                </div>
+                <h1 class="aura-logotext">AURA</h1>
+                <p class="subtitle" style="font-size: 0.95rem; max-width: 250px;">Music by Horizon Global</p>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+            <h2 class="title">Design iconico.<br><span class="gradient-horizon">Motore nuovo.</span></h2>
+            <p class="subtitle">L'inconfondibile UI/UX di ViMusic si fonde con l'infrastruttura backend di Horizon. Più veloce, più scalabile.</p>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+            <h2 class="title">Aura Archive<br>& <span class="gradient-aura">Aura+</span>.</h2>
+            <p class="subtitle">Streaming globale senza limiti. Archivi proprietari ultrarapidi ed esclusive riservate alla community.</p>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide">
+            <h2 class="title">Una nuova era.</h2>
+            <p class="subtitle">Rivivi le emozioni dell'<strong>Evento di Lancio</strong> dei servizi Aura. Il futuro dell'audio è qui.</p>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide">
+            <h2 class="title gradient-xmas">Aura Xmas Night.</h2>
+            <p class="subtitle">Magia e musica per le feste. L'evento speciale invernale che ha illuminato le nostre notti.</p>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide">
+            <h2 class="title">Inizia l'ascolto.</h2>
+            <p class="subtitle">Scarica l'app ufficiale e unisciti all'universo Horizon oggi stesso.</p>
+            
+            <div class="download-section">
+                <button type="button" class="btn btn-android" onclick="downloadAndroid()">
+                    <svg style="width:20px;height:20px;margin-right:8px;" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4483-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 0 0-.1521-.5676.416.416 0 0 0-.5676.1521l-2.0223 3.503C15.5902 8.244 13.8533 7.8512 12 7.8512s-3.5902.3928-5.1367 1.099l-2.0223-3.503a.4158.4158 0 0 0-.5676-.1521.416.416 0 0 0-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/>
+                    </svg>
+                    Scarica per Android
+                </button>
+                
+                <button type="button" class="btn btn-secondary" onclick="showComingSoon('iOS')">Scarica per iOS</button>
+                <button type="button" class="btn btn-secondary" onclick="showComingSoon('Windows')">Scarica per Windows</button>
+                <button type="button" class="btn btn-secondary" onclick="showComingSoon('Linux')">Scarica per Linux</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast" class="toast">Versione in arrivo!</div>
+
+    <script>
+        // Funzione notifiche globale
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.innerText = message;
+            clearTimeout(toastTimeout);
+            toast.classList.add('show');
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function showComingSoon(platform) {
+            showToast(`La versione per ${platform} è in arrivo!`);
+        }
+
+        function downloadAndroid() {
+            const downloadUrl = "https://www.mediafire.com/file/hazk3h6rpetykpf/Aura-8.1.2.apk/file?dkey=z99ead8w9sq&r=589";
+            
+            // 1. Mostra subito il banner di notifica
+            showToast("Avvio del download in corso...");
+
+            // 2. Se è un file APK diretto, esegui il download completamente invisibile
+            if (downloadUrl.endsWith('.apk')) {
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = 'Aura-8.1.2.apk';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                // 3. Per MediaFire (pagina intermedia con blocco anti-iframe):
+                // Apre in background in una nuova scheda senza rompere lo slider della pagina
+                window.open(downloadUrl, '_blank');
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const slides = document.querySelectorAll('.slide');
+            let currentSlide = 0;
+            let slideInterval;
+
+            const nextSlide = () => {
+                slides[currentSlide].classList.remove('active');
+                currentSlide++;
+
+                if (currentSlide >= slides.length - 1) {
+                    currentSlide = slides.length - 1;
+                    slides[currentSlide].classList.add('active');
+                    clearInterval(slideInterval);
+                    return;
+                }
+
+                slides[currentSlide].classList.add('active');
+            };
+
+            slideInterval = setInterval(nextSlide, 4500);
+        });
+    </script>
+</body>
+</html>
+ cx="180" cy="130" r="1.5" class="star star-2" />
                             <circle cx="40" cy="80" r="1.5" class="star star-4" />
                             
                             <!-- Distant small stars -->
